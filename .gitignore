@@ -1,0 +1,6 @@
+# Idris binaries
+*.ibc
+
+# PDFs
+*.pdf
+
