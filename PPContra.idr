@@ -21,14 +21,17 @@ checkEqNat (S k) (S j) = case checkEqNat k j of
 
 -- Attempt at pretty-printing
 
-printContra : (contra : (num1 = num2) -> Void) -> String
-printContra (sucNotZero) = "LHS is 0, RHS is 1"
-printContra (zeroNotSuc) = "LHS is 1, RHS is 0"
-printContra contra = ?printContra_rhs_2
+-- very simple implementation
+showContra : (contra : (num1 = num2) -> Void) -> String
+showContra (sucNotZero) = "LHS is 0, RHS is > 0"
+showContra (zeroNotSuc) = "LHS is > 1, RHS is 0"
+-- can't match on this:
+-- showContra (noRec sucNotZero) = ?incr_rhs
+-- showContra (noRec zeroNotSuc) = ?incr_lhs
 
 ppPrototype : Dec (num1 = num2) -> IO ()
 ppPrototype (Yes prf) = putStrLn "Everything is fine."
-ppPrototype (No contra) = putStrLn (printContra contra)
+ppPrototype (No contra) = putStrLn (showContra contra)
 
 test : IO ()
-test = ppPrototype (checkEqNat 2 3)
+test = ppPrototype (checkEqNat 3 2)
