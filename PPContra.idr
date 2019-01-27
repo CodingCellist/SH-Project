@@ -1,4 +1,4 @@
-module Main
+module PPContra
 
 -- Basic Dec example from the book
 
@@ -19,6 +19,16 @@ checkEqNat (S k) (S j) = case checkEqNat k j of
                               (Yes prf) => Yes (cong prf)
                               (No contra) => No (noRec contra)
 
-main : Dec (num1 = num2) -> IO ()
-main (Yes prf) = ?main_rhs_1
-main (No contra) = ?main_rhs_2
+-- Attempt at pretty-printing
+
+printContra : (contra : (num1 = num2) -> Void) -> String
+printContra (sucNotZero) = "LHS is 0, RHS is 1"
+printContra (zeroNotSuc) = "LHS is 1, RHS is 0"
+printContra contra = ?printContra_rhs_2
+
+ppPrototype : Dec (num1 = num2) -> IO ()
+ppPrototype (Yes prf) = putStrLn "Everything is fine."
+ppPrototype (No contra) = putStrLn (printContra contra)
+
+test : IO ()
+test = ppPrototype (checkEqNat 2 3)
