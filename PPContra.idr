@@ -35,3 +35,40 @@ ppPrototype (No contra) = putStrLn (showContra contra)
 
 test : IO ()
 test = ppPrototype (checkEqNat 3 2)
+
+
+-- Working version for Nat (credit to Edwin Brady)
+
+data Different : Nat -> Nat -> Type where
+    ZNotS : Different Z (S k)
+    SNotZ : Different (S k) Z
+    RecDiff : Different k j -> Different (S k) (S j)
+
+Show (Different k j) where
+  show ZNotS = "First number smaller."
+  show SNotZ = "Second number smaller"
+  show (RecDiff x) = show x
+
+toContra : Different x y -> (x = y) -> Void
+toContra ZNotS = zeroNotSuc
+toContra SNotZ = sucNotZero
+toContra (RecDiff x) = noRec (toContra x)
+
+natDiff : (n1 : Nat) -> (n2 : Nat) -> Either (Different n1 n2) (n1 = n2)
+natDiff Z Z = Right Refl
+natDiff Z (S k) = Left ZNotS
+natDiff (S k) Z = Left SNotZ
+natDiff (S k) (S j) = case natDiff k j of
+                           Left diff => Left (RecDiff diff)
+                           Right Refl => Right Refl
+
+decNat' : (n1 : Nat) -> (n2 : Nat) -> Dec (n1 = n2)
+decNat' n1 n2 = case natDiff n1 n2 of
+                     Left diff => No (toContra diff)
+                     Right prf => Yes prf
+
+-- a more proper test
+test' : (n1 : Nat) -> (n2 : Nat) -> String
+test' n1 n2 = case natDiff n1 n2 of
+                   Left diff => show diff
+                   Right prf => "The two numbers are identical."
