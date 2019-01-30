@@ -80,6 +80,9 @@ mutual
     data TyOr : Bool -> Bool -> Type where
         MkFalseOr : TyOr False False
         MkTrueOr : TyOr _ _
+        -- MkOr : TyOr True True
+        -- MkOr : TyOr True False
+        -- MkOr : TyOr False True
 
     data BooleanExpression : Type where
         BParen : BooleanExpression -> BooleanExpression
@@ -164,12 +167,19 @@ isAnd False True = No absurd
 isAnd True True = Yes MkAnd
 isAnd True False = No absurd
 
+-- implementation Uninhabited (TyOr False False) where
+--   uninhabited TyOr impossible
+
 -- teh6: need a similar function for "Or"?
 isOr : (b1 : Bool) -> (b2 : Bool) -> Dec (TyOr b1 b2)
 isOr False False = Yes MkFalseOr
 isOr False True = Yes MkTrueOr
 isOr True False = Yes MkTrueOr
 isOr True True = Yes MkTrueOr
+-- isOr False False = No absurd
+-- isOr False True = Yes MkOr
+-- isOr True False = Yes MkOr
+-- isOr True True = Yes MkOr
 
 beval : (env : Env) -> (b : BooleanExpression) -> Bool
 beval env (BParen x) = beval env x
