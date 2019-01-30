@@ -2,6 +2,10 @@ module Darknet
 
 import Data.So
 
+%access public export
+
+
+
 
 {-
 
@@ -68,64 +72,116 @@ public export
 data Evald : NumericExpression -> Nat -> Type where
     MkEvald : (x : NumericExpression) -> (y : Nat) -> Evald x y
 
-public export
-data BooleanExpression : Type where
-    BParen : BooleanExpression -> BooleanExpression
-    Not    : BooleanExpression -> BooleanExpression
-    And    : BooleanExpression -> BooleanExpression -> BooleanExpression
+mutual
+    data TyAnd : Bool -> Bool -> Type where
+        MkAnd : TyAnd True True
 
-  --  And :  (x : BooleanExpression)
-  --      -> (y : BooleanExpression)
---        -> Evald x x'
---        -> Evald y y'
-    --    -> choose (x && y)
-     --   -> BooleanExpression
+    data BooleanExpression : Type where
+        BParen : BooleanExpression -> BooleanExpression
+        -- Not    : BooleanExpression -> BooleanExpression
 
-    Or     : BooleanExpression -> BooleanExpression -> BooleanExpression
+        And :  (x : BooleanExpression)
+        -> (y : BooleanExpression)
+        -> BEvald x x'
+        -> BEvald y y'
+        -> Dec (TyAnd x' y')
+        -> BooleanExpression
 
-    Eq     : (x : NumericExpression) 
-          -> (y : NumericExpression)
-          -> Evald x x'
-          -> Evald y y'
-          -> (x' = y') 
-          -> BooleanExpression
+        -- Or     : BooleanExpression -> BooleanExpression -> BooleanExpression
+
+        Eq     : (x : NumericExpression) 
+            -> (y : NumericExpression)
+            -> Evald x x'
+            -> Evald y y'
+            -> Dec (x' = y') 
+            -> BooleanExpression
 
 
-    NEq    : (x : NumericExpression) -> (y : NumericExpression) -> (x = y -> Void) -> BooleanExpression
-    -- LT     : NumericExpression -> NumericExpression -> BooleanExpression
+        -- NEq    : (x : NumericExpression) -> (y : NumericExpression) -> (x = y -> Void) -> BooleanExpression
+        -- LT     : NumericExpression -> NumericExpression -> BooleanExpression
 
-    LT :  {x' : Nat} -> {y' : Nat}
-       -> (x : NumericExpression)
-       -> (y : NumericExpression)
-       -> Evald x x'
-       -> Evald y y'
-       -> Dec (x' `LT` y')
-       -> BooleanExpression
+        LT :  {x' : Nat} -> {y' : Nat}
+        -> (x : NumericExpression)
+        -> (y : NumericExpression)
+        -> Evald x x'
+        -> Evald y y'
+        -> Dec (x' `LT` y')
+        -> BooleanExpression
 
-    LTE    :  {x' : Nat} -> {y' : Nat}
-           -> (x : NumericExpression)
-           -> (y : NumericExpression)
-           -> Evald x x'
-           -> Evald y y'
-           -> Dec (x' `LTE` y')
-           -> BooleanExpression
+        LTE    :  {x' : Nat} -> {y' : Nat}
+            -> (x : NumericExpression)
+            -> (y : NumericExpression)
+            -> Evald x x'
+            -> Evald y y'
+            -> Dec (x' `LTE` y')
+            -> BooleanExpression
+        
+        -- GT     : NumericExpression -> NumericExpression -> BooleanExpression
+        GT :  {x' : Nat} -> {y' : Nat}
+        -> (x : NumericExpression)
+        -> (y : NumericExpression)
+        -> Evald x x'
+        -> Evald y y'
+        -> Dec (y' `LT` x')
+        -> BooleanExpression
+
+        GTE    : {x' : Nat} -> {y' : Nat} 
+            -> (x : NumericExpression) 
+            -> (y : NumericExpression) 
+            -> Evald x x' 
+            -> Evald y y' 
+            -> Dec (y' `LTE` x') 
+            -> BooleanExpression
     
-    -- GT     : NumericExpression -> NumericExpression -> BooleanExpression
-    GT :  {x' : Nat} -> {y' : Nat}
-       -> (x : NumericExpression)
-       -> (y : NumericExpression)
-       -> Evald x x'
-       -> Evald y y'
-       -> Dec (y' `LT` x')
-       -> BooleanExpression
 
-    GTE    : {x' : Nat} -> {y' : Nat} 
-           -> (x : NumericExpression) 
-           -> (y : NumericExpression) 
-           -> Evald x x' 
-           -> Evald y y' 
-           -> Dec (y' `LTE` x') 
-           -> BooleanExpression
+    data BEvald : BooleanExpression -> Bool -> Type where
+        MkBEvald : (x : BooleanExpression) -> (y : Bool) -> BEvald x y
+
+implementation Uninhabited (TyAnd False True) where
+    uninhabited MkAnd impossible
+
+implementation Uninhabited (TyAnd True False) where
+    uninhabited MkAnd impossible
+
+implementation Uninhabited (TyAnd False False) where
+    uninhabited MkAnd impossible
+
+isAnd : (b : Bool) -> (c : Bool) -> Dec (TyAnd b c)
+isAnd False False = No absurd
+isAnd False True = No absurd
+isAnd True True = Yes MkAnd
+isAnd True False = No absurd
+
+beval : (env : Env) -> (b : BooleanExpression) -> Bool
+beval env (BParen x) = beval env x
+-- beval env (Not x) = ?beval_rhs_2
+beval env (And x y z w (Yes prf)) = True
+beval env (And x y z w (No contra)) = False
+-- beval env (Or x y) = ?beval_rhs_4
+beval env (Eq x y z w (Yes prf)) = True
+beval env (Eq x y z w (No contra)) = False
+-- beval env (NEq x y f) = ?beval_rhs_6
+beval env (LT x y z w (Yes prf)) = True
+beval env (LT x y z w (No contra)) = False
+beval env (LTE x y z w (Yes prf)) = True
+beval env (LTE x y z w (No contra)) = False
+beval env (GT x y z w (Yes prf)) = True
+beval env (GT x y z w (No contra)) = False
+beval env (GTE x y z w (Yes prf)) = True
+beval env (GTE x y z w (No contra)) = False
+    
+    
+    -- beval env (Eq n1 n2 n1' n2' Refl) = eval n1 == eval n2
+    -- beval env (Lit (S cost)) = S cost
+    -- beval env (Var name) = case lookup name env of
+    --                             Just value => value 
+    --                             Nothing    => 0
+    -- beval env (NParen x) = eval env x
+    -- beval env (Plus x y) = (eval env x) `plus` (eval env y)
+    -- beval env (Sub x y) = (eval env x) `minus` (eval env y)
+    -- beval env (Mul x y) = (eval env x) `mult` (eval env y)
+    -- beval env (Div x y) = assert_total $ (eval env x) `div` (eval env y)
+    -- beval env (Mod x y) = assert_total $ (eval env x) `mod` (eval env y)
 
 public export
 data Assertion : Type where
@@ -201,24 +257,24 @@ proveGTE {y} {x} prfGTE = case (liftGTE {f = eval . Label} x prfGTE) of
 
 -- congGTE {f= (eval . Label)} y x hell (liftGTE x hell) ?h2
 
-public export
-fact_assert : Env -> Assertion
-fact_assert env = let x = (Lit 8)
-                      y = (Lit 8)
-                      x' = eval [] x
-                      y' = eval [] y
-                  in MkAssertion (Eq x y (MkEvald x x') (MkEvald y y') ( Refl))
+-- public export
+-- fact_assert : Env -> Assertion
+-- fact_assert env = let x = (Lit 8)
+--                       y = (Lit 8)
+--                       x' = eval [] x
+--                       y' = eval [] y
+--                   in MkAssertion (Eq x y (MkEvald x x') (MkEvald y y') ( Refl))
 
-public export
-fact_assert_gte : Env -> Assertion
-fact_assert_gte env =
-    let x = (Lit 8)
-        y = (Lit 7)
-        x' = eval [] x
-        y' = eval [] y
-    in MkAssertion (GTE x y (MkEvald x x') 
-                            (MkEvald y y')
-                            (isLTE y' x') )
+-- public export
+-- fact_assert_gte : Env -> Assertion
+-- fact_assert_gte env =
+--     let x = (Lit 8)
+--         y = (Lit 7)
+--         x' = eval [] x
+--         y' = eval [] y
+--     in MkAssertion (GTE x y (MkEvald x x') 
+--                             (MkEvald y y')
+--                             (isLTE y' x') )
 
 
 
@@ -290,40 +346,40 @@ fact_eg = do
     Assert fact_assert
 -}
 
-public export
-fact_eq : CLang
-fact_eq = DecVar "x" 8 $
-          BlockTime "fact_cost" 8 $
-          For 1 8 (StmtEnergy "iter_cost" 1 Halt) $
-          Assert fact_assert $ Halt
+-- public export
+-- fact_eq : CLang
+-- fact_eq = DecVar "x" 8 $
+--           BlockTime "fact_cost" 8 $
+--           For 1 8 (StmtEnergy "iter_cost" 1 Halt) $
+--           Assert fact_assert $ Halt
 
-public export
-fact_gte : CLang
-fact_gte = DecVar "x" 8 $
-          BlockTime "fact_cost" 8 $
-          For 1 8 (StmtEnergy "iter_cost" 1 Halt) $
-          Assert fact_assert_gte  $ Halt
+-- public export
+-- fact_gte : CLang
+-- fact_gte = DecVar "x" 8 $
+--           BlockTime "fact_cost" 8 $
+--           For 1 8 (StmtEnergy "iter_cost" 1 Halt) $
+--           Assert fact_assert_gte  $ Halt
 
-public export
-fact_assert_gte2 : Env -> Assertion
-fact_assert_gte2 env =
-              let e = (Var "fact_energy")
-                  x = (Var "fact_cost")
-                  y = (Var "x")
-                  e' = eval env e
-                  x' = eval env x
-                  y' = eval env y
-              in MkAssertion (GTE x y (MkEvald x x') 
-                                      (MkEvald y y')
-                                      (isLTE y' x') )
+-- public export
+-- fact_assert_gte2 : Env -> Assertion
+-- fact_assert_gte2 env =
+--               let e = (Var "fact_energy")
+--                   x = (Var "fact_cost")
+--                   y = (Var "x")
+--                   e' = eval env e
+--                   x' = eval env x
+--                   y' = eval env y
+--               in MkAssertion (GTE x y (MkEvald x x') 
+--                                       (MkEvald y y')
+--                                       (isLTE y' x') )
 
-public export
-fact_gte2 : CLang
-fact_gte2 = DecVar "x" 7 $
-            BlockEnergy "fact_energy" 2 $
-            BlockTime "fact_cost" 8 $
-            For 1 8 (StmtEnergy "iter_cost" 1 Halt) $
-            Assert fact_assert_gte2  $ Halt
+-- public export
+-- fact_gte2 : CLang
+-- fact_gte2 = DecVar "x" 7 $
+--             BlockEnergy "fact_energy" 2 $
+--             BlockTime "fact_cost" 8 $
+--             For 1 8 (StmtEnergy "iter_cost" 1 Halt) $
+--             Assert fact_assert_gte2  $ Halt
 
 {-
 __teamplay_time("loop_cost");
