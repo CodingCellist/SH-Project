@@ -13,11 +13,11 @@ __teamplay_time("loop_cost");
 for(i = 0; i < net.n; ++i){
         net.index = i;
         layer l = net.layers[i];
-        if(l.delta){            
+        if(l.delta){
             __teamplay_worst_time("fill_cpu_time", net.n);
             fill_cpu(l.outputs * l.batch, 0, l.delta, 1);
         }
- 
+
         __teamplay_worst_time("forward_time", net.n);
         l.forward(l, net);
 
@@ -45,7 +45,7 @@ Env = List (String, Nat)
 
 public export
 data NumericExpression : Type where
-    Lit    : (cost : Nat) -> NumericExpression -- assume normalisation 
+    Lit    : (cost : Nat) -> NumericExpression -- assume normalisation
     Var    : (name : String) -> NumericExpression
     NParen : NumericExpression -> NumericExpression
     Plus   : NumericExpression -> NumericExpression -> NumericExpression
@@ -55,11 +55,11 @@ data NumericExpression : Type where
     Mod    : NumericExpression -> NumericExpression -> NumericExpression
 
 public export
-eval : Env -> NumericExpression -> Nat 
+eval : Env -> NumericExpression -> Nat
 eval env (Lit Z) = Z
 eval env (Lit (S cost)) = S cost
 eval env (Var name) = case lookup name env of
-                        Just value => value 
+                        Just value => value
                         Nothing    => 0
 eval env (NParen x) = eval env x
 eval env (Plus x y) = (eval env x) `plus` (eval env y)
@@ -76,6 +76,11 @@ mutual
     data TyAnd : Bool -> Bool -> Type where
         MkAnd : TyAnd True True
 
+    -- teh6: False and otherwise True?
+    data TyOr : Bool -> Bool -> Type where
+        MkFalseOr : TyOr False False
+        MkTrueOr : TyOr _ _
+
     data BooleanExpression : Type where
         BParen : BooleanExpression -> BooleanExpression
         -- Not    : BooleanExpression -> BooleanExpression
@@ -88,12 +93,19 @@ mutual
         -> BooleanExpression
 
         -- Or     : BooleanExpression -> BooleanExpression -> BooleanExpression
+        -- teh6: I think this does "Or"
+        Or  :   (x : BooleanExpression)
+            -> (y : BooleanExpression)
+            -> BEvald x x'
+            -> BEvald y y'
+            -> Dec (TyOr x' y')
+            -> BooleanExpression
 
-        Eq     : (x : NumericExpression) 
+        Eq     : (x : NumericExpression)
             -> (y : NumericExpression)
             -> Evald x x'
             -> Evald y y'
-            -> Dec (x' = y') 
+            -> Dec (x' = y')
             -> BooleanExpression
 
 
@@ -115,7 +127,7 @@ mutual
             -> Evald y y'
             -> Dec (x' `LTE` y')
             -> BooleanExpression
-        
+
         -- GT     : NumericExpression -> NumericExpression -> BooleanExpression
         GT :  {x' : Nat} -> {y' : Nat}
         -> (x : NumericExpression)
@@ -125,14 +137,14 @@ mutual
         -> Dec (y' `LT` x')
         -> BooleanExpression
 
-        GTE    : {x' : Nat} -> {y' : Nat} 
-            -> (x : NumericExpression) 
-            -> (y : NumericExpression) 
-            -> Evald x x' 
-            -> Evald y y' 
-            -> Dec (y' `LTE` x') 
+        GTE    : {x' : Nat} -> {y' : Nat}
+            -> (x : NumericExpression)
+            -> (y : NumericExpression)
+            -> Evald x x'
+            -> Evald y y'
+            -> Dec (y' `LTE` x')
             -> BooleanExpression
-    
+
 
     data BEvald : BooleanExpression -> Bool -> Type where
         MkBEvald : (x : BooleanExpression) -> (y : Bool) -> BEvald x y
@@ -152,6 +164,13 @@ isAnd False True = No absurd
 isAnd True True = Yes MkAnd
 isAnd True False = No absurd
 
+-- teh6: need a similar function for "Or"?
+isOr : (b1 : Bool) -> (b2 : Bool) -> Dec (TyOr b1 b2)
+isOr False False = Yes MkFalseOr
+isOr False True = Yes MkTrueOr
+isOr True False = Yes MkTrueOr
+isOr True True = Yes MkTrueOr
+
 beval : (env : Env) -> (b : BooleanExpression) -> Bool
 beval env (BParen x) = beval env x
 -- beval env (Not x) = ?beval_rhs_2
@@ -169,12 +188,12 @@ beval env (GT x y z w (Yes prf)) = True
 beval env (GT x y z w (No contra)) = False
 beval env (GTE x y z w (Yes prf)) = True
 beval env (GTE x y z w (No contra)) = False
-    
-    
+
+
     -- beval env (Eq n1 n2 n1' n2' Refl) = eval n1 == eval n2
     -- beval env (Lit (S cost)) = S cost
     -- beval env (Var name) = case lookup name env of
-    --                             Just value => value 
+    --                             Just value => value
     --                             Nothing    => 0
     -- beval env (NParen x) = eval env x
     -- beval env (Plus x y) = (eval env x) `plus` (eval env y)
@@ -272,7 +291,7 @@ proveGTE {y} {x} prfGTE = case (liftGTE {f = eval . Label} x prfGTE) of
 --         y = (Lit 7)
 --         x' = eval [] x
 --         y' = eval [] y
---     in MkAssertion (GTE x y (MkEvald x x') 
+--     in MkAssertion (GTE x y (MkEvald x x')
 --                             (MkEvald y y')
 --                             (isLTE y' x') )
 
@@ -293,7 +312,7 @@ proveGTE {y} {x} prfGTE = case (liftGTE {f = eval . Label} x prfGTE) of
         // net.n            = 107
 -}
 
-{- we model the C only on the parts that we need to model, blocks, statements, and loops. 
+{- we model the C only on the parts that we need to model, blocks, statements, and loops.
    the blocks and statements can be treat as a black box. -}
 
 
@@ -313,10 +332,10 @@ proveGTE {y} {x} prfGTE = case (liftGTE {f = eval . Label} x prfGTE) of
 
 
 data Prog : Type -> State -> State -> Type where
-	DecVar : (name : String) -> (val : Maybe Nat) -> Prog () st (addVal name val st)
-	For    : (init : Nat) -> (bound : Nat) -> (bl : Prog () st1 st2) -> Prog () st1 st2
-	BaVar  : (name : String) -> (cst : Nat) -> Prog () st (addVal name (Just val) st)
-	BlVar  : (name : String) -> (cst : Nat) -> (bl : Prog () (addVal name (Just val) st0) st2) -> Prog () st0 st2
+    DecVar : (name : String) -> (val : Maybe Nat) -> Prog () st (addVal name val st)
+    For    : (init : Nat) -> (bound : Nat) -> (bl : Prog () st1 st2) -> Prog () st1 st2
+    BaVar  : (name : String) -> (cst : Nat) -> Prog () st (addVal name (Just val) st)
+    BlVar  : (name : String) -> (cst : Nat) -> (bl : Prog () (addVal name (Just val) st0) st2) -> Prog () st0 st2
     Assert : Pred -> Prog () st st
 -}
 
@@ -341,8 +360,8 @@ data CLang : Type where
 
 {- fact_eg : Prog () [] [("iter_cost", Just 1), ("fact_cost", Just 8), ("x", Nothing)]
 fact_eg = do
-	DecVar "x" Nothing
-	BlVar "fact_cost" 8 (For 1 8 (BaVar "iter_cost" 1))
+    DecVar "x" Nothing
+    BlVar "fact_cost" 8 (For 1 8 (BaVar "iter_cost" 1))
     Assert fact_assert
 -}
 
@@ -369,7 +388,7 @@ fact_eg = do
 --                   e' = eval env e
 --                   x' = eval env x
 --                   y' = eval env y
---               in MkAssertion (GTE x y (MkEvald x x') 
+--               in MkAssertion (GTE x y (MkEvald x x')
 --                                       (MkEvald y y')
 --                                       (isLTE y' x') )
 
@@ -386,11 +405,11 @@ __teamplay_time("loop_cost");
 for(i = 0; i < net.n; ++i){
         net.index = i;
         layer l = net.layers[i];
-        if(l.delta){            
+        if(l.delta){
             __teamplay_worst_time("fill_cpu_time", net.n);
             fill_cpu(l.outputs * l.batch, 0, l.delta, 1);
         }
- 
+
         __teamplay_worst_time("forward_time", net.n);
         l.forward(l, net);
 
@@ -407,7 +426,7 @@ for(i = 0; i < net.n; ++i){
 -}
 
 {- darknet_assert : Env -> Assertion
-darknet_assert env = 
+darknet_assert env =
     let loop_cost      = (Var "loop_cost")
         fill_cpu_time  = (Var "fill_cpu_time")
         forward_time   = (Var "forward_time")
@@ -444,11 +463,11 @@ mkCertificate' (StmtEnergy name y z) (env, a) = mkCertificate'  z (store env (na
 
 mkCertificate' (DecVar name y z) (env, a) = mkCertificate' z ( store env (name, y), a)
 
-mkCertificate' (For init bound bl y) (env, a) = 
-                            let (env', innerAsserts) = mkCertificate' bl (env, a) 
+mkCertificate' (For init bound bl y) (env, a) =
+                            let (env', innerAsserts) = mkCertificate' bl (env, a)
                             in mkCertificate' y (env', innerAsserts ++ a)
 mkCertificate' (Assert y z) (env, a) = let res = y env in  mkCertificate' z (env, res :: a)
-mkCertificate' Halt (env, a)  = (env, a) 
+mkCertificate' Halt (env, a)  = (env, a)
 
 public export
 mkCertificate : CLang -> (Env, List Assertion)
