@@ -84,6 +84,11 @@ mutual
         -- MkFalseOr : TyOr False False
         -- MkTrueOr : TyOr _ _
 
+    -- teh6: FIXME: should probably be done using the pre-defined stuff
+    data TyNEq : Nat -> Nat -> Type where
+        MkNEqL : TyNEq Z (S k)
+        MkNEqR : TyNEq (S k) Z
+
     data BooleanExpression : Type where
         BParen : BooleanExpression -> BooleanExpression
         -- Not    : BooleanExpression -> BooleanExpression
@@ -113,12 +118,20 @@ mutual
 
 
         -- NEq    : (x : NumericExpression) -> (y : NumericExpression) -> (x = y -> Void) -> BooleanExpression
+        -- teh6: a "simple" implementation
         NEq     : (x : NumericExpression)
                 -> (y : NumericExpression)
                 -> Evald x x'
                 -> Evald y y'
-                -> Dec ((x' = y') -> Void)
+                -> Dec (TyNEq x' y')
                 -> BooleanExpression
+        -- teh6: FIXME: this is probably how it should be done
+        -- NEq     : (x : NumericExpression)
+        --         -> (y : NumericExpression)
+        --         -> Evald x x'
+        --         -> Evald y y'
+        --         -> Dec ((x' = y') -> Void)
+        --         -> BooleanExpression
 
         -- LT     : NumericExpression -> NumericExpression -> BooleanExpression
 
@@ -190,6 +203,18 @@ isOr True True = Yes MkOr
 -- isOr False True = Yes MkTrueOr
 -- isOr True False = Yes MkTrueOr
 -- isOr True True = Yes MkTrueOr
+
+implementation Uninhabited (TyNEq Z Z) where
+    uninhabited MkNEqL impossible
+    uninhabited MkNEqR impossible
+
+
+-- teh6: decidability rules for "NEq"
+isNEq : (n1 : Nat) -> (n2 : Nat) -> Dec (TyNEq n1 n2)
+isNEq Z Z = No absurd
+isNEq Z (S k) = Yes MkNEqL
+isNEq (S k) Z = Yes MkNEqR
+isNEq (S k) (S j) = ?isNEq_rhs_5
 
 beval : (env : Env) -> (b : BooleanExpression) -> Bool
 beval env (BParen x) = beval env x
