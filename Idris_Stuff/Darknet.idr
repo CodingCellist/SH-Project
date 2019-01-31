@@ -76,14 +76,13 @@ mutual
     data TyAnd : Bool -> Bool -> Type where
         MkAnd : TyAnd True True
 
-    -- teh6: False and otherwise True?
+    -- teh6: all True, left True, or right True
     data TyOr : Bool -> Bool -> Type where
-        MkFalseOr : TyOr False False
-        MkTrueOr : TyOr _ _
-        -- teh6: FixMe: Potential implementation?
-        -- MkOr : TyOr True True
-        -- MkOrL : TyOr True False
-        -- MkOrR : TyOr False True
+        MkOr : TyOr True True
+        MkOrL : TyOr True False
+        MkOrR : TyOr False True
+        -- MkFalseOr : TyOr False False
+        -- MkTrueOr : TyOr _ _
 
     data BooleanExpression : Type where
         BParen : BooleanExpression -> BooleanExpression
@@ -114,6 +113,13 @@ mutual
 
 
         -- NEq    : (x : NumericExpression) -> (y : NumericExpression) -> (x = y -> Void) -> BooleanExpression
+        NEq     : (x : NumericExpression)
+                -> (y : NumericExpression)
+                -> Evald x x'
+                -> Evald y y'
+                -> Dec ((x' = y') -> Void)
+                -> BooleanExpression
+
         -- LT     : NumericExpression -> NumericExpression -> BooleanExpression
 
         LT :  {x' : Nat} -> {y' : Nat}
@@ -168,23 +174,22 @@ isAnd False True = No absurd
 isAnd True True = Yes MkAnd
 isAnd True False = No absurd
 
--- teh6: FixMe: Potential implementation?
--- implementation Uninhabited (TyOr False False) where
---   uninhabited MkOr impossible
---   uninhabited MkOrL impossible
---   uninhabited MkOrR impossible
+implementation Uninhabited (TyOr False False) where
+    uninhabited MkOr impossible
+    uninhabited MkOrL impossible
+    uninhabited MkOrR impossible
 
--- teh6: need a similar function for "Or"?
+-- teh6: decidability rules for "Or"
 isOr : (b1 : Bool) -> (b2 : Bool) -> Dec (TyOr b1 b2)
-isOr False False = Yes MkFalseOr
-isOr False True = Yes MkTrueOr
-isOr True False = Yes MkTrueOr
-isOr True True = Yes MkTrueOr
--- teh6: FixMe: Potential implementation?
--- isOr False False = No absurd
--- isOr False True = Yes MkOrR
--- isOr True False = Yes MkOrL
--- isOr True True = Yes MkOr
+isOr False False = No absurd
+isOr True False = Yes MkOrL
+isOr False True = Yes MkOrR
+isOr True True = Yes MkOr
+-- teh6: old implementation
+-- isOr False False = Yes MkFalseOr
+-- isOr False True = Yes MkTrueOr
+-- isOr True False = Yes MkTrueOr
+-- isOr True True = Yes MkTrueOr
 
 beval : (env : Env) -> (b : BooleanExpression) -> Bool
 beval env (BParen x) = beval env x
