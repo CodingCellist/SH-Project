@@ -88,6 +88,9 @@ mutual
     data TyNEq : Nat -> Nat -> Type where
         MkNEqL : TyNEq Z (S k)
         MkNEqR : TyNEq (S k) Z
+        MkNEqRec : TyNEq k j -> TyNEq (S k) (S j)
+--        MkNEqSL : TyNEq (S (S k)) (S k)
+--        MkNEqSR : TyNEq (S k) (S (S k))
 
     data BooleanExpression : Type where
         BParen : BooleanExpression -> BooleanExpression
@@ -209,23 +212,33 @@ implementation Uninhabited (TyNEq Z Z) where
     uninhabited MkNEqR impossible
 
 
-proveSuccNEq : (prf : TyNEq k j) -> TyNEq (S k) (S j)
-proveSuccNEq MkNEqL = ?proveSuccNEq_rhs_1
-proveSuccNEq MkNEqR = ?proveSuccNEq_rhs_2
+proveSuccNEq : {k : Nat} -> {j : Nat} -> (prf : TyNEq k j) -> TyNEq (S k) (S j)
+-- proveSuccNEq {k=(S j)} {j=Z} MkNEqR = (case j of
+--                                             Z => MkNEqSL
+--                                             (S k) => ?proveSuccNEq_rhs_4)
 
 -- teh6: if the numbers are equal, we cannot construct a NEq proof for the successors
 proveSuccEq : TyNEq (S k) (S j) -> Void
 proveSuccEq MkNEqL impossible
 proveSuccEq MkNEqR impossible
 
+proveNEqRec: (contra : TyNEq k j -> Void) -> TyNEq (S k) (S j) -> Void
+proveNEqRec contra (MkNEqRec x) = contra x
+
 -- teh6: decidability rules for "NEq"
 isNEq : (n1 : Nat) -> (n2 : Nat) -> Dec (TyNEq n1 n2)
+-- isNEq Z Z = No absurd
+-- isNEq Z (S k) = Yes MkNEqL
+-- isNEq (S k) Z = Yes MkNEqR
+-- isNEq (S k) (S j) = case isNEq k j of
+--                          Yes prf => Yes (proveSuccNEq prf)
+--                          No contra => No proveSuccEq
 isNEq Z Z = No absurd
 isNEq Z (S k) = Yes MkNEqL
 isNEq (S k) Z = Yes MkNEqR
 isNEq (S k) (S j) = case isNEq k j of
-                         Yes prf => Yes (proveSuccNEq prf)
-                         No contra => No proveSuccEq
+                         (Yes prf) => Yes (MkNEqRec prf)
+                         (No contra) => No (proveNEqRec contra)
 
 beval : (env : Env) -> (b : BooleanExpression) -> Bool
 beval env (BParen x) = beval env x
