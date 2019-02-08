@@ -12,7 +12,7 @@ import Data.Either
 import Data.Maybe
 data Found = CLangTime (String, Int, Int) 
            | CLangEnergy (String, Int, Int)
-           | Assert String 
+           | Assert ([String], String) 
            | None
 
 getASTYolo :: CTranslUnit
@@ -101,17 +101,42 @@ darknet_assert env =
     in MkAssertion (LTE loop_cost worst (MkEvald loop_cost loop_cost') (MkEvald worst worst') (isLTE loop_cost' worst'))
 -}
 
-generateAssertion expr = "\n\n\tdarknet_assert : Env -> Assertion\n\tdarknet_assert env = " ++ expr
+generateAssertion (brs, expr) = "\n\n\tdarknet_assert : Env -> Assertion\n\tdarknet_assert env = \n\t\tlet\n" ++ (Prelude.concat brs) ++ "\n\t\tin MkAssertion ( " ++ expr ++ " ) "
+
 
 parseExpr (CBinary CEqOp e1 e2 _) count =  let p1 = "p" ++ (show count)
                                                p2 = "p" ++ (show (count + 1))
                                                p1' = p1 ++ "'"
                                                p2' = p2 ++ "'"
-                                               branch1 = "\t\t " ++ p1 ++ " = " ++ parseExpr e1 (count+2) ++ "\n"
-                                               branch2 = "\t\t " ++ p2  ++ " = " ++ parseExpr e2 (count +50)  ++ "\n"
+                                               (branches1, expr1) = parseExpr e1 (count+2) 
+                                               (branches2, expr2) = parseExpr e2 (count +50) 
+					       branch1  ="\t\t " ++ p1  ++ " = " ++ expr1 ++ "\n"
+                                               branch2  ="\t\t " ++ p2  ++ " = " ++ expr2 ++ "\n"
                                                branch1' ="\t\t " ++ p1' ++ " = eval env " ++ p1 ++ "\n"
                                                branch2' ="\t\t " ++ p2' ++ " = eval env " ++ p2 ++ "\n"
-                                           in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (Eq " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(Refl ))"
+						
+ 					       expr = "(Eq " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(decEq " ++ p1' ++ " " ++ p2' ++" ))"
+ 					   in ( branches1 ++ branches2 ++ [branch1, branch2, branch1', branch2'], expr)
+
+parseExpr (CBinary CLndOp e1 e2 _) count = let p1 = "p" ++ (show count)
+                                               p2 = "p" ++ (show (count + 1))
+                                               p1' = p1 ++ "'"
+                                               p2' = p2 ++ "'"
+                                               (branches1, expr1) = parseExpr e1 (count+2) 
+                                               (branches2, expr2) = parseExpr e2 (count+50) --  "\t\t " ++ p2  ++ " = " ++ parseExpr e2 (count +50)  ++ "\n"
+                                               branch1  ="\t\t " ++ p1  ++ " = " ++ expr1 ++ "\n"
+                                               branch2  ="\t\t " ++ p2  ++ " = " ++ expr2 ++ "\n"
+                                               branch1' ="\t\t " ++ p1' ++ " = beval env " ++ p1 ++ "\n"
+                                               branch2' ="\t\t " ++ p2' ++ " = beval env " ++ p2 ++ "\n"
+ 						
+					       expr = "( And " ++ p1 ++ " " ++ p2 ++ " (MkBEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkBEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isAnd " ++ p1' ++ " " ++ p2' ++" ))"
+                                           in (branches1 ++  branches2 ++ [branch1, branch2, branch1', branch2'], expr)
+
+                                           -- in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (And " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "MkAnd )"
+
+
+                                           -- in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin kAssertion (Eq " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(Refl ))"
+
 
 
 
@@ -119,47 +144,101 @@ parseExpr (CBinary CGrOp e1 e2 _) count =  let p1 = "p" ++ (show count)
                                                p2 = "p" ++ (show (count + 1))
                                                p1' = p1 ++ "'"
                                                p2' = p2 ++ "'"
-                                               branch1 = "\t\t " ++ p1 ++ " = " ++ parseExpr e1 (count+2) ++ "\n"
-                                               branch2 = "\t\t " ++ p2  ++ " = " ++ parseExpr e2 (count +50)  ++ "\n"
+                                               (branches1, expr1) = parseExpr e1 (count+2) 
+                                               (branches2, expr2) = parseExpr e2 (count +50) 
+                                               branch1  ="\t\t " ++ p1  ++ " = " ++ expr1 ++ "\n"
+                                               branch2  ="\t\t " ++ p2  ++ " = " ++ expr2 ++ "\n"
                                                branch1' ="\t\t " ++ p1' ++ " = eval env " ++ p1 ++ "\n"
                                                branch2' ="\t\t " ++ p2' ++ " = eval env " ++ p2 ++ "\n"
-                                           in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (GT " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ "(S " ++ p2' ++ " )"  ++ " " ++ p1' ++ " ))"
+
+					       expr = " (GT " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ "(S " ++ p2' ++ " )"  ++ " " ++ p1' ++ " )) "
+
+					     in ( branches1 ++ branches2 ++ [branch1, branch2, branch1', branch2'], expr)
+					
+                                           -- in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (GT " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ "(S " ++ p2' ++ " )"  ++ " " ++ p1' ++ " ))"
+
+
 
 parseExpr (CBinary CGeqOp e1 e2 _) count =  let p1 = "p" ++ (show count)
                                                 p2 = "p" ++ (show (count + 1))
                                                 p1' = p1 ++ "'"
                                                 p2' = p2 ++ "'"
-                                                branch1 = "\t\t " ++ p1 ++ " = " ++ parseExpr e1 (count+2) ++ "\n"
-                                                branch2 = "\t\t " ++ p2  ++ " = " ++ parseExpr e2 (count +50)  ++ "\n"
+						(branches1, expr1) = parseExpr e1 (count+2) 
+                                                (branches2, expr2) = parseExpr e2 (count +50)  
+                                                branch1  ="\t\t " ++ p1  ++ " = " ++ expr1 ++ "\n"
+                                                branch2  ="\t\t " ++ p2  ++ " = " ++ expr2 ++ "\n"
                                                 branch1' ="\t\t " ++ p1' ++ " = eval env " ++ p1 ++ "\n"
                                                 branch2' ="\t\t " ++ p2' ++ " = eval env " ++ p2 ++ "\n"
-                                            in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (GTE " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ p2' ++ " " ++ p1' ++ " ))"
+
+  						expr = "(GTE " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ p2' ++ " " ++ p1' ++ " ))"
+
+					    in ( branches1 ++ branches2 ++ [branch1, branch2, branch1', branch2'], expr)
+
+                                            -- in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (GTE " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ p2' ++ " " ++ p1' ++ " ))"
 
 
 parseExpr (CBinary CLeOp e1 e2 _) count = let p1 = "p" ++ (show count)
                                               p2 = "p" ++ (show (count + 1))
                                               p1' = p1 ++ "'"
                                               p2' = p2 ++ "'"
-                                              branch1 = "\t\t " ++ p1 ++ " = " ++ parseExpr e1 (count+2) ++ "\n"
-                                              branch2 = "\t\t " ++ p2  ++ " = " ++ parseExpr e2 (count +50)  ++ "\n"
+                                              (branches1, expr1) = parseExpr e1 (count+2)
+                                              (branches2, expr2) = parseExpr e2 (count +50) 
+                                              branch1  ="\t\t " ++ p1  ++ " = " ++ expr1 ++ "\n"
+                                              branch2  ="\t\t " ++ p2  ++ " = " ++ expr2 ++ "\n"
                                               branch1' ="\t\t " ++ p1' ++ " = eval env " ++ p1 ++ "\n"
                                               branch2' ="\t\t " ++ p2' ++ " = eval env " ++ p2 ++ "\n"
-                                          in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (LT " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ "(S " ++ p1' ++ " )" ++ " " ++ p2' ++ " ))"
+					      
+  					      expr = "(LT " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ "(S " ++ p1' ++ " )" ++ " " ++ p2' ++ " ))"
+
+					  in ( branches1 ++ branches2 ++ [branch1, branch2, branch1', branch2'], expr)
+
+                                          -- in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (LT " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ "(S " ++ p1' ++ " )" ++ " " ++ p2' ++ " ))"
+
 
 parseExpr (CBinary CLeqOp e1 e2 _) count = let p1 = "p" ++ (show count)
 					       p2 = "p" ++ (show (count + 1))
  					       p1' = p1 ++ "'"
 					       p2' = p2 ++ "'"
-                                               branch1 = "\t\t " ++ p1 ++ " = " ++ parseExpr e1 (count+2) ++ "\n" 
-					       branch2 = "\t\t " ++ p2  ++ " = " ++ parseExpr e2 (count +50)  ++ "\n"
+                                               (branches1, expr1) = parseExpr e1 (count+2) 
+					       (branches2, expr2) = parseExpr e2 (count +50) 
+                                               branch1  ="\t\t " ++ p1  ++ " = " ++ expr1 ++ "\n"
+                                               branch2  ="\t\t " ++ p2  ++ " = " ++ expr2 ++ "\n"
 					       branch1' ="\t\t " ++ p1' ++ " = eval env " ++ p1 ++ "\n"
 					       branch2' ="\t\t " ++ p2' ++ " = eval env " ++ p2 ++ "\n"
-				           in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (LTE " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ p1' ++ " " ++ p2' ++ " ))"
 
-parseExpr (CBinary CMulOp e1 e2 _) count = "( Mul " ++ parseExpr e1 count ++ parseExpr e2 (count+20) ++ " ) " 
-parseExpr (CBinary CAddOp e1 e2 _) count = "( Plus " ++ parseExpr e1 count  ++ parseExpr e2 (count+20)  ++ " ) "
-parseExpr (CVar (Ident name _ _) _) count = "(Var " ++ show name ++ ") " 
-parseExpr (CConst (CIntConst x _) ) count = "( Lit " ++ show x ++ " ) " 
+					       expr = "(LTE " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ p1' ++ " " ++ p2' ++ " ))"
+
+					   in ( branches1 ++ branches2 ++ [branch1, branch2, branch1', branch2'], expr)
+
+
+--				           in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (LTE " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ p1' ++ " " ++ p2' ++ " ))"
+
+
+
+--                                           in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (And " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "MkAnd )"
+
+
+parseExpr (CBinary CLorOp e1 e2 _) count = let (brs1, exps1) = parseExpr e1 count 
+                                               (brs2, exps2) = parseExpr e2 (count+20)
+					       exprs3 = "( Or " ++ exps1 ++ exps2 ++ " ) "
+                                           in (brs1 ++ brs2, exprs3)
+
+parseExpr (CBinary CMulOp e1 e2 _) count = let (brs1, exps1) = parseExpr e1 count
+                                               (brs2, exps2) = parseExpr e2 (count+20)
+                                               exprs3 = "( Mul " ++ exps1 ++ exps2 ++ " ) "
+                                           in (brs1 ++ brs2, exprs3)
+
+parseExpr (CBinary CAddOp e1 e2 _) count = let (brs1, exps1) = parseExpr e1 count
+                                               (brs2, exps2) = parseExpr e2 (count+20)
+                                               exprs3 = "( Plus " ++ exps1 ++ exps2 ++ " ) "
+                                           in (brs1 ++ brs2, exprs3)
+
+parseExpr (CVar (Ident name _ _) _) count = ([], "(Var " ++ show  name ++ " )")
+
+
+parseExpr (CConst (CIntConst x _) ) count = ([], "( Lit " ++ show x ++ " ) " )
+
+
 parseExpr x _ = error (show x)
 
 -- fact_darknet : CLang
