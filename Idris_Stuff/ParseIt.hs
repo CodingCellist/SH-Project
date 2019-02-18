@@ -16,7 +16,9 @@ data Found = CLangTime (String, Int, Int)
            | None
 
 getASTYolo :: CTranslUnit
-getASTYolo = let Right res = unsafePerformIO $ parseCFile (newGCC "cc") Nothing [] "Yolo_for_teamplay/src/network.c"
+-- getASTYolo = let Right res = unsafePerformIO $ parseCFile (newGCC "cc") Nothing [] "Yolo_for_teamplay/src/network.c"
+--             in res
+getASTYolo = let Right res = unsafePerformIO $ parseCFile (newGCC "cc") Nothing [] "./src/network.c"
              in res
 
 getAST :: CTranslUnit
@@ -209,6 +211,22 @@ parseExpr (CBinary CLeqOp e1 e2 _) count = let p1 = "p" ++ (show count)
 					       expr = "(LTE " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ p1' ++ " " ++ p2' ++ " ))"
 
 					   in ( branches1 ++ branches2 ++ [branch1, branch2, branch1', branch2'], expr)
+
+parseExpr (CBinary CNeqOp e1 e2 _) count = let
+                                               p1 = "p" ++ (show count)
+                                               p2 = "p" ++ (show (count + 1))
+                                               p1' = p1 ++ "'"
+                                               p2' = p2 ++ "'"
+                                               (branches1, expr1) = parseExpr e1 (count+2) 
+                                               (branches2, expr2) = parseExpr e2 (count +50) 
+                                               branch1  ="\t\t " ++ p1  ++ " = " ++ expr1 ++ "\n"
+                                               branch2  ="\t\t " ++ p2  ++ " = " ++ expr2 ++ "\n"
+                                               branch1' ="\t\t " ++ p1' ++ " = eval env " ++ p1 ++ "\n"
+                                               branch2' ="\t\t " ++ p2' ++ " = eval env " ++ p2 ++ "\n"
+
+                                               expr = "(NEq " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isNEq " ++ p1' ++ " " ++ p2' ++ " ))"
+                                           in
+                                               (branches1 ++ branches2 ++ [branch1, branch2, branch1', branch2'], expr)
 
 
 --				           in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (LTE " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ p1' ++ " " ++ p2' ++ " ))"
