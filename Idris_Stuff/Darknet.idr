@@ -73,6 +73,9 @@ data Evald : NumericExpression -> Nat -> Type where
     MkEvald : (x : NumericExpression) -> (y : Nat) -> Evald x y
 
 mutual
+    data TyBNot : Bool -> Type where
+        MkBNot : TyBNot False
+
     data TyAnd : Bool -> Bool -> Type where
         MkAnd : TyAnd True True
 
@@ -94,7 +97,13 @@ mutual
 
     data BooleanExpression : Type where
         BParen : BooleanExpression -> BooleanExpression
+        
         -- Not    : BooleanExpression -> BooleanExpression
+        -- teh6: Boolean negation
+        Not : (x : BooleanExpression)
+            -> BEvald x x'
+            -> Dec (TyBNot x')
+            -> BooleanExpression
 
         And :  (x : BooleanExpression)
         -> (y : BooleanExpression)
@@ -175,6 +184,16 @@ mutual
     data BEvald : BooleanExpression -> Bool -> Type where
         MkBEvald : (x : BooleanExpression) -> (y : Bool) -> BEvald x y
 
+-- teh6: cannot construct `Not b` if `b = True`
+implementation Uninhabited (TyBNot True) where
+    uninhabited MkBNot impossible
+
+-- teh6: decidability for Not
+isNot : (b : Bool) -> Dec (TyBNot b)
+isNot False = Yes MkBNot
+isNot True = No absurd
+
+
 implementation Uninhabited (TyAnd False True) where
     uninhabited MkAnd impossible
 
@@ -190,12 +209,13 @@ isAnd False True = No absurd
 isAnd True True = Yes MkAnd
 isAnd True False = No absurd
 
+
 implementation Uninhabited (TyOr False False) where
     uninhabited MkOr impossible
     uninhabited MkOrL impossible
     uninhabited MkOrR impossible
 
--- teh6: decidability rules for "Or"
+-- teh6: decidability rules for `Or`
 isOr : (b1 : Bool) -> (b2 : Bool) -> Dec (TyOr b1 b2)
 isOr False False = No absurd
 isOr True False = Yes MkOrL
