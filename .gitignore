@@ -4,3 +4,6 @@
 # PDFs
 *.pdf
 
+# Test src
+Idris_Stuff/src
+
