@@ -73,6 +73,7 @@ data Evald : NumericExpression -> Nat -> Type where
     MkEvald : (x : NumericExpression) -> (y : Nat) -> Evald x y
 
 mutual
+    -- teh6: Not False is True, i.e. what we're looking for
     data TyBNot : Bool -> Type where
         MkBNot : TyBNot False
 
@@ -92,8 +93,6 @@ mutual
         MkNEqL : TyNEq Z (S k)
         MkNEqR : TyNEq (S k) Z
         MkNEqRec : TyNEq k j -> TyNEq (S k) (S j)
---        MkNEqSL : TyNEq (S (S k)) (S k)
---        MkNEqSR : TyNEq (S k) (S (S k))
 
     data BooleanExpression : Type where
         BParen : BooleanExpression -> BooleanExpression
@@ -137,13 +136,6 @@ mutual
                 -> Evald y y'
                 -> Dec (TyNEq x' y')
                 -> BooleanExpression
-        -- teh6: FIXME: this is probably how it should be done
-        -- NEq     : (x : NumericExpression)
-        --         -> (y : NumericExpression)
-        --         -> Evald x x'
-        --         -> Evald y y'
-        --         -> Dec ((x' = y') -> Void)
-        --         -> BooleanExpression
 
         -- LT     : NumericExpression -> NumericExpression -> BooleanExpression
 
@@ -221,11 +213,6 @@ isOr False False = No absurd
 isOr True False = Yes MkOrL
 isOr False True = Yes MkOrR
 isOr True True = Yes MkOr
--- teh6: old implementation
--- isOr False False = Yes MkFalseOr
--- isOr False True = Yes MkTrueOr
--- isOr True False = Yes MkTrueOr
--- isOr True True = Yes MkTrueOr
 
 implementation Uninhabited (TyNEq Z Z) where
     uninhabited MkNEqL impossible
@@ -251,13 +238,6 @@ isNEq (S k) Z = Yes MkNEqR
 isNEq (S k) (S j) = case isNEq k j of
                          (Yes prf) => Yes (MkNEqRec prf)
                          (No contra) => No (proveNEqRec contra)
--- teh6: old attempted implementation
--- isNEq Z Z = No absurd
--- isNEq Z (S k) = Yes MkNEqL
--- isNEq (S k) Z = Yes MkNEqR
--- isNEq (S k) (S j) = case isNEq k j of
---                          Yes prf => Yes (proveSuccNEq prf)
---                          No contra => No proveSuccEq
 
 beval : (env : Env) -> (b : BooleanExpression) -> Bool
 beval env (BParen x) = beval env x

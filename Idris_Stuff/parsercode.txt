@@ -1,0 +1,1 @@
+Prelude.writeFile "DContract.idr" $ generateIdris "fact_darknet"  $ findTeamplayElements $ findStatement $ getStatementsTrans getASTYolo

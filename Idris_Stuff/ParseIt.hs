@@ -21,6 +21,15 @@ getASTYolo :: CTranslUnit
 getASTYolo = let Right res = unsafePerformIO $ parseCFile (newGCC "cc") Nothing [] "./src/network.c"
              in res
 
+getASTNEq :: CTranslUnit
+getASTNEq = let Right res = unsafePerformIO $ parseCFile (newGCC "cc") Nothing [] "./tests/NEq.c"
+             in res
+
+
+getASTTestNot :: CTranslUnit
+getASTTestNot = let Right res = unsafePerformIO $ parseCFile (newGCC "cc") Nothing [] "./tests/Not.c"
+                in res
+
 getAST :: CTranslUnit
 getAST = let Right res = unsafePerformIO $ parseCFile (newGCC "cc") Nothing [] "foo.c"
          in res
@@ -104,7 +113,6 @@ darknet_assert env =
 -}
 
 generateAssertion (brs, expr) = "\n\n\tdarknet_assert : Env -> Assertion\n\tdarknet_assert env = \n\t\tlet\n" ++ (Prelude.concat brs) ++ "\n\t\tin MkAssertion ( " ++ expr ++ " ) "
-
 
 parseExpr (CBinary CEqOp e1 e2 _) count =  let p1 = "p" ++ (show count)
                                                p2 = "p" ++ (show (count + 1))
@@ -227,6 +235,18 @@ parseExpr (CBinary CNeqOp e1 e2 _) count = let
                                                expr = "(NEq " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isNEq " ++ p1' ++ " " ++ p2' ++ " ))"
                                            in
                                                (branches1 ++ branches2 ++ [branch1, branch2, branch1', branch2'], expr)
+
+-- teh6: no `CLNotOp`, this is instead `CNegOp` - "logical negation"
+parseExpr (CUnary CNegOp e1 _) count = let
+                                             p1 = "p" ++ (show count)
+                                             p1' = p1 ++ "'"
+                                             (branches1, expr1) = parseExpr e1 (count + 2)
+                                             branch1 = "\t\t " ++ p1 ++ " = " ++ expr1 ++ "\n"
+                                             branch1' = "\t\t " ++ p1' ++ " = beval env " ++ p1 ++ "\n"
+                                             
+                                             expr = "(Not " ++ p1 ++ " (MkBEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(isNot " ++ p1' ++ " ))"
+                                         in
+                                             (branches1 ++ [branch1, branch1'], expr)
 
 
 --				           in "\n\t\tlet\n" ++ branch1 ++ branch2 ++ branch1' ++ branch2' ++ "\n\t\tin MkAssertion (LTE " ++ p1 ++ " " ++ p2 ++ " (MkEvald " ++ p1 ++ " " ++ p1' ++ ") " ++ "(MkEvald " ++ p2 ++ " " ++ p2' ++ ") " ++ "(isLTE " ++ p1' ++ " " ++ p2' ++ " ))"
