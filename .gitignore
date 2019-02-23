@@ -4,6 +4,9 @@
 # PDFs
 *.pdf
 
-# Test src
+# Test C src
 Idris_Stuff/src
+
+# Misc
+*~
 
