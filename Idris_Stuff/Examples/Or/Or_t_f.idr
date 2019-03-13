@@ -13,10 +13,10 @@ mutual
   or_t_f_assert env =
     let
       t1 = b_true env
-      t2 = b_false env
+      f2 = b_false env
       t1' = True
-      t2' = False
-      prf = isOr t1' t2'
+      f2' = False
+      prf = isOr t1' f2'
     in
-      MkAssertion (Or t1 t2 (MkBEvald t1 t1') (MkBEvald t2 t2') prf)
+      MkAssertion (Or t1 f2 (MkBEvald t1 t1') (MkBEvald f2 f2') prf)
 
