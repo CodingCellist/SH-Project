@@ -1,5 +1,5 @@
 import Darknet
-import Examples.Not.False
+import Examples.False
 
 mutual
   not_false : CLang
@@ -9,7 +9,7 @@ mutual
   not_false_assert : Env -> Assertion
   not_false_assert env =
     let
-      f = False.b_false env
+      f = b_false env
       f' = False
       prf = isNot f'
     in
