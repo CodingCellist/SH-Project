@@ -1,6 +1,6 @@
 
 void main(void)
 {
-    __teamplay_assert(2 > 3);
+    __teamplay_assert(1 > 3);
 }
 
