@@ -1,4 +1,4 @@
-\documentclass[12pt,twoside]{report}
+\documentclass[12pt]{report}
 
 \usepackage[utf8]{inputenc}
 \usepackage[a4paper]{geometry}
@@ -7,8 +7,12 @@
 
 \title{
     {TITLE}\\
+    \vspace{2cm}
+    {\includegraphics[scale=0.25]{uosta/curve.png}}\\
     {\large School of Computer Science}\\
-    {\includegraphics[scale=0.3]{uosta/01-standard-vertical-black.png}}
+    \vspace{-0.8cm}
+    {\includegraphics[scale=0.3]{uosta/01-standard-vertical-black.png}}\\
+    \vspace{-2cm}
 }
 \author{
     {Thomas Ekstr{\" o}m Hansen}\\
@@ -26,6 +30,9 @@
     
     \chapter{Objectives}
     \include{chapters/objectives}
+    
+    \chapter{Context Survey}
+    \include{chapters/context-survey}
         
     \chapter{Design}
     \include{chapters/design}
