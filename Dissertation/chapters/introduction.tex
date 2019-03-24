@@ -1,9 +1,13 @@
 \begin{itemize}
-	\item security is an ever increasing concern
-	\item side channel attacks are very hard to guard against
-	\item hard to write secure, low-level programs
-	\item hard to \textit{guarantee} that a program is secure
-	\item mention correctness by construction \cite{Chapman:2006:CCM:1151816.1151820}?
-	\item introduce a EDSL for C which uses Idris' proof system to prove
-		  correctness of safety properties
+	\item embedded systems are increasingly common, the IoT
+	\item e.g. wireless handsets, smart cards, routers, scientific sensors,
+		  health services, satellites, etc.
+	\item these often require small footprints in terms of CPU cycles/time and
+		  energy as they have limited resources
+	\item being able to reason about how much time and energy a part of a
+		  program takes is useful for these
+	\item even better if guarantees could be made
+	\item using an EDSL and Idris' proof system, obtain something which allows
+		  us to reason about these and to provide ``contracts'' which prove that
+		  the desired properties hold.
 \end{itemize}
