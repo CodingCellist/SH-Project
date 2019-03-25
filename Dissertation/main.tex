@@ -4,12 +4,13 @@
 \usepackage[a4paper]{geometry}
 \usepackage{graphicx}
 \usepackage{indentfirst}
+%\usepackage{palatino}
 
 \title{
     {TITLE}\\
     \vspace{2cm}
     {\includegraphics[scale=0.25]{uosta/curve.png}}\\
-    {\large School of Computer Science}\\
+    {\fontfamily{ppl}\selectfont\large School of Computer Science}\\
     \vspace{-0.8cm}
     {\includegraphics[scale=0.3]{uosta/01-standard-vertical-black.png}}\\
     \vspace{-2cm}
@@ -24,6 +25,10 @@
     \maketitle
     
     \tableofcontents
+    
+    \chapter*{Declaration}
+    %\include{chapters/declaration}
+    \input{chapters/declaration}
     
     \chapter{Introduction}
     %\include{chapters/introduction}
