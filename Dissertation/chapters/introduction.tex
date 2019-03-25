@@ -6,10 +6,21 @@
 		  energy as they have limited resources
 	\item being able to reason about how much time and energy a part of a
 		  program takes is useful for these
+	\item why DSLs are good for this \cite{685738,hudak1996building}
+	\item why EDSLs are ``easy'' to implement \cite{685738}
 	\item even better if guarantees could be made
 	\item using an EDSL and Idris' proof system, obtain something which allows
 		  us to reason about these and to provide ``contracts'' which prove that
 		  the desired properties hold.
 \end{itemize}
 
-Embedded systems are becoming increasingly common. From wireless handsets, smart cards, and routers to scientific sensors, health monitors, and satellites, embedded systems constitute more and more of our daily lives, and control more and more essential parts of it. With more devices connected to the internet than people since approximately 2009 and an estimated 50 billion connected devices by 2020 \cite{cisco-whitepaper}, there is an increasing need to provide certain guarantees for these systems. Since embedded systems often have limited resources, e.g. battery or processing power, being able to reason about how much time and energy programs take would be very useful for the programmers of embedded systems. Based on existing work by the TEAMPLAY project \cite{teamplay:d1.1} this project explores the ability to express and prove timing and energy properties using an Embedded Domain Specific Language (EDSL) and the Idris programming language \cite{brady_2013}
+Embedded systems are becoming increasingly common. From wireless handsets, smart cards, and routers to scientific sensors, health monitors, and satellites, embedded systems are an increasing part of our daily lives, and control more and more essential parts of it. With more devices connected to the internet than people since approximately 2009 and an estimated 50 billion connected devices by 2020 \cite{cisco-whitepaper}, there is an increasing need to provide certain guarantees for these systems. Since embedded systems often have limited resources, e.g. battery or processing power, being able to reason about how much time and energy programs take would be very useful for the programmers of embedded systems. One way to reason about these are (Embedded) Domain Specific Languages.\\\par
+
+A Domain Specific Language is a programming language which is designed for a specific purpose. The theoretical benefit to these is that the programmer will be able to much quicker develop the program they want, using the DSL, than they would using a general purpose language \cite{685738}. However, since designing a language is difficult and time-consuming building a language \textit{on top of} another language allows us to borrow constructs from the ``host'' language (e.g. operators, variable declarations) and use them in our DSL, thereby speeding up its development \cite{hudak1996building}.\\\par
+
+Based on existing work by the TEAMPLAY project \cite{teamplay:d1.1} this project explores the ability to express and prove timing and energy properties using an Embedded Domain Specific Language (EDSL) and the Idris programming language \cite{brady_2013}.
+
+\begin{itemize}
+	\item have objectives here?
+	\item something along the lines of ``Initially, this project will examine...''?
+\end{itemize}

@@ -1,9 +1,9 @@
 \begin{itemize}
-	\item why DSLs are useful \cite{685738,hudak1996building}
-	\item why EDSLs are ``easy'' to implement \cite{685738}
+	\item existing EDSLs focus on code generation or language reasoning, not the
+	      HW side
 	\item why Haskell and Idris are good tools for implementing EDSLs (citing
-    	  \cite{10.1007/3-540-45350-4_5,685738,hudak1996building} for Haskell and
-    	  \cite{brady2015embedded} for Idris)
+    	  \cite{10.1007/3-540-45350-4_5,685738,hudak1996building} for Haskell
+    	  and \cite{brady2015embedded} for Idris)
 	\item mention Hume \cite{10.1007/978-3-540-39815-8_3} and Feldspar
   		  \cite{5558637} as examples of existing EDSLs
 	\item something on how Idris proofs work (citing \cite{brady2015embedded})?
@@ -13,4 +13,19 @@
 		  \cite{10.1007/978-3-642-27694-1_18,Brady:2011:ISP:1929529.1929536}?
 	\item mention previous work done using Idris on network protocols
 		  \cite{5158855}?
+	\item the existing Haskell-based DSLs do not have a built-in proof system
+		  for guaranteeing that the ``type-promises'' are correct
+	\item the existing Idris-based DSLs do not focus on generating
+		  proofs/contracts that the programs do what they say (beyond
+		  type-checking) and do not concern themselves with timing or energy
 \end{itemize}
+
+\section{Haskell-based DSLs}
+	One example of an existing EDSL is ``Feldspar'' \cite{5558637}. Feldspar is a language for reasoning about digital signal processing (DSP) algorithms and is built on Haskell. Its aim is to help build sound DSP algorithms and then use the high-level description to generate fast, low-level C code \cite{5558637}. [What/How to elaborate?]
+	
+	Another example is ``Hume'' \cite{10.1007/978-3-540-39815-8_3}. The idea behind Hume is that the low-level requirements of the embedded system can guide the process of adapting an existing high(er)-level language to the embedded system, whilst maintaining resource requirements \cite{10.1007/978-3-540-39815-8_3}. [Correctly understood? What/How to elaborate?]
+
+\section{Idris-based DSLs}
+	Several Idris-based DSLs exist and demonstrate the benefits of using Idris for implementing the DSLs. State-aware EDSLs for systems programming \cite{10.1007/978-3-642-27694-1_18} allows the programmer to reason about network transfer or correct file-access. This lets them construct safe, low-level protocols in a higher-level language, and the type-checker can help them spot problems by construction \cite{10.1007/978-3-642-27694-1_18} rather than by trial-and-error. \textbf{TODO: mention the other two Idris examples}
+
+\section{Limitations of the existing work}
