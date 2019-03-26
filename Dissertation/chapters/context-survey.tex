@@ -14,18 +14,28 @@
 	\item mention previous work done using Idris on network protocols
 		  \cite{5158855}?
 	\item the existing Haskell-based DSLs do not have a built-in proof system
-		  for guaranteeing that the ``type-promises'' are correct
+		  (?) for guaranteeing that the ``type-promises'' are correct
+	\item outside DSL-scope, things like simulation (cycle-accurate, functional,
+		  etc.). But these are slow and/or resource-intensive
 	\item the existing Idris-based DSLs do not focus on generating
 		  proofs/contracts that the programs do what they say (beyond
 		  type-checking) and do not concern themselves with timing or energy
 \end{itemize}
 
 \section{Haskell-based DSLs}
-	One example of an existing EDSL is ``Feldspar'' \cite{5558637}. Feldspar is a language for reasoning about digital signal processing (DSP) algorithms and is built on Haskell. Its aim is to help build sound DSP algorithms and then use the high-level description to generate fast, low-level C code \cite{5558637}. [What/How to elaborate?]
+	One example of an existing EDSL is ``Feldspar'' \cite{5558637}. Feldspar is a language for reasoning about digital signal processing (DSP) algorithms and is built on Haskell. Its aim is to help build sound DSP algorithms and then use the high-level description to generate fast, low-level C code \cite{5558637}. \textbf{[What/How to elaborate?]}
 	
-	Another example is ``Hume'' \cite{10.1007/978-3-540-39815-8_3}. The idea behind Hume is that the low-level requirements of the embedded system can guide the process of adapting an existing high(er)-level language to the embedded system, whilst maintaining resource requirements \cite{10.1007/978-3-540-39815-8_3}. [Correctly understood? What/How to elaborate?]
+	Another example is ``Hume'' \cite{10.1007/978-3-540-39815-8_3}. The idea behind Hume is that the low-level requirements of the embedded system can guide the process of adapting an existing high(er)-level language to the embedded system, whilst maintaining resource requirements \cite{10.1007/978-3-540-39815-8_3}. \textbf{[Correctly understood? What/How to elaborate?]}
 
 \section{Idris-based DSLs}
-	Several Idris-based DSLs exist and demonstrate the benefits of using Idris for implementing the DSLs. State-aware EDSLs for systems programming \cite{10.1007/978-3-642-27694-1_18} allows the programmer to reason about network transfer or correct file-access. This lets them construct safe, low-level protocols in a higher-level language, and the type-checker can help them spot problems by construction \cite{10.1007/978-3-642-27694-1_18} rather than by trial-and-error. \textbf{TODO: mention the other two Idris examples}
+	Several Idris-based DSLs exist and demonstrate the benefits of using Idris for implementing the DSLs. State-aware EDSLs for systems programming \cite{10.1007/978-3-642-27694-1_18} allows the programmer to reason about network transfer or correct file-access. This lets them construct safe, low-level protocols in a higher-level language, and the type-checker can help them spot problems by construction \cite{10.1007/978-3-642-27694-1_18} rather than by trial-and-error.
+	Another example uses Idris for concurrent programming \cite{brady2010correct}. By representing the state of a concurrent program and the locking and unlocking operations as types, the resulting EDSL allows the programmer to reason about the thread-safety of their program when constructing it, rather than when testing it.
+	DSLs can also be used to create correct-by-construction network protocols where the embedded types ensure that the protocol operates correctly as long as it type-checks \cite{5158855}.
+
+\section{Non-DSL Approaches}
+	Alternatively to DSLs, a simulator could be used to determine how much time and/or energy a program takes. However, these are often resource intensive and slow. \textbf{[TODO: Citations?]}
 
 \section{Limitations of the existing work}
+	DSLs for time and energy constraints in embedded systems exist. However, due to being written in Haskell, there is no built-in, simple way of formally proving that they hold.
+	
+	The utility of Idris-based DSLs is great: The types ensure that the program is correctly written, and the built-in proof system allows for conditions to be formally guaranteed to hold. Existing research using these properties \cite{10.1007/978-3-642-27694-1_18,brady2010correct,5158855} clearly show that these features can be leveraged to create very powerful prototyping and formal verification methods, but is not in the area of time and energy guarantees.
