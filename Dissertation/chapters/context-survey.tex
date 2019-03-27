@@ -13,8 +13,8 @@
 		  \cite{10.1007/978-3-642-27694-1_18,Brady:2011:ISP:1929529.1929536}?
 	\item mention previous work done using Idris on network protocols
 		  \cite{5158855}?
-	\item the existing Haskell-based DSLs do not have a built-in proof system
-		  (?) for guaranteeing that the ``type-promises'' are correct
+	\item the existing Haskell-based DSLs do not have a built-in proof system(?)
+		  for guaranteeing that the ``type-promises'' are correct
 	\item outside DSL-scope, things like simulation (cycle-accurate, functional,
 		  etc.). But these are slow and/or resource-intensive
 	\item the existing Idris-based DSLs do not focus on generating
@@ -33,9 +33,9 @@
 	DSLs can also be used to create correct-by-construction network protocols where the embedded types ensure that the protocol operates correctly as long as it type-checks \cite{5158855}.
 
 \section{Non-DSL Approaches}
-	Alternatively to DSLs, a simulator could be used to determine how much time and/or energy a program takes. However, these are often resource intensive and slow. \textbf{[TODO: Citations?]}
+	Alternatively to DSLs, a simulator could be used. These mainly focus on the designing the architectures themselves \cite{10.1007/3-540-46002-0_32,Lee:2008:FFC:1375657.1375670} or target the energy consumption of the entire embedded system \cite{782199} rather than a specific program or piece of software. Simulation is also orders of magnitude slower than running the actual hardware, even when sacrifices are made in terms of accuracy (for example, using a functional simulator instead of a cycle-accurate simulator).
 
 \section{Limitations of the existing work}
-	DSLs for time and energy constraints in embedded systems exist. However, due to being written in Haskell, there is no built-in, simple way of formally proving that they hold.
+	[The Haskell-based DSLs do not have a built-in, straightforward way of producing proofs for the written programs.]
 	
-	The utility of Idris-based DSLs is great: The types ensure that the program is correctly written, and the built-in proof system allows for conditions to be formally guaranteed to hold. Existing research using these properties \cite{10.1007/978-3-642-27694-1_18,brady2010correct,5158855} clearly show that these features can be leveraged to create very powerful prototyping and formal verification methods, but is not in the area of time and energy guarantees.
+	The utility of Idris-based DSLs is great: The types ensure that the program is correctly written, and the built-in proof system allows for conditions to be formally guaranteed to hold. Existing research using these properties \cite{5158855,brady2010correct,10.1007/978-3-642-27694-1_18} show that these features can be leveraged to create powerful prototyping and formal verification methods, but is not in the area of time and energy guarantees.
