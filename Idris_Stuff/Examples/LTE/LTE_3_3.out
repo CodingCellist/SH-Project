@@ -1,0 +1,8 @@
+([],
+ [MkAssertion (LTE (Lit 3)
+                   (Lit 3)
+                   (MkEvald (Lit 3) 3)
+                   (MkEvald (Lit 3) 3)
+                   (Yes (LTESucc (LTESucc (LTESucc LTEZero)))))]) : (List (String, Nat),
+                                                                     List Assertion)
+
