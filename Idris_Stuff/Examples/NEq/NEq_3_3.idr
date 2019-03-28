@@ -1,12 +1,12 @@
 import Darknet
 
 mutual
-  neq_false : CLang
-  neq_false = Assert neq_false_assert
-              $ Halt
+  neq_3_3 : CLang
+  neq_3_3 = Assert neq_3_3_assert
+            $ Halt
 
-  neq_false_assert : Env -> Assertion
-  neq_false_assert env =
+  neq_3_3_assert : Env -> Assertion
+  neq_3_3_assert env =
     let
       x = Lit 3
       y = Lit 3

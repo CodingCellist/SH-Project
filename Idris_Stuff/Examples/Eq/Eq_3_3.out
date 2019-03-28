@@ -1,0 +1,7 @@
+([],
+ [MkAssertion (Eq (Lit 3)
+                  (Lit 3)
+                  (MkEvald (Lit 3) 3)
+                  (MkEvald (Lit 3) 3)
+                  (Yes Refl))]) : (List (String, Nat), List Assertion)
+
