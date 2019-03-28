@@ -1,0 +1,7 @@
+([("acc", 2), ("measured", 3)],
+ [MkAssertion (LTE (Var "acc")
+                   (Var "measured")
+                   (MkEvald (Var "acc") 2)
+                   (MkEvald (Var "measured") 3)
+                   (Yes (LTESucc (LTESucc LTEZero))))]) : (List (String, Nat),
+                                                           List Assertion)
