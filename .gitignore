@@ -7,6 +7,15 @@
 # Test C src
 Idris_Stuff/src
 
-# Misc
+# Vim lock files
 *~
+
+# Archives/Compressed things
+*.gz
+*.tar
+*.zip
+
+# Misc
+Idris_Stuff/Examples/clean
+Dissertation/uosta/University\ of\ St\ Andrews\ -\ Logos
 

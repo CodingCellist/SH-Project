@@ -1,0 +1,55 @@
+\documentclass[12pt]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper]{geometry}
+\usepackage{graphicx}
+\usepackage{indentfirst}
+%\usepackage{palatino}
+
+\title{
+    {TITLE}\\
+    \vspace{2cm}
+    {\includegraphics[scale=0.25]{uosta/curve.png}}\\
+    {\fontfamily{ppl}\selectfont\large School of Computer Science}\\
+    \vspace{-0.8cm}
+    {\includegraphics[scale=0.3]{uosta/01-standard-vertical-black.png}}\\
+    \vspace{-2cm}
+}
+\author{
+    {Thomas Ekstr{\" o}m Hansen}\\
+    {150015673}
+}
+\date{DD MM 2019}
+
+\begin{document}
+    \maketitle
+    
+    \tableofcontents
+    
+    \chapter*{Declaration}
+    %\include{chapters/declaration}
+    \input{chapters/declaration}
+    
+    \chapter{Introduction}
+    %\include{chapters/introduction}
+    \input{chapters/introduction}
+    
+    \chapter{Context Survey}
+    %\include{chapters/context-survey}
+    \input{chapters/context-survey}
+        
+    \chapter{Design}
+    %\include{chapters/design}
+    \input{chapters/design}
+    
+    \chapter{Evaluation}
+    %\include{chapters/evaluation}
+    \input{chapters/evaluation}
+        
+    \chapter{Conclusion}
+    %\include{chapters/conclusion}
+    \input{chapters/conclusion}
+    
+    \bibliographystyle{abbrv}
+    \bibliography{references}
+\end{document}
