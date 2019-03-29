@@ -13,3 +13,5 @@
 	\item explain how these `building blocks'/operators go together (similar to
 		  a stack-based language)
 \end{itemize}
+
+When writing C programs for embedded systems, the programmer might want to capture certain elements like the time taken or the energy consumed. This is done by declaring C variables, and then using these in the EDSL. When compiling the DSL, the variables are translated to \texttt{Var} types, numbers are translated to \texttt{Lit} types, all of which can then be evaluated using the given \texttt{Env}.
