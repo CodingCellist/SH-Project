@@ -1,0 +1,24 @@
+\section{Natural Numbers}
+	Natural numbers in \Idris are implemented as Peano numbers \cite{brady_2013}. This means that the natural numbers $\mathbb{N}$ are defined based on the constant 0 (\idrisinline{Z} in Idris) and the \textit{successor function} \idrisinline{S}. From these two, all the naturals can be constructed:
+	\begin{tabular}{r l}
+		\idrisinline{Z} & $\mapsto 0$ \\ 
+		\idrisinline{S Z} & $\mapsto 1$ \\ 
+		\idrisinline{S (S Z)} & $\mapsto 2$ \\ 
+		\vdots & \\
+	\end{tabular}
+	\par
+	The benefit of this is that it allows us to pattern match on numbers. This helps in terms of decidability.
+
+\section{Decidability}
+	\textbf{TODO: Book}
+	\begin{code}
+		decNat : (a : Nat) -> (b : Nat) -> Dec (a = b)
+		decNat Z Z = Yes Refl
+		decNat (S k) Z = ?hole1
+		decNat Z (S j) = ?hole2
+		decNat (S k) (S j) = case decNat k j of
+													Yes prf => Yes (cong prf)
+													No contra => No contra
+	\end{code}
+
+\section{Proofs}
