@@ -2,14 +2,21 @@ I initially made sure the basic operators worked. Once this was done, more
 complicated examples were created using the operators.
 \section{Operators}
 	Several examples were constructed to evaluate whether the operators worked
-	as intended. There are essentially three cases which need to be covered:
+	as intended. There were three cases which needed to be covered:
 	\begin{enumerate}
-		\item \texttt{Z} (i.e 0), as this is the base case for all \texttt{Nat}s
-		\item \texttt{S Z} (i.e 1), as it is the immediate successor of 0
-		\item \texttt{(S ... (S Z)..)} (i.e. numbers greater than 1), as they
+		\item \idrisinline{Z} (i.e 0), as this is the base case for all
+			  \texttt{Nat}s
+		\item \idrisinline{S Z} (i.e 1), as it is the immediate successor of 0
+		\item \idrisinline{(S ... (S Z)..)} (i.e. numbers greater than 1), as they
 			  demonstrate that the recursion works.
 	\end{enumerate}
+	For each of the numeric operators, I wrote examples based on relationships between 0, 1, and 3. I then used the numeric operators to define two simple statements, one which was true and a one which was false, and used these to evaluate the boolean operators.
+	
+	\newpage
+	
     \subsection{The \texttt{Eq} Operator}
+		\idrisinput{"../Idris_Stuff/Examples/Eq/Eq_0_0.idr"}
+		\idrisinput{"../Idris_Stuff/Examples/Eq/Eq_0_0.out"}
     
     \subsection{The \texttt{NEq} Operator}
     
@@ -20,6 +27,10 @@ complicated examples were created using the operators.
     \subsection{The \texttt{GTE} Operator}
     
     \subsection{The \texttt{GT} Operator}
+    
+    \subsection{The \texttt{And} Operator}
+    
+    \subsection{The \texttt{Or} Operator}
     
     \subsection{The \texttt{Not} Operator}
 
