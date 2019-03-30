@@ -23,10 +23,8 @@
 }
 
 @inproceedings{10.1007/978-3-642-27694-1_18,
-    author      = {Brady, Edwin
-    and Hammond, Kevin},
-    editor      = {Russo, Claudio
-    and Zhou, Neng-Fa},
+    author      = {Brady, Edwin and Hammond, Kevin},
+    editor      = {Russo, Claudio and Zhou, Neng-Fa},
     title       = {Resource-Safe Systems Programming with Embedded Domain Specific Languages},
     booktitle   = {Practical Aspects of Declarative Languages},
     year        = {2012},
@@ -34,7 +32,8 @@
     address     = {Berlin, Heidelberg},
     pages       = {242--257},
     abstract    = {We introduce a new overloading notation that facilitates programming, modularity and reuse in Embedded Domain Specific Languages (EDSLs), and use it to reason about safe resource usage and state management. We separate the structural language constructs from our primitive operations, and show how precisely-typed functions can be lifted into the EDSL. In this way, we implement a generic framework for constructing state-aware EDSLs for systems programming.},
-    isbn        = {978-3-642-27694-1}
+    isbn        = {978-3-642-27694-1},
+    doi			= {10.1007/978-3-642-27694-1_18}
 }
 
 @inproceedings{10.1007/978-3-540-39815-8_3,
@@ -47,7 +46,8 @@
     address     = {Berlin, Heidelberg},
     pages       = {37--56},
     abstract    = {This paper describes Hume: a novel domain-specific language whose purpose is to explore the expressibility/costability spectrum in resource-constrained systems, such as real-time embedded or control systems. Hume provides a number of high level features including higher-order functions, polymorphic types, arbitrary but sized user-defined data structures, asynchronous processes, lightweight exception handling, automatic memory management and domain-specific metaprogramming features, whilst seeking to guarantee strong space/time behaviour and maintaining overall determinacy.},
-    isbn        = {978-3-540-39815-8}
+    isbn        = {978-3-540-39815-8},
+    doi			= {10.1007/978-3-540-39815-8_3}
 }
 
 @inproceedings{5558637,
@@ -100,7 +100,8 @@
     address     = {Berlin, Heidelberg},
     pages       = {9--26},
     abstract    = {Functional languages are particularly well-suited to the im- plementation of interpreters for domain-specific embedded languages (DSELs). We describe an implemented technique for producing optimiz- ing compilers for DSELs, based on Kamin's idea of DSELs for program generation. The technique uses a data type of syntax for basic types, a set of smart constructors that perform rewriting over those types, some code motion transformations, and a back-end code generator. Domain- specific optimization results from chains of rewrites on basic types. New DSELs are defined directly in terms of the basic syntactic types, plus host language functions and tuples. This definition style makes compil- ers easy to write and, in fact, almost identical to the simplest embedded interpreters. We illustrate this technique with a language Pan for the computationally intensive domain of image synthesis and manipulation.},
-    isbn        = {978-3-540-45350-5}
+    isbn        = {978-3-540-45350-5},
+    doi			= {10.1007/3-540-45350-4_5}
 }
 
 @inproceedings{Chapman:2006:CCM:1151816.1151820,
@@ -208,7 +209,8 @@
 	address		= {Berlin, Heidelberg},
 	pages		= {460--464},
 	abstract	= {Times is a modelling and schedulability analysis tool for embedded real-time systems, developed at Uppsala University in 2001. It is appropriate for systems that can be described as a set of preemptive or non-preemptive tasks which are triggered periodically or sporadically by time or external events. It provides a graphical interface for editing and simulation, and an engine for schedulability analysis. The main features of Times are:A graphical editor for timed automata extended with tasks [1], which allows the user to model a system and the abstract behaviour of its environment In addition the user may specify a set of preemptive or non-preemtive tasks with parameters such as (relative) deadline, execution time, priority, etc.A simulator, in which the user can validate the dynamic behaviour of the system and see how the tasks execute according to the task parameters and a given scheduling policy. The simulator shows a graphical representation of the generated trace showing the time points when the tasks are released, invoked, suspended, resumed, and completed.A verifier for schedulability analysis, which is used to check if all reachable states of the complete system are schedulable that is, all task instances meet their deadlines. A symbolic algorithm has been developed based on the DBM techniques and implemented based on the verifier of the Uppaal tool [2].A code generator for automatic synthesis of C-code on LegoOS platform from the model. If the automata model is schedulable according to the schedulability analyser the execution of the generated code will meet all the timing constraints specified in the model and the tasks.},
-	isbn		= {978-3-540-46002-2}
+	isbn		= {978-3-540-46002-2},
+	doi			= {10.1007/3-540-46002-0_32}
 }
 
 @inproceedings{782199,
@@ -223,4 +225,24 @@
 	doi			= {10.1109/DAC.1999.782199},
 	ISSN		= {},
 	month		= {June}
+}
+
+@article{howard1980formulae,
+	title		= {The formulae-as-types notion of construction},
+	author		= {Howard, William A},
+	year		= {1980}
+}
+
+@InProceedings{10.1007/978-3-540-74130-5_9,
+	author		= {Brady, Edwin},
+	editor		= {Horv{\'a}th, Zolt{\'a}n and Zs{\'o}k, Vikt{\'o}ria and Butterfield, Andrew},
+	title		= {Ivor, a Proof Engine},
+	booktitle	= {Implementation and Application of Functional Languages},
+	year		= {2007},
+	publisher	= {Springer Berlin Heidelberg},
+	address		= {Berlin, Heidelberg},
+	pages		= {145--162},
+	abstract	= {Dependent type theory has several practical applications in the fields of theorem proving, program verification and programming language design. Ivor is a Haskell library designed to allow easy extending and embedding of a type theory based theorem prover in a Haskell application. In this paper, I give an overview of the library and show how it can be used to embed theorem proving technology in an implementation of a simple functional programming language; by using type theory as a core representation, we can construct and evaluate terms and prove correctness properties of those terms within the same framework, ensuring consistency of the implementation and the theorem prover.},
+	isbn		= {978-3-540-74130-5},
+	doi			= {10.1007/978-3-540-74130-5_9}
 }
