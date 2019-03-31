@@ -18,7 +18,7 @@
              No  : (contra : prop -> Void) -> Dec prop
 	\end{lstlisting}
     Here, \texttt{prf} is a proof that \texttt{prop} holds. And \texttt{contra} is a proof that the value can never exist. The latter is done by having a function which returns \texttt{Void} given \texttt{prop}. \texttt{Void} is a data type with no constructors, i.e. if it is ever possible to return a \texttt{Void}, then it must be impossible to construct one of the arguments to the function (in this case \texttt{prop}). An example use-case of this is proving that two natural numbers are equal:
-	\begin{lstlisting}[caption={Proving the equality between natural numbers \cite{brady_2017}}]
+	\begin{lstlisting}[caption={Proving the equality between natural numbers \cite{brady_2017}},label={lst:decEq}]
     -- a proof that zero cannot be the successor of a natural number
     zeroNotSuc : (0 = S k) -> Void
     zeroNotSuc Refl impossible

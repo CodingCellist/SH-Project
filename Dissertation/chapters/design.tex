@@ -1,6 +1,4 @@
 \begin{itemize}
-	\item explain Idris \texttt{Nat} numbers (i.e. \texttt{Z} and \texttt{S})?
-	\item explain \texttt{Dec}?
 	\item TEAMPLAY \texttt{blocks}, \texttt{blockenergy}, \texttt{blocktime},
 		  etc?
 	\item \texttt{Eq} was already implemented (using `native' things),
@@ -8,10 +6,18 @@
 		  not equal)
 	\item explain how only \texttt{LTE} is required for that selection of
 		  operators?
+    \item \textbf{explain the structure of operators and decidability rules}
 	\item \texttt{And} was already implemented with custom types, used this as
 		  inspiration for implementation of \texttt{Or}
 	\item explain how these `building blocks'/operators go together (similar to
 		  a stack-based language)
+    \item a table of the operators and their DSL equivalents?
 \end{itemize}
 
 When writing C programs for embedded systems, the programmer might want to capture certain elements like the time taken or the energy consumed. This is done by declaring C variables, and then using these in the EDSL. When compiling the DSL, the variables are translated to \texttt{Var} types, numbers are translated to \texttt{Lit} types, all of which can then be evaluated using the given \texttt{Env}.
+\\\par
+
+\texttt{Eq} had already been implemented by the \textsc{TeamPlay} project as part of the D1.1 deliverable \cite{teamplay:d1.1}. However, \texttt{NEq} had not and was more complicated due to the fact that natural numbers can be different in infinitely many ways. For example, 1 is not equal to 2 because 1 is 1 smaller than 2, but 1 is also not equal to 3 in a different way than it is not equal to 2 (and etc. for all combinations of unequal natural numbers). I implemented \texttt{NEq} by doing the `opposite' of \texttt{decEq} (Listing \ref{lst:decEq}). There are three cases under which natural numbers can be unequal, two base-cases and one general case: \textbf{TODO}
+\begin{enumerate}
+    \item \textbf{The firs number is zero and the second is not} -- in this case, the numbers are not equal
+\end{enumerate}
