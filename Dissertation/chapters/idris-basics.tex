@@ -28,8 +28,8 @@
     sucNotZero Refl impossible
     
     -- given a proof that two numbers ARE NOT equal and a proof that
-    -- their successors ARE equal, return the empty type, i.e.
-    -- maintain that the numbers are not equal
+    -- their successors ARE equal, return the empty type, i.e. a
+    -- proof by contradiction
     noRec : (contra : (k = j) -> Void) -> (S k = S j) -> Void
     noRec contra Refl = contra Refl
 
@@ -42,5 +42,6 @@
                             Yes prf => Yes (cong prf)
                             No contra => No (noRec contra)
 	\end{lstlisting}
+    This is somewhat useful on its own, but the best bit is that any function which uses the above check, or any other \texttt{Dec}, has both an answer as to whether the check was valid or not \textit{and} a proof that it is or a proof that it is impossible.
 
 \section{Proofs}
