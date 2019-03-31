@@ -23,9 +23,14 @@
 \end{itemize}
 
 \section{Haskell-based DSLs}
-	One example of an existing EDSL is ``Feldspar'' \cite{5558637}. Feldspar is a language for reasoning about digital signal processing (DSP) algorithms and is built on Haskell. Its aim is to help build sound DSP algorithms and then use the high-level description to generate fast, low-level C code \cite{5558637}. \textbf{[What/How to elaborate?]}
+	One example of an existing EDSL is ``Feldspar'' \cite{5558637}. Feldspar is a language for reasoning about digital signal processing (DSP) algorithms and is built on Haskell. Its DSL's main building blocks are \texttt{value}, \texttt{ifThenElse}, \texttt{while}, and \texttt{parallel} \cite{5558637}. These capture the building-blocks of simple C programs and introduces its own unique function \texttt{parallel} for describing parts of the program where each `sub-computation' can be done independently \cite{5558637}. Feldspar's aim is to help build sound DSP algorithms and then use the high-level description to generate fast, low-level C code \cite{5558637}. \textbf{[What/How to elaborate?]}
+    \\\par
 	
-	Another example is ``Hume'' \cite{10.1007/978-3-540-39815-8_3}. The idea behind Hume is that the low-level requirements of the embedded system can guide the process of adapting an existing high(er)-level language to the embedded system, whilst maintaining resource requirements \cite{10.1007/978-3-540-39815-8_3}. \textbf{[Correctly understood? What/How to elaborate?]}
+	Another example is ``Hume'' \cite{10.1007/978-3-540-39815-8_3}. Hume is much different from Feldspar in that it focuses on modelling embedded systems and not DSP algorithms. In Hume, the programmer can reason about \texttt{box}es, \texttt{wire}s, \texttt{device}s, \texttt{datatype}s, \texttt{function}s, and \texttt{exception}s \cite{10.1007/978-3-540-39815-8_3}. Through these constructs, the programmer can model embedded systems as coarse- or fine-grained as they want, and Hume then estimates the stack, heap, and space/time requirements \cite{10.1007/978-3-540-39815-8_3}.
+    
+    \sout{The idea behind Hume is that the low-level requirements of the embedded system can guide the process of adapting an existing high(er)-level language to the embedded system, whilst maintaining resource requirements \cite{10.1007/978-3-540-39815-8_3}.}
+    
+    \textbf{[Correctly understood? What/How to elaborate?]}
 
 \section{Idris-based DSLs}
 	Several Idris-based DSLs exist and demonstrate the benefits of using Idris for implementing the DSLs. State-aware EDSLs for systems programming \cite{10.1007/978-3-642-27694-1_18} allows the programmer to reason about network transfer or correct file-access. This lets them construct safe, low-level protocols in a higher-level language, and the type-checker can help them spot problems by construction \cite{10.1007/978-3-642-27694-1_18} rather than by trial-and-error.
