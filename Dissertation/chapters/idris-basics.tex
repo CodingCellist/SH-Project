@@ -45,3 +45,9 @@
     This is somewhat useful on its own, but the best bit is that any function which uses the above check, or any other \texttt{Dec}, has both an answer as to whether the check was valid or not \textit{and} a proof that it is or a proof that it is impossible.
 
 \section{Proofs}
+    Proofs in \Idris rely on the type-checker and constructors. The reason \texttt{Refl} is a proof for equality is that it is defined as follows:
+    \begin{lstlisting}[caption={Reflexivity as defined in the \Idris prelude \cite{brady_2017}}]
+        data (=) : a -> b -> Type where
+            Refl : x = x
+    \end{lstlisting}
+    The only constructor for \texttt{(=)} is \texttt{Refl} and \texttt{Refl} can only be constructed when the arguments are equal. Therefore, if a program using \texttt{=} type-checks, the only way that the program can return a \texttt{Yes Refl} is if the arguments to the function were truly equal. Similarly, the only way that the program could return a \texttt{No contra} is if there is a constructible reason as to why the arguments are different.

@@ -11,13 +11,95 @@
 		  inspiration for implementation of \texttt{Or}
 	\item explain how these `building blocks'/operators go together (similar to
 		  a stack-based language)
-    \item a table of the operators and their DSL equivalents?
 \end{itemize}
 
 When writing C programs for embedded systems, the programmer might want to capture certain elements like the time taken or the energy consumed. This is done by declaring C variables, and then using these in the EDSL. When compiling the DSL, the variables are translated to \texttt{Var} types, numbers are translated to \texttt{Lit} types, all of which can then be evaluated using the given \texttt{Env}.
 \\\par
 
-\texttt{Eq} had already been implemented by the \textsc{TeamPlay} project as part of the D1.1 deliverable \cite{teamplay:d1.1}. However, \texttt{NEq} had not and was more complicated due to the fact that natural numbers can be different in infinitely many ways. For example, 1 is not equal to 2 because 1 is 1 smaller than 2, but 1 is also not equal to 3 in a different way than it is not equal to 2 (and etc. for all combinations of unequal natural numbers). I implemented \texttt{NEq} by doing the `opposite' of \texttt{decEq} (Listing \ref{lst:decEq}). There are three cases under which natural numbers can be unequal, two base-cases and one general case: \textbf{TODO}
-\begin{enumerate}
-    \item \textbf{The firs number is zero and the second is not} -- in this case, the numbers are not equal
-\end{enumerate}
+The following section focuses on describing existing work done by the \textsc{TeamPlay} project \cite{teamplay:d1.1}.
+
+\section{The TeamPlay DSL}
+    \subsection{C to DSL mappings}
+        \begin{tabular}{c | c}
+            \textbf{C operator} &   \textsc{TeamPlay} \textbf{DSL equivalent}   \\
+            \hline
+            \texttt{==}         &   \texttt{Eq}     \\
+            \texttt{!=}         &   \texttt{NEq}    \\
+            \texttt{<=}         &   \texttt{LTE}    \\
+            \texttt{<}          &   \texttt{LT}     \\
+            \texttt{>=}         &   \texttt{GTE}    \\
+            \texttt{>}          &   \texttt{GT}     \\
+            \texttt{\&\&}       &   \texttt{And}    \\
+            \texttt{||}         &   \texttt{Or}     \\
+            \texttt{!}          &   \texttt{Not}
+        \end{tabular}
+    
+    \subsection{Arithmetic Operators and Numeric Expressions}
+        The arithmetic operators all take two operands, their evaluation, a proof concerning what the operator evaluates to, and returns a \texttt{BooleanExpression}.
+        The operands are \texttt{NumericExpressions}. A \texttt{NumericExpression} can be any of:
+        \begin{itemize}
+            \item {[have this as a grammar?]}
+            \item literally a natural number -- \texttt{Lit}
+            \item a variable -- \texttt{Var}
+            \item a paranthesised expression(?) -- \texttt{NParen}
+            \item the addition, subtraction, multiplication, or division of two
+                  \texttt{NumericExpression}s -- \texttt{Plus}, \texttt{Sub},
+                  \texttt{Mul}, or \texttt{Div} respectively
+            \item a \texttt{NumericExpression} modulo another 
+                  \texttt{NumericExpression} -- \texttt{Mod}
+        \end{itemize}
+        \texttt{NumericExpression}s are concepts until they are evaluated given an environment \texttt{Env}. The environment is essentially a mapping between symbols and numbers, i.e. it specifies which symbols mean what numbers, which values were assigned to what variable, etc. The \texttt{eval} function uses this to evaluate a \texttt{NumericExpression}; Given an \texttt{Env} and a \texttt{NumericExpression}, the \texttt{eval} function returns the natural number which is the result of that \texttt{NumericExpression} over that environment. To use the evaluation in a proof, we use the \texttt{Evald} type which captures the evaluation of a \texttt{NumericExpression} and the \texttt{Nat} it evaluated to.
+        \begin{lstlisting}[caption={\texttt{Evald} as defined in the \textsc{TeamPlay} DSL}]
+    data Evald : NumericExpression -> Nat -> Type where
+        MkEvald : (x : NumericExpression) -> (y : Nat) -> Evald x y
+        \end{lstlisting}
+        When applying an arithmetic operator to some \texttt{NumericExpression}s, we get a \texttt{BooleanExpression}.
+    
+    \subsection{Boolean Operators and Boolean Expressions}
+        The boolean operators \texttt{And} and \texttt{Or} take two operands, their evaluation, a proof of what the operator evaluates to, and returns a \texttt{BooleanExpression}. The boolean \texttt{Not} operator only takes one operand, its evaluation, a proof of what the operator evaluates to, and returns a \texttt{BooleanExpression}. As we are dealing with boolean operators, the operand(s) are \texttt{BooleanExpression}(s) as well.
+        As with the arithmetic operators and the \texttt{NumericExpression}s, \texttt{BooleanExpression}s are concepts until evaluated over an environment. This is the purpose of the \texttt{beval} function. \textbf{[TODO: beval and BEvald]}
+        % TODO: explain beval and BEVald
+
+\section{Inequality}
+    \texttt{Eq} had already been implemented by the \textsc{TeamPlay} project as part of the D1.1 deliverable \cite{teamplay:d1.1}. However, \texttt{NEq} had not and was more complicated due to the fact that natural numbers can be different in infinitely many ways. For example, 1 is not equal to 2 because 1 is 1 smaller than 2, but 1 is also not equal to 3 in a different way than it is not equal to 2 (and etc. for all combinations of inequal natural numbers). I implemented \texttt{NEq} by doing the `opposite' of \texttt{decEq} (Listing \ref{lst:decEq}). There are three cases under which natural numbers can be not equal, two base-cases and one general case:
+    \begin{enumerate}
+        \item \textbf{The first number is zero and the second is not} -- in this case the numbers are not equal, specifically the left number is zero. Since no number can have zero as its successor, the numbers are not equal.
+        \item \textbf{The second number is zero and the first is not} -- in this case, the numbers are not equal, specifically the right number is zero. Since no number can have zero as its successor, the numbers are not equal.
+        \item \textbf{The numbers are not equal} -- in this case, the successors of the numbers must also be not equal.
+    \end{enumerate}
+    These cases are the constructors for the \texttt{TyNEq} type:
+    \begin{lstlisting}[caption={\texttt{TyNEq}} -- proving inequality.]
+        data TyNEq : Nat -> Nat -> Type where
+            MkNEqL   : TyNEq Z (S k)
+            MkNEqR   : TyNEq (S k) Z
+            MkNEqRec : TyNEq k j -> TyNEq (S k) (S j)
+    \end{lstlisting}
+    This guarantees that a \texttt{TyNEq} can only be constructed if the numbers are truly not equal and hence allows for the definition of decidability rules for inequality.
+    \begin{lstlisting}[caption={Decidability rules for inequality}]
+    -- if both numbers are zero, we cannot construct a TyNEq as
+    -- its constructors require one of the numbers to be non-zero
+    implementation Uninhabited (TyNEq Z Z) where
+        uninhabited MkNEqL impossible
+        uninhabited MkNEqR impossible
+
+    -- if the numbers are equal, we cannot construct a TyNEq for      
+    -- the successors as neither successor can be zero
+    proveSuccEq : TyNEq (S k) (S j) -> Void
+    proveSuccEq MkNEqL impossible
+    proveSuccEq MkNEqR impossible
+    
+    -- if we have a recursive counter-proof for k and j, the
+    -- counter-proof for their successors is 'included'
+    proveNEqRec : (contra : TyNEq k j -> Void) ->
+                  TyNEq (S k) (S j) -> Void
+    proveNEqRec contra (MkNEqRec x) = contra x
+    
+    -- decidability rules for "NEq"
+    isNEq : (n1 : Nat) -> (n2 : Nat) -> Dec (TyNEq n1 n2)
+    isNEq Z Z = No absurd
+    isNEq Z (S k) = Yes MkNEqL
+    isNEq (S k) Z = Yes MkNEqR
+    isNEq (S k) (S j) = case isNEq k j of
+                            Yes prf => Yes (MkNEqRec prf)
+                            No contra => No (proveNEqRec contra)
+    \end{lstlisting}
