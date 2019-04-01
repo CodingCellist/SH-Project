@@ -88,7 +88,7 @@ mutual
         -- MkFalseOr : TyOr False False
         -- MkTrueOr : TyOr _ _
 
-    -- teh6: FIXME: should probably be done using the pre-defined stuff
+    -- teh6: zNotS, sNotZ, or k != j -> (S k) != (S j)
     data TyNEq : Nat -> Nat -> Type where
         MkNEqL : TyNEq Z (S k)
         MkNEqR : TyNEq (S k) Z
@@ -129,7 +129,7 @@ mutual
 
 
         -- NEq    : (x : NumericExpression) -> (y : NumericExpression) -> (x = y -> Void) -> BooleanExpression
-        -- teh6: a "simple" implementation
+        -- teh6: implemented inequality
         NEq     : (x : NumericExpression)
                 -> (y : NumericExpression)
                 -> Evald x x'
@@ -242,12 +242,21 @@ isNEq (S k) (S j) = case isNEq k j of
 beval : (env : Env) -> (b : BooleanExpression) -> Bool
 beval env (BParen x) = beval env x
 -- beval env (Not x) = ?beval_rhs_2
+-- teh6: added `beval Not`
+beval env (Not x x' (Yes prf)) = True
+beval env (Not x x' (No contra)) = False
 beval env (And x y z w (Yes prf)) = True
 beval env (And x y z w (No contra)) = False
 -- beval env (Or x y) = ?beval_rhs_4
+-- teh6: added `beval Or`
+beval env (Or x y x' y' (Yes prf)) = True
+beval env (Or x y x' y' (No contra)) = False
 beval env (Eq x y z w (Yes prf)) = True
 beval env (Eq x y z w (No contra)) = False
 -- beval env (NEq x y f) = ?beval_rhs_6
+-- teh6: added `beval NEq`
+beval env (NEq x y x' y' (Yes prf)) = True
+beval env (NEq x y x' y' (No contra)) = False
 beval env (LT x y z w (Yes prf)) = True
 beval env (LT x y z w (No contra)) = False
 beval env (LTE x y z w (Yes prf)) = True
