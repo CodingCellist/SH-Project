@@ -51,3 +51,6 @@
             Refl : x = x
     \end{lstlisting}
     The only constructor for \texttt{(=)} is \texttt{Refl} and \texttt{Refl} can only be constructed when the arguments are equal. Therefore, if a program using \texttt{=} type-checks, the only way that the program can return a \texttt{Yes Refl} is if the arguments to the function were truly equal. Similarly, the only way that the program could return a \texttt{No contra} is if there is a constructible reason as to why the arguments are different.
+    
+    \textbf{TODO: `Uninhabited'}
+    % TODO: explain Uninhabited
