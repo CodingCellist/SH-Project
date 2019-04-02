@@ -14,8 +14,8 @@ mutual
     let
       t1 = b_true env
       f2 = b_false env
-      t1' = True
-      f2' = False
+      t1' = beval env t1
+      f2' = beval env f2
       prf = isAnd t1' f2'
     in
       MkAssertion (And t1 f2 (MkBEvald t1 t1') (MkBEvald f2 f2') prf)

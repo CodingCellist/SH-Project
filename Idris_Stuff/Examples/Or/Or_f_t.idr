@@ -14,8 +14,8 @@ mutual
     let
       f1 = b_false env
       t2 = b_true env
-      f1' = False
-      t2' = True
+      f1' = beval env f1
+      t2' = beval env t2
       prf = isOr f1' t2'
     in
       MkAssertion (Or f1 t2 (MkBEvald f1 f1') (MkBEvald t2 t2') prf)

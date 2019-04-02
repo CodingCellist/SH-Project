@@ -10,7 +10,7 @@ mutual
   not_false_assert env =
     let
       f = b_false env
-      f' = False
+      f' = beval env f
       prf = isNot f'
     in
       MkAssertion (Not f (MkBEvald f f') prf)
