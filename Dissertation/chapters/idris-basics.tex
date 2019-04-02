@@ -10,7 +10,7 @@
     \par
     The benefit of this is that it allows us to pattern match on numbers. This helps in terms of decidability.
 
-\section{Decidability}
+\section{Decidability}\label{idris:dec}
 	The reader may be familiar with Haskell's \texttt{Maybe} monad, which allows a function to return something that may not be there, e.g. a specific substring of a string. In \Idris, the \texttt{Dec} type allows for a stronger guarantee: either something is there, or there is a proof that it is impossible to create that thing.
 	\begin{lstlisting}[caption={\texttt{Dec} as defined in the \Idris prelude \cite{brady_2017}}]
         data Dec : (prop : Type) -> Type where
@@ -50,7 +50,31 @@
         data (=) : a -> b -> Type where
             Refl : x = x
     \end{lstlisting}
-    The only constructor for \texttt{(=)} is \texttt{Refl} and \texttt{Refl} can only be constructed when the arguments are equal. Therefore, if a program using \texttt{=} type-checks, the only way that the program can return a \texttt{Yes Refl} is if the arguments to the function were truly equal. Similarly, the only way that the program could return a \texttt{No contra} is if there is a constructible reason as to why the arguments are different.
+    The only constructor for \texttt{(=)} is \texttt{Refl} and \texttt{Refl} can only be constructed when the arguments are equal. Therefore, if a program using \texttt{Dec (t1 = t2)} type-checks, the only way that the program can return a \texttt{Yes Refl} is if the arguments to the function were truly equal. Similarly, the only way that the program could return a \texttt{No contra} is if there is no possible way that a \texttt{Refl} could be constructed; No possible way the arguments could be equal. This is a very common thing in proofs, and as such \Idris provides a number of things to help describe this.
+    \\\par
     
-    \textbf{TODO: `Uninhabited'}
-    % TODO: explain Uninhabited
+    % TODO: Rewrite this - Alex didn't understand
+    For counter-proofs, we have already seen the \texttt{Void} type (Section \ref{idris:dec}). \texttt{Void} is interesting because it is impossible to construct, meaning that given an instance of it we can do anything (e.g. prove \texttt{2 = 3}). The \texttt{void} function in \Idris captures this. It is defined as:
+    \begin{code}
+        void : Void -> a
+    \end{code}
+    Essentially, \texttt{Void} and \texttt{void} captures the absurdity of a contradiction. If we accept the contradiction to hold, we can then prove anything we want; We can construct any type we want. The \texttt{Uninhabited} interface allows us to specify instances which have no constructors and is defined as follows:
+    \begin{lstlisting}[caption={The \texttt{Uninhabited} interface \cite{brady_2017}}]
+        interface Uninhabited t where
+            uninhabited : t -> Void
+    \end{lstlisting}
+    For example, we could define \texttt{Uninhabited} for \texttt{2 = 3}:
+    \begin{code}
+        implementation Uninhabited (2 = 3) where
+            uninhabited Refl impossible
+    \end{code}
+    The \texttt{impossible} keyword specifies a case which would not type check and tells the \Idris type checker that it \textit{must} not type check. If the case specified as \texttt{impossible} could type-check, i.e. there \textit{is} a way to construct it, \Idris will print an error message and the program will not compile. Therefore, if a program using \texttt{impossible} compiles, we can be sure that it is truly not possible to construct something of that type.
+    % TODO: `impossible` example
+    This is in turn used to define the \texttt{absurd} function in the Prelude:
+    \begin{lstlisting}[caption={The \texttt{absurd} function  \cite{brady_2017}}]
+        absurd : Uninhabited t => (h : t) -> a
+        absurd h = void (uninhabited h)
+    \end{lstlisting}
+    With \texttt{absurd} we have described exactly that: an absurdity. Hence, any constructors specified in an \texttt{Uninhabited} implementation allows a function to call \texttt{absurd}, thereby covering all cases and describing which of them cannot happen. Or rather, describing \textit{precisely which} can happen.
+    
+    % TODO: explain Uninhabited, absurd
