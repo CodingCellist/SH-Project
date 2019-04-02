@@ -1,0 +1,58 @@
+map mkCertificate [not_false, not_true, and_f_f, and_f_t, and_t_f, and_t_t, or_f_f, or_f_t, or_t_f, or_t_t]
+[([],
+  [MkAssertion (Not (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS))
+                    (MkBEvald (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS)) False)
+                    (Yes MkBNot))]),
+ ([],
+  [MkAssertion (Not (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl))
+                    (MkBEvald (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl)) True)
+                    (No absurd))]),
+ ([],
+  [MkAssertion (And (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS))
+                    (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS))
+                    (MkBEvald (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS)) False)
+                    (MkBEvald (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS)) False)
+                    (No absurd))]),
+ ([],
+  [MkAssertion (And (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS))
+                    (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl))
+                    (MkBEvald (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS)) False)
+                    (MkBEvald (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl)) True)
+                    (No absurd))]),
+ ([],
+  [MkAssertion (And (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl))
+                    (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS))
+                    (MkBEvald (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl)) True)
+                    (MkBEvald (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS)) False)
+                    (No absurd))]),
+ ([],
+  [MkAssertion (And (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl))
+                    (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl))
+                    (MkBEvald (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl)) True)
+                    (MkBEvald (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl)) True)
+                    (Yes MkAnd))]),
+ ([],
+  [MkAssertion (Or (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS))
+                   (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS))
+                   (MkBEvald (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS)) False)
+                   (MkBEvald (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS)) False)
+                   (No absurd))]),
+ ([],
+  [MkAssertion (Or (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS))
+                   (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl))
+                   (MkBEvald (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS)) False)
+                   (MkBEvald (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl)) True)
+                   (Yes MkOrR))]),
+ ([],
+  [MkAssertion (Or (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl))
+                   (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS))
+                   (MkBEvald (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl)) True)
+                   (MkBEvald (Eq (Lit 0) (Lit 1) (MkEvald (Lit 0) 0) (MkEvald (Lit 1) 1) (No ZnotS)) False)
+                   (Yes MkOrL))]),
+ ([],
+  [MkAssertion (Or (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl))
+                   (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl))
+                   (MkBEvald (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl)) True)
+                   (MkBEvald (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl)) True)
+                   (Yes MkOr))])]
+
