@@ -1,3 +1,5 @@
+% TODO types, dependent types, functions, data-types
+
 \section{Natural Numbers}
     Natural numbers in \Idris are implemented as Peano numbers \cite{brady_2013}. This means that the natural numbers $\mathbb{N}$ are defined based on the constant 0 (\idrisinline{Z} in Idris) and the \textit{successor function} \idrisinline{S}. From these two, all the naturals can be constructed:
     \begin{tabular}{r l}
@@ -12,13 +14,13 @@
 
 \section{Decidability}\label{idris:dec}
 	The reader may be familiar with Haskell's \texttt{Maybe} monad, which allows a function to return something that may not be there, e.g. a specific substring of a string. In \Idris, the \texttt{Dec} type allows for a stronger guarantee: either something is there, or there is a proof that it is impossible to create that thing.
-	\begin{lstlisting}[caption={\texttt{Dec} as defined in the \Idris prelude \cite{brady_2017}}]
+	\begin{code}[caption={\texttt{Dec} as defined in the \Idris prelude \cite{brady_2017}}]
         data Dec : (prop : Type) -> Type where
              Yes : (prf : prop) -> Dec prop
              No  : (contra : prop -> Void) -> Dec prop
-	\end{lstlisting}
+	\end{code}
     Here, \texttt{prf} is a proof that \texttt{prop} holds. And \texttt{contra} is a proof that the value can never exist. The latter is done by having a function which returns \texttt{Void} given \texttt{prop}. \texttt{Void} is a data type with no constructors, i.e. if it is ever possible to return a \texttt{Void}, then it must be impossible to construct one of the arguments to the function (in this case \texttt{prop}). An example use-case of this is proving that two natural numbers are equal:
-	\begin{lstlisting}[caption={Proving the equality between natural numbers \cite{brady_2017}},label={lst:decEq}]
+	\begin{code}[caption={Proving the equality between natural numbers \cite{brady_2017}},label={lst:decEq}]
     -- a proof that zero cannot be the successor of a natural number
     zeroNotSuc : (0 = S k) -> Void
     zeroNotSuc Refl impossible
@@ -41,15 +43,15 @@
     decEq (S k) (S j) = case decEq k j of
                             Yes prf => Yes (cong prf)
                             No contra => No (noRec contra)
-	\end{lstlisting}
+	\end{code}
     This is somewhat useful on its own, but the best bit is that any function which uses the above check, or any other \texttt{Dec}, has both an answer as to whether the check was valid or not \textit{and} a proof that it is or a proof that it is impossible.
 
 \section{Proofs}
     Proofs in \Idris rely on the type-checker and constructors. The reason \texttt{Refl} is a proof for equality is that it is defined as follows:
-    \begin{lstlisting}[caption={Reflexivity as defined in the \Idris prelude \cite{brady_2017}}]
+    \begin{code}[caption={Reflexivity as defined in the \Idris prelude \cite{brady_2017}}]
         data (=) : a -> b -> Type where
             Refl : x = x
-    \end{lstlisting}
+    \end{code}
     The only constructor for \texttt{(=)} is \texttt{Refl} and \texttt{Refl} can only be constructed when the arguments are equal. Therefore, if a program using \texttt{Dec (t1 = t2)} type-checks, the only way that the program can return a \texttt{Yes Refl} is if the arguments to the function were truly equal. Similarly, the only way that the program could return a \texttt{No contra} is if there is no possible way that a \texttt{Refl} could be constructed; No possible way the arguments could be equal. This is a very common thing in proofs, and as such \Idris provides a number of things to help describe this.
     \\\par
     
@@ -59,10 +61,10 @@
         void : Void -> a
     \end{code}
     Essentially, \texttt{Void} and \texttt{void} captures the absurdity of a contradiction. If we accept the contradiction to hold, we can then prove anything we want; We can construct any type we want. The \texttt{Uninhabited} interface allows us to specify instances which have no constructors and is defined as follows:
-    \begin{lstlisting}[caption={The \texttt{Uninhabited} interface \cite{brady_2017}}]
+    \begin{code}[caption={The \texttt{Uninhabited} interface \cite{brady_2017}}]
         interface Uninhabited t where
             uninhabited : t -> Void
-    \end{lstlisting}
+    \end{code}
     For example, we could define \texttt{Uninhabited} for \texttt{2 = 3}:
     \begin{code}
         implementation Uninhabited (2 = 3) where
@@ -71,10 +73,10 @@
     The \texttt{impossible} keyword specifies a case which would not type check and tells the \Idris type checker that it \textit{must} not type check. If the case specified as \texttt{impossible} could type-check, i.e. there \textit{is} a way to construct it, \Idris will print an error message and the program will not compile. Therefore, if a program using \texttt{impossible} compiles, we can be sure that it is truly not possible to construct something of that type.
     % TODO: `impossible` example
     This is in turn used to define the \texttt{absurd} function in the Prelude:
-    \begin{lstlisting}[caption={The \texttt{absurd} function  \cite{brady_2017}}]
+    \begin{code}[caption={The \texttt{absurd} function  \cite{brady_2017}}]
         absurd : Uninhabited t => (h : t) -> a
         absurd h = void (uninhabited h)
-    \end{lstlisting}
+    \end{code}
     With \texttt{absurd} we have described exactly that: an absurdity. Hence, any constructors specified in an \texttt{Uninhabited} implementation allows a function to call \texttt{absurd}, thereby covering all cases and describing which of them cannot happen. Or rather, describing \textit{precisely which} can happen.
     
     % TODO: explain Uninhabited, absurd

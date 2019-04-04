@@ -58,12 +58,17 @@ The following section (\ref{des:tp-dsl}) focuses on describing existing work don
             \alt ; modulo\\
                  `Mod' <NumericExpression> <NumericExpression>
         \end{grammar}
-        \texttt{NumericExpression}s are evaluated given an environment \texttt{Env}. The environment is essentially a mapping from symbols to values. The \texttt{eval} function uses this to evaluate a \texttt{NumericExpression}: Given an \texttt{Env} and a \texttt{NumericExpression}, the \texttt{eval} function returns the natural number. This is the result of that \texttt{NumericExpression} over that environment. To use the evaluation in a proof, we use the \texttt{Evald} type which captures the evaluation of a \texttt{NumericExpression} and the \texttt{Nat} it evaluated to.
-        \begin{lstlisting}[caption={\texttt{Evald} as defined in the \textsc{TeamPlay} CSL}]
+        \texttt{NumericExpression}s are evaluated given an environment \texttt{Env}. The environment is essentially a mapping from symbols to values.
+        \begin{code}[caption={The type of the \texttt{eval} function}]
+            eval : Env -> NumericExpression -> Nat
+        \end{code}
+        The \texttt{eval} function uses this to evaluate a \texttt{NumericExpression}: Given an \texttt{Env} and a \texttt{NumericExpression}, the \texttt{eval} function returns a natural number. This is the result of that \texttt{NumericExpression} over that environment. To use the evaluation in a proof, we use the \texttt{Evald} type which captures the evaluation of a \texttt{NumericExpression} and the \texttt{Nat} it evaluated to.
+        \begin{code}[caption={\texttt{Evald} as defined in the \textsc{TeamPlay} CSL}]
     data Evald : NumericExpression -> Nat -> Type where
         MkEvald : (x : NumericExpression) -> (y : Nat) -> Evald x y
-        \end{lstlisting}
-        When applying an arithmetic operator to some \texttt{NumericExpression}s, we get a \texttt{BooleanExpression}.
+        \end{code}
+        As can be seen in the listing above, an \texttt{Evald} is a 
+        When applying a numeric operator to some \texttt{NumericExpression}s, we get a \texttt{BooleanExpression}.
     
     \subsection{Boolean Operators and Boolean Expressions}
         \begin{code}[caption={The definitions of \texttt{And} and \texttt{Or}},escapeinside={(*}{*)}]
@@ -110,14 +115,14 @@ The following section (\ref{des:tp-dsl}) focuses on describing existing work don
     \end{enumerate}
     % TODO: Move this above the `enumerate`
     These cases are the constructors for the \texttt{TyNEq} type:
-    \begin{lstlisting}[caption={\texttt{TyNEq}} -- proving inequality.]
+    \begin{code}[caption={\texttt{TyNEq}} -- proving inequality.]
         data TyNEq : Nat -> Nat -> Type where
             MkNEqL   : TyNEq Z (S k)
             MkNEqR   : TyNEq (S k) Z
             MkNEqRec : TyNEq k j -> TyNEq (S k) (S j)
-    \end{lstlisting}
+    \end{code}
     This guarantees that a \texttt{TyNEq} can only be constructed if the numbers are truly not equal and hence allows for the definition of decidability rules for inequality.
-    \begin{lstlisting}[caption={Decidability rules for inequality}]
+    \begin{code}[caption={Decidability rules for inequality}]
     -- if both numbers are zero, we cannot construct a TyNEq as
     -- its constructors require one of the numbers to be non-zero
     implementation Uninhabited (TyNEq Z Z) where
@@ -144,74 +149,74 @@ The following section (\ref{des:tp-dsl}) focuses on describing existing work don
     isNEq (S k) (S j) = case isNEq k j of
                             Yes prf => Yes (MkNEqRec prf)
                             No contra => No (proveNEqRec contra)
-    \end{lstlisting}
+    \end{code}
     
     With decidability rules for \texttt{NEq}, inequality could now be proven (see Section \ref{evaln:ops:neq})
     
 \section{Boolean Disjunction (\texttt{Or})}
     Boolean conjunction (\texttt{And}) was already implemented. I used it as a starting point for how to implement \texttt{Or}, as they are somewhat similar.
-    \begin{lstlisting}[caption={The proof type for \texttt{And}}]
+    \begin{code}[caption={The proof type for \texttt{And}}]
         data TyAnd : Bool -> Bool -> Type where
             MkAnd : TyAnd True True
-    \end{lstlisting}
+    \end{code}
     The proof of the conjunction of two \texttt{BooleanExpression}s being true was done through the use of the \texttt{TyAnd} type, who's only constructor was one where both expressions were true. Seeing this, I defined the \texttt{TyOr} type, which could only be constructed if the disjunction of the expressions was true:
-    \begin{lstlisting}[caption={The proof type for \texttt{Or}}]
+    \begin{code}[caption={The proof type for \texttt{Or}}]
         data TyOr : Bool -> Bool -> Type where
             MkOr  : TyOr True True
             MkOrL : TyOr True False
             MkOrR : TyOr False True
-    \end{lstlisting}
+    \end{code}
     Then, an implementation of the \texttt{Uninhabited} interface was done for the case where the disjunction would evaluate to false:
-    \begin{lstlisting}[caption={\texttt{Or False False} is impossible}]
+    \begin{code}[caption={\texttt{Or False False} is impossible}]
         implementation Uninhabite (TyOr False False) where
             uninhabited MkOr  impossible
             uninhabited MkOrL impossible
             uninhabited MkOrR impossible
-    \end{lstlisting}
+    \end{code}
     With the proofs and counter-proofs implemented, the decidability rules for \texttt{Or} were implemented:
-    \begin{lstlisting}[caption={Decidability rules for \texttt{Or}}]
+    \begin{code}[caption={Decidability rules for \texttt{Or}}]
         isOr : (b1 : Bool) -> (b2 : Bool) -> Dec (TyOr b1 b2)
         isOr False False = No absurd
         isOr True False  = Yes MkOrL
         isOr False True  = Yes MkOrR
         isOr True True   = Yes MkOr
-    \end{lstlisting}
+    \end{code}
     Finally, \texttt{beval} was extended to also handle \texttt{Or}:
-    \begin{lstlisting}[caption={\texttt{beval} for \texttt{Or}}, escapeinside={(*}{*)}]
+    \begin{code}[caption={\texttt{beval} for \texttt{Or}}, escapeinside={(*}{*)}]
         beval : (env : Env) -> (b : BooleanExpression) -> Bool
             (*\vdots*)
         beval env (Or x y x' y' (Yes prf))   = True
         beval env (Or x y x' y' (No contra)) = False
             (*\vdots*)
-    \end{lstlisting}
+    \end{code}
     
     An evaluation showing that these do indeed prove \texttt{Or} can be found in Section \ref{evaln:ops:or}.
 
 \section{Boolean Negation (\texttt{Not})}
     Boolean negation was also implemented using a custom proof type. The only case where negation evaluates to true is when negating false. Therefore, it is only possible to construct a \texttt{TyBNot} if the given \texttt{BooleanExpression} was false:
-    \begin{lstlisting}[caption={The proof type for \texttt{Not}}]
+    \begin{code}[caption={The proof type for \texttt{Not}}]
         data TyBNot : Bool -> Type where
             MkBNot  : TyBNot False
-    \end{lstlisting}
+    \end{code}
     This time, only a single counter-proof is needed, i.e. \texttt{Not True}:
-    \begin{lstlisting}[caption={Constructing \texttt{Not True} is impossible}]
+    \begin{code}[caption={Constructing \texttt{Not True} is impossible}]
         implementation Uninhabited (TyBNot True) where
             uninhabited MkBNot impossible
-    \end{lstlisting}
+    \end{code}
     From this, the decidability rules are trivial:
-    \begin{lstlisting}[caption={Decidability rules for \texttt{Not}}]
+    \begin{code}[caption={Decidability rules for \texttt{Not}}]
         isNot : (b : Bool) -> Dec (TyBNot b)
         isNot False = Yes MkBNot
         isNot True  = No absurd
-    \end{lstlisting}
+    \end{code}
     As before, \texttt{beval} was extended to also be able to evaluate \texttt{Not}:
-    \begin{lstlisting}[caption={\texttt{beval} for \texttt{Not}}, escapeinside={(*}{*)}]
+    \begin{code}[caption={\texttt{beval} for \texttt{Not}}, escapeinside={(*}{*)}]
         beval : (env : Env) -> (b : BooleanExpression) -> Bool
             (*\vdots*)
         beval env (Not x x' (Yes prf))   = True
         beval env (Not x x' (No contra)) = False
             (*\vdots*)
-    \end{lstlisting}
+    \end{code}
     
     An evaluation of \texttt{Not} can be found in Section \ref{evaln:ops:not}.
     
