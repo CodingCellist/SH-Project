@@ -1,6 +1,7 @@
 \begin{itemize}
 	\item mention/explain TEAMPLAY \texttt{blocks}, \texttt{blockenergy},
           \texttt{blocktime}, etc?
+    % TODO: CSL
 	\item \sout{\texttt{Eq} was already implemented (using `native' things)}
     %      \texttt{NEq} was more complicated (different ways \texttt{Nat}s can be
     %	  not equal)
@@ -13,7 +14,7 @@
     	  a stack-based language)?
 \end{itemize}
 
-When writing C programs for embedded systems, the programmer might want to capture certain elements like the time taken or the energy consumed. This is done by declaring C variables, and then using these in the EDSL. When compiling the DSL, the variables are translated to \texttt{Var} types, numbers are translated to \texttt{Lit} types, all of which can then be evaluated using the given \texttt{Env}.
+When writing C programs for embedded systems, the programmer might want to capture extra-functional properties like the time taken or the energy consumed. Furthermore, the programmer may want to have provable guarantees that these properties of the program hold. This is done through contracts which can be proven using the \Idris proof system. The Contract Specification Language (CSL) works by declaring C variables, and then using these in the \Idris-based EDSL. By using an EDSL, the programmer does not need to change tools/libraries or learn a new language. Instead, the annotations seamlessly integrate with the existing code. When compiling the CSL, the variables are translated to \texttt{Var} types, numbers are translated to \texttt{Lit} types, all of which can then be evaluated using the given \texttt{Env}.
 \\\par
 
 The following section (\ref{des:tp-dsl}) focuses on describing existing work done by the \textsc{TeamPlay} project \cite{teamplay:d1.1}.
@@ -35,32 +36,70 @@ The following section (\ref{des:tp-dsl}) focuses on describing existing work don
         \end{tabular}
     
     \subsection{Numeric Operators and Numeric Expressions}
-        The numeric operators all take two operands, their evaluation, a proof concerning what the operator evaluates to, and returns a \texttt{BooleanExpression}.
-        The operands are \texttt{NumericExpression}s. A \texttt{NumericExpression} can be any of:
-        \begin{itemize}
-            \item {[have this as a grammar?]}
-            \item literally a natural number -- \texttt{Lit}
-            \item a variable -- \texttt{Var}
-            \item a paranthesised expression(?) -- \texttt{NParen}
-            \item the addition, subtraction, multiplication, or division of two\\
-                  \texttt{NumericExpression}s -- \texttt{Plus}, \texttt{Sub},
-                  \texttt{Mul}, or \texttt{Div} respectively
-            \item a \texttt{NumericExpression} modulo another 
-                  \texttt{NumericExpression} -- \texttt{Mod}
-        \end{itemize}
-        \texttt{NumericExpression}s are concepts until they are evaluated given an environment \texttt{Env}. The environment is essentially a mapping between symbols and numbers, i.e. it specifies which symbols mean what numbers, which values were assigned to what variables, etc. The \texttt{eval} function uses this to evaluate a \texttt{NumericExpression}: Given an \texttt{Env} and a \texttt{NumericExpression}, the \texttt{eval} function returns the natural number which is the result of that \texttt{NumericExpression} over that environment. To use the evaluation in a proof, we use the \texttt{Evald} type which captures the evaluation of a \texttt{NumericExpression} and the \texttt{Nat} it evaluated to.
-        \begin{lstlisting}[caption={\texttt{Evald} as defined in the \textsc{TeamPlay} DSL}]
+        The numeric operators all take two arguments, their evaluation, a proof concerning what the operator evaluates to, and returns a \texttt{BooleanExpression}.
+        The operands are \texttt{NumericExpression}s. A \texttt{NumericExpression} is defined by the following grammar:
+        \setlength{\grammarindent}{12em}
+        \begin{grammar}
+            <NumericExpression>
+            ::=  ; a literal\\
+                 `Lit' <digit>$^+$
+            \alt ; a variable\\
+                 `Var' <identifier>
+            \alt ; a parenthesised expression\\
+                 `NParen' <NumericExpression>
+            \alt ; addition\\
+                 `Plus' <NumericExpression> <NumericExpression>
+            \alt ; subtraction\\
+                 `Sub' <NumericExpression> <NumericExpression>
+            \alt ; multiplication\\
+                 `Mul' <NumericExpression> <NumericExpression>
+            \alt ; division\\
+                 `Div' <NumericExpression> <NumericExpression>
+            \alt ; modulo\\
+                 `Mod' <NumericExpression> <NumericExpression>
+        \end{grammar}
+        \texttt{NumericExpression}s are evaluated given an environment \texttt{Env}. The environment is essentially a mapping from symbols to values. The \texttt{eval} function uses this to evaluate a \texttt{NumericExpression}: Given an \texttt{Env} and a \texttt{NumericExpression}, the \texttt{eval} function returns the natural number. This is the result of that \texttt{NumericExpression} over that environment. To use the evaluation in a proof, we use the \texttt{Evald} type which captures the evaluation of a \texttt{NumericExpression} and the \texttt{Nat} it evaluated to.
+        \begin{lstlisting}[caption={\texttt{Evald} as defined in the \textsc{TeamPlay} CSL}]
     data Evald : NumericExpression -> Nat -> Type where
         MkEvald : (x : NumericExpression) -> (y : Nat) -> Evald x y
         \end{lstlisting}
         When applying an arithmetic operator to some \texttt{NumericExpression}s, we get a \texttt{BooleanExpression}.
     
     \subsection{Boolean Operators and Boolean Expressions}
+        \begin{code}[caption={The definitions of \texttt{And} and \texttt{Or}},escapeinside={(*}{*)}]
+        mutual
+            data TyAnd : Bool -> Bool -> Type where
+                MkAnd  : TyAnd True True
+                
+            data TyOr : Bool -> Bool -> Type where
+                MkOr  : TyOr True True
+                MkOrL : TyOr True False
+                MkOrR : TyOr False True
+                
+            data BooleanExpression : Type where
+                (*\vdots*)
+                And  : (x : BooleanExpression)
+                    -> (y : BooleanExpression)
+                    -> BEvald x x'
+                    -> BEvald y y'
+                    -> Dec (TyAnd x' y')
+                    -> BooleanExpression
+                    
+                Or   : (x : BooleanExpression)
+                    -> (y : BooleanExpression)
+                    -> BEvald x x'
+                    -> BEvald y y'
+                    -> Dec (TyOr x' y')
+                    -> BooleanExpression
+                (*\vdots*)
+        \end{code}
+        % TODO: Explain `And` and `Or` based on the code above
         The boolean operators \texttt{And} and \texttt{Or} take two operands, their evaluation, a proof of what the operator evaluates to, and returns a \texttt{BooleanExpression}. The boolean \texttt{Not} operator only takes one operand, its evaluation, a proof of what the operator evaluates to, and returns a \texttt{BooleanExpression}. As we are dealing with boolean operators, the operand(s) are \texttt{BooleanExpression}(s) as well.
         As with the numeric operators and the \texttt{NumericExpression}s, \texttt{BooleanExpression}s are concepts until evaluated over an environment. This is the purpose of the \texttt{beval} function, which takes an environment and a \texttt{BooleanExpression} and returns the evaluation of the \texttt{BooleanExpression} over that environment. To use the boolean evaluation in a proof, we have the type \texttt{BEvald} which, similar to \texttt{Evald}, captures the \texttt{BooleanExpression} and the \texttt{Bool} it evaluated to.
         \\\par
         
         Most operators were already implemented. However, so as to have a complete set, I implemented the ones that were not.
+        % TODO: Specify which ones
 
 \section{Inequality (\texttt{NEq})}
     \texttt{Eq} had already been implemented by the \textsc{TeamPlay} project as part of the D1.1 deliverable \cite{teamplay:d1.1}. However, \texttt{NEq} had not and was more complicated due to the fact that natural numbers can be different in infinitely many ways. For example, 1 is not equal to 2 because 1 is 1 smaller than 2, but 1 is also not equal to 3 in a different way than it is not equal to 2 (and etc. for all combinations of inequal natural numbers). I implemented \texttt{NEq} by doing the `opposite' of \texttt{decEq} (Listing \ref{lst:decEq}). There are three cases under which natural numbers can be not equal, two base-cases and one general case:
@@ -69,6 +108,7 @@ The following section (\ref{des:tp-dsl}) focuses on describing existing work don
         \item \textbf{The second number is zero and the first is not} -- in this case, the numbers are not equal, specifically the right number is zero. Since no number can have zero as its successor, the numbers are not equal.
         \item \textbf{The numbers are not equal} -- in this case, the successors of the numbers must also be not equal.
     \end{enumerate}
+    % TODO: Move this above the `enumerate`
     These cases are the constructors for the \texttt{TyNEq} type:
     \begin{lstlisting}[caption={\texttt{TyNEq}} -- proving inequality.]
         data TyNEq : Nat -> Nat -> Type where
