@@ -221,8 +221,8 @@ implementation Uninhabited (TyNEq Z Z) where
 
 -- teh6: if we have a recursive counter-proof for k and j, the counter-proof
 --       for their successors is 'included'
-proveNEqRec: (contra : TyNEq k j -> Void) -> TyNEq (S k) (S j) -> Void
-proveNEqRec contra (MkNEqRec x) = contra x
+succNEqImpossible : (contra : TyNEq k j -> Void) -> TyNEq (S k) (S j) -> Void
+succNEqImpossible contra (MkNEqRec x) = contra x
 
 -- teh6: decidability rules for "NEq"
 isNEq : (n1 : Nat) -> (n2 : Nat) -> Dec (TyNEq n1 n2)
@@ -231,7 +231,7 @@ isNEq Z (S k) = Yes MkNEqL
 isNEq (S k) Z = Yes MkNEqR
 isNEq (S k) (S j) = case isNEq k j of
                          (Yes prf) => Yes (MkNEqRec prf)
-                         (No contra) => No (proveNEqRec contra)
+                         (No contra) => No (succNEqImpossible contra)
 
 beval : (env : Env) -> (b : BooleanExpression) -> Bool
 beval env (BParen x) = beval env x
