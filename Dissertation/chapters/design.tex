@@ -20,6 +20,7 @@ When writing C programs for embedded systems, the programmer might want to captu
 The following section (\ref{des:tp-dsl}) focuses on describing existing work done by the \textsc{TeamPlay} project \cite{teamplay:d1.1}.
 
 \section{The TeamPlay DSL}\label{des:tp-dsl}
+    % TODO: explain `assert` + contracts before the mapping
     \subsection{C to DSL mappings}
         \begin{tabular}{c | c}
             \textbf{C operator} &   \textsc{TeamPlay} \textbf{DSL equivalent}   \\
@@ -63,7 +64,7 @@ The following section (\ref{des:tp-dsl}) focuses on describing existing work don
             eval : Env -> NumericExpression -> Nat
         \end{code}
         The \texttt{eval} function uses this to evaluate a \texttt{NumericExpression}: Given an \texttt{Env} and a \texttt{NumericExpression}, the \texttt{eval} function returns a natural number. This is the result of that \texttt{NumericExpression} over that environment. To use the evaluation in a proof, we use the \texttt{Evald} type.
-        \begin{code}[caption={\texttt{Evald} as defined in the \textsc{TeamPlay} CSL},label={des:evald}]
+        \begin{code}[caption={\texttt{Evald} as defined in the \Idris model},label={des:evald}]
     data Evald : NumericExpression -> Nat -> Type where
         MkEvald : (x : NumericExpression) -> (y : Nat) -> Evald x y
         \end{code}
@@ -73,54 +74,51 @@ The following section (\ref{des:tp-dsl}) focuses on describing existing work don
         When applying a numeric operator to some \texttt{NumericExpression}s, we get a \texttt{BooleanExpression}.
     
     \subsection{Boolean Operators and Boolean Expressions}
-        \begin{code}[caption={The definitions of \texttt{And} and \texttt{Or}},escapeinside={(*}{*)}]
-        mutual
-            data TyAnd : Bool -> Bool -> Type where
-                MkAnd  : TyAnd True True
-                
-            data TyOr : Bool -> Bool -> Type where
-                MkOr  : TyOr True True
-                MkOrL : TyOr True False
-                MkOrR : TyOr False True
-                
-            data BooleanExpression : Type where
-                (*\vdots*)
-                And  : (x : BooleanExpression)
-                    -> (y : BooleanExpression)
-                    -> BEvald x x'
-                    -> BEvald y y'
-                    -> Dec (TyAnd x' y')
-                    -> BooleanExpression
-                    
-                Or   : (x : BooleanExpression)
-                    -> (y : BooleanExpression)
-                    -> BEvald x x'
-                    -> BEvald y y'
-                    -> Dec (TyOr x' y')
-                    -> BooleanExpression
-                (*\vdots*)
-        \end{code}
-        % TODO: Explain `And` and `Or` based on the code above
-        The boolean operators \texttt{And} and \texttt{Or} take two arguments, their evaluation, a proof of what the operator evaluates to, and returns a \texttt{BooleanExpression}. The boolean \texttt{Not} operator only takes one operand, its evaluation, a proof of what the operator evaluates to, and returns a \texttt{BooleanExpression}. As we are dealing with boolean operators, the operand(s) are \texttt{BooleanExpression}(s) as well.
-        As with the numeric operators and the \texttt{NumericExpression}s, \texttt{BooleanExpression}s are evaluated over an environment. This is the purpose of the \texttt{beval} function.
+        Boolean expressions result from either a numeric operator or a boolean operator. The grammar for constructing boolean expressions is:
+        \setlength{\grammarindent}{11em}
+        \begin{grammar}
+            <BooleanExpression>
+            ::=  ; a paranthesised expression\\
+            `BParen' <BooleanExpression>
+            \alt ; the negation of an expression\\
+            `Not' <BooleanExpression>
+            \alt ; the conjunction of two expressions\\
+            `And' <BooleanExpression> <BooleanExpression>
+            \alt ; the disjunction of two expressions\\
+            `Or' <BooleanExpression> <BooleanExpression>
+            \alt ; testing two numbers for equality\\
+            `Eq' <NumericExpression> <NumericExpression>
+            \alt ; testing two numbers for inequality\\
+            `NEq' <NumericExpression> <NumericExpression>
+            \alt ; whether one number is strictly less than the other\\
+            `LT' <NumericExpression> <NumericExpression>
+            \alt ; whether one number is less than or equal to the other\\
+            `LTE' <NumericExpression> <NumericExpression>
+            \alt ; whether one number is strictly greater than the other\\
+            `GT' <NumericExpression> <NumericExpression>
+            \alt ; whether one number is greater than or equal to the other\\
+            `GTE' <NumericExpression> <NumericExpression>
+        \end{grammar}
+        Similar to \texttt{NumericExpressions}, \texttt{BooleanExpressions} are evaluated over an environment.
         \begin{code}[caption={The type of the \texttt{beval} function}]
             beval : Env -> BooleanExpression -> Bool
         \end{code}
-        The \texttt{beval} function takes an environment and a \texttt{BooleanExpression} and returns the evaluation of the \texttt{BooleanExpression} over that environment. To use the boolean evaluation in a proof, we have the type \texttt{BEvald}.
-        \begin{code}[caption={The \texttt{BEvald} data type}]
-        data BEvald : BooleanExpression -> Bool -> Type where
-            MkBEvald : (x : BooleanExpression) ->
-                        (y : Bool) -> BEvald x y
+        Given an \texttt{Env} and a \texttt{BooleanExpression}, the \texttt{beval} function returns a boolean. This boolean is the result of evaluating that \texttt{BooleanExpression} over that environment. Like with \texttt{NumericExpressions}, to use the evaluation in a proof, we have the \texttt{BEvald} type.
+        \begin{code}[caption={\texttt{BEvald} as defined in the \Idris model}]
+data BEvald : BooleanExpression -> Nat -> Type where
+    MkBEvald : (x : BooleanExpression) -> (y : Bool) -> BEvald x y
         \end{code}
-        % TODO: explain BEvald
-        Similar to \texttt{Evald}, captures the \texttt{BooleanExpression} and the \texttt{Bool} it evaluated to.
-        \\\par
+        \texttt{BEvald} works like \texttt{Evald} except for boolean expressions and values. It is a data type constructed from a \texttt{BooleanExpression} and a \texttt{Bool}. Like \texttt{eval}, the \texttt{beval} function only evaluates the value of the boolean expression, it does not provide a proof that the expression evaluates to that boolean. The \texttt{BEval} type is a proof that the boolean expression \texttt{x} evaluates to the boolean \texttt{y}.
+        \\
         
-        The operators \texttt{And}, \texttt{Eq}, \texttt{LT}, \texttt{LTE}, \texttt{GT}, and \texttt{GTE} were already implemented. So in order to have a complete set, I implemented \texttt{NEq}, \texttt{Or}, and \texttt{Not}.
+        The operators \texttt{And}, \texttt{Eq}, \texttt{LT}, \texttt{LTE}, \texttt{GT}, and \texttt{GTE} were already implemented. So in order to have a complete set of operators, I implemented \texttt{NEq}, \texttt{Or}, and \texttt{Not}.
 
 \section{Inequality (\texttt{NEq})}
     % TODO: Rewrite this bit
-    \texttt{Eq} had already been implemented by the \textsc{TeamPlay} project as part of the D1.1 deliverable \cite{teamplay:d1.1}. However, \texttt{NEq} had not and was more complicated due to the fact that natural numbers can be different in infinitely many ways. For example, 1 is not equal to 2 because 1 is 1 smaller than 2, but 1 is also not equal to 3 in a different way than it is not equal to 2 (and etc. for all combinations of inequal natural numbers). I implemented \texttt{NEq} by doing the `opposite' of \texttt{decEq} (Listing \ref{lst:decEq}). There are three cases under which natural numbers can be not equal, two base-cases and one general case. The cases are the constructors for the \texttt{TyNEq} type:
+    \texttt{Eq} had already been implemented by the \textsc{TeamPlay} project as part of the D1.1 deliverable \cite{teamplay:d1.1}.
+    \textbf{TODO}
+    
+    I implemented \texttt{NEq} by doing the `opposite' of \texttt{decEq} (Listing \ref{lst:decEq}). There are three cases under which natural numbers can be not equal, two base-cases and one general case. The cases are the constructors for the \texttt{TyNEq} type:
     \begin{code}[caption={\texttt{TyNEq}} -- proving inequality.]
         data TyNEq : Nat -> Nat -> Type where
         MkNEqL   : TyNEq Z (S k)
@@ -165,7 +163,58 @@ The following section (\ref{des:tp-dsl}) focuses on describing existing work don
     With decidability rules for \texttt{NEq}, inequality could now be proven (see Section \ref{evaln:ops:neq})
     
 \section{Boolean Disjunction (\texttt{Or})}
-    Boolean conjunction (\texttt{And}) was already implemented. I used it as a starting point for how to implement \texttt{Or}, as they are somewhat similar.
+    The boolean operators are made up of different stages: Constructors for boolean expressions which evaluate to true, the operators keywords, an evaluation of the boolean expression, and a proof of what the boolean expression evaluates to. Boolean conjunction (\texttt{And}) was already implemented. I used it as a starting point for how to implement \texttt{Or}, as they are somewhat similar.
+    \begin{code}[label={des:tyand-or}, caption={The constructors for true \texttt{And} and \texttt{Or} statements}, escapeinside={(*}{*)}]
+        mutual
+            data TyAnd : Bool -> Bool -> Type where
+                MkAnd  : TyAnd True True
+            
+            data TyOr : Bool -> Bool -> Type where
+                MkOr  : TyOr True True
+                MkOrL : TyOr True False
+                MkOrR : TyOr False True
+    \end{code}
+    There is only one case where \texttt{And} evaluates to true, i.e. \texttt{And True True}. This is reflected in that the only constructor for \texttt{TyAnd} has to have both arguments be \texttt{True}. With this idea in mind, the constructors for \texttt{Or} can be implemented. \texttt{TyOr} can be constructed when the expression evaluates to true, i.e. in three cases:
+    \begin{itemize}
+        \item both arguments are \texttt{True}, \texttt{Or True True}
+        \item the left argument is \texttt{True}, \texttt{Or True False}
+        \item the right argument is \texttt{True}, \texttt{Or False True}
+    \end{itemize}
+    
+    With constructors for \texttt{TyOr}, we can then define the \texttt{Or} operator similar to the \texttt{And} operator.
+    
+    \newpage
+    
+    \begin{code}[caption={The definitions of \texttt{And} and \texttt{Or}}, escapeinside={(*}{*)}]
+            data BooleanExpression : Type where
+                (*\vdots*)
+                
+                And :  (x : BooleanExpression)
+                    -> (y : BooleanExpression)
+                    -> BEvald x x'
+                    -> BEvald y y'
+                    -> Dec (TyAnd x' y')
+                    -> BooleanExpression
+                
+                Or  :  (x : BooleanExpression)
+                    -> (y : BooleanExpression)
+                    -> BEvald x x'
+                    -> BEvald y y'
+                    -> Dec (TyOr x' y')
+                    -> BooleanExpression
+                (*\vdots*)
+    \end{code}
+    \texttt{And} takes 5 arguments: two boolean expressions, the proofs of what these evaluated to, and decidable proof of whether those arguments would cause the \texttt{And} to evaluate to true. From the constructors of \texttt{TyAnd} (Listing \ref{des:tyand-or}), this can only be constructed when both arguments are \texttt{True}, i.e. when the \texttt{And} would evaluate to \texttt{True}. Based on this, \texttt{And} returns a new \texttt{BooleanExpression} (which can then be evaluated using the \texttt{beval} function). \texttt{Or} takes the same first 4 arguments. The difference being that its 5$^{th}$ argument is a decidable proof of whether those arguments would cause the \texttt{Or} to evaluate to \texttt{True}. From the constructors of \texttt{TyOr} (Listing \ref{des:tyand-or}), this can only be constructed if one or both of the arguments is \texttt{True}, i.e. the \texttt{Or} would evaluate to \texttt{True}. Based on its arguments, \texttt{Or} then returns a new \texttt{BooleanExpression} (which can then be evaluated using the \texttt{beval} function).
+    % TODO: explain how `uninhabited` ties into all of this
+
+
+
+
+
+
+
+
+    
     \begin{code}[caption={The proof type for \texttt{And}}]
         data TyAnd : Bool -> Bool -> Type where
             MkAnd : TyAnd True True
@@ -179,7 +228,7 @@ The following section (\ref{des:tp-dsl}) focuses on describing existing work don
     \end{code}
     Then, an implementation of the \texttt{Uninhabited} interface was done for the case where the disjunction would evaluate to false:
     \begin{code}[caption={\texttt{Or False False} is impossible}]
-        implementation Uninhabite (TyOr False False) where
+        implementation Uninhabited (TyOr False False) where
             uninhabited MkOr  impossible
             uninhabited MkOrL impossible
             uninhabited MkOrR impossible
