@@ -19,6 +19,7 @@ When writing C programs for embedded systems, the programmer might want to captu
 
 The following section (\ref{des:tp-dsl}) focuses on describing existing work done by the \textsc{TeamPlay} project \cite{teamplay:d1.1}.
 
+
 \section{The TeamPlay DSL}\label{des:tp-dsl}
     % TODO: explain `assert` + contracts before the mapping
     \subsection{C to DSL mappings}
@@ -113,6 +114,7 @@ data BEvald : BooleanExpression -> Nat -> Type where
         
         The operators \texttt{And}, \texttt{Eq}, \texttt{LT}, \texttt{LTE}, \texttt{GT}, and \texttt{GTE} were already implemented. So in order to have a complete set of operators, I implemented \texttt{NEq}, \texttt{Or}, and \texttt{Not}.
 
+
 \section{Inequality (\texttt{NEq})}
     \texttt{Eq} had already been implemented by the \textsc{TeamPlay} project, using the built-in \texttt{(=)} data type and the \texttt{DecEq} interface, as part of the D1.1 deliverable \cite{teamplay:d1.1}. Because there is no built-in \texttt{NEq} data type, one had to be defined.
     \begin{code}[caption={The data type used for capturing inequality}]
@@ -175,6 +177,9 @@ isNEq (S k) (S j) = case isNEq k j of
     \\\par
     
     With the \texttt{eval} function and the \texttt{Evald} type giving us the numbers, and the decidability rules through the implementation of the \texttt{Uninhabited} interface and using the \texttt{succNEqImpossible} function, we have all the parts needed for the \texttt{NEq} constructor. Hence, we can prove inequality between numbers.
+    
+    % TODO: beval neq
+    
     
 \section{Boolean Disjunction (\texttt{Or})}
     The boolean operators are made up of different stages: Constructors for boolean expressions which evaluate to true, the operators keywords, an evaluation of the boolean expression, and a proof of what the boolean expression evaluates to. Boolean conjunction (\texttt{And}) was already implemented. I used it as a starting point for how to implement \texttt{Or}, as they are somewhat similar.
@@ -254,27 +259,36 @@ isNEq (S k) (S j) = case isNEq k j of
     \end{code}
     
     When at least one of the arguments to \texttt{isOr} is \texttt{True}, it is possible to construct a \texttt{TyOr} using the appropriate constructor. If both arguments are \texttt{False}, constructing a \texttt{TyOr} is absurd since none of the constructors can be applied to \texttt{False False} (as defined in Listing \ref{des:or-uninh}). Hence, given two boolean expressions, a proof of what they evaluate to, and using the decidability rules, we can construct a \texttt{BooleanExpression} using the \texttt{Or} constructor, i.e. we can prove boolean disjunction.
-    % TODO: decidability rules
+    
+    % TODO: beval or
+
 
 \section{Boolean Negation (\texttt{Not})}
-    % TODO: Correct this section
-    Boolean negation was also implemented using a custom proof type. The only case where negation evaluates to true is when negating false. Therefore, it is only possible to construct a \texttt{TyBNot} if the given \texttt{BooleanExpression} was false:
-    \begin{code}[caption={The proof type for \texttt{Not}}]
-        data TyBNot : Bool -> Type where
-            MkBNot  : TyBNot False
+    Boolean negation was fairly simple to implement. As with the other operators, I initially declared a custom data type to capture what negations are valid.
+    
+    \begin{code}[caption={The case where \texttt{Not} would evaluate to \texttt{True}}]
+            data TyBNot : Bool -> Type where
+                MkBNot  : TyBNot False
     \end{code}
-    This time, only a single counter-proof is needed, i.e. \texttt{Not True}:
-    \begin{code}[caption={Constructing \texttt{Not True} is impossible}]
+    
+    The only case where boolean negation evaluates to \texttt{True} is when negating \texttt{False}. Therefore, it is only possible to construct a \texttt{TyBNot} if the given \texttt{BooleanExpression} was \texttt{False}.
+    Similarly, there is only one case where boolean negation evaluates to \texttt{False}.
+    
+    \begin{code}[caption={The \texttt{uninhabited} case for constructing a \texttt{TyBNot}}]
         implementation Uninhabited (TyBNot True) where
             uninhabited MkBNot impossible
     \end{code}
-    From this, the decidability rules are trivial:
+    
+    The \texttt{MkBNot} constructor only works if the argument is \texttt{False}, so constructing a \texttt{TyBNot} given \texttt{True} is impossible.
+    
     \begin{code}[caption={Decidability rules for \texttt{Not}}]
         isNot : (b : Bool) -> Dec (TyBNot b)
         isNot False = Yes MkBNot
         isNot True  = No absurd
     \end{code}
-    As before, \texttt{beval} was extended to also be able to evaluate \texttt{Not}:
+    
+    If the argument is \texttt{False}, the negation is \texttt{True}, so a \texttt{TyBNot} is constructed. Otherwise, if the argument is \texttt{True}, then it is absurd to construct a \texttt{TyBNot} as the negation will evaluate to \texttt{False}. This, combined with the given boolean expression and a proof of what it evaluates to, allows us to prove boolean negation.
+
     \begin{code}[caption={\texttt{beval} for \texttt{Not}}, escapeinside={(*}{*)}]
         beval : (env : Env) -> (b : BooleanExpression) -> Bool
             (*\vdots*)
@@ -283,6 +297,4 @@ isNEq (S k) (S j) = case isNEq k j of
             (*\vdots*)
     \end{code}
     
-    An evaluation of \texttt{Not} can be found in Section \ref{evaln:ops:not}.
-    
-    
+    Since we can prove negation, we can also evaluate it. Given an environment \texttt{Env} and a \texttt{Not}-expression which has been proven to hold true, its evaluation is the boolean `\texttt{True}'. Otherwise, if it has been proven to be impossible to hold, then its evaluation is the boolean `\texttt{False}'.
