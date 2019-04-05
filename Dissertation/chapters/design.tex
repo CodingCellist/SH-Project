@@ -236,14 +236,24 @@ isNEq (S k) (S j) = case isNEq k j of
 
     Since \texttt{MkAnd} requires both arguments to be \texttt{True}, an implementation of \texttt{Uninhabited} can be given for the other three cases. In each of the cases, the \texttt{And} would evaluate to \texttt{False}. With an implementation of \texttt{Uninhabited}, we can provide a proof for each case that it is impossible to construct a \texttt{MkAnd} and as such, the expression must evaluate to \texttt{False}. For \texttt{Or} there is only one case which evaluates to \texttt{False}.
     
-    \begin{code}[caption={The impossible \texttt{Or} case}]
+    \begin{code}[label={des:or-uninh}, caption={The impossible \texttt{Or} case}]
         implementation Uninhabited (TyOr False False) where
             uninhabited MkOr  impossible
             uninhabited MkOrL impossible
             uninhabited MkOrR impossible
     \end{code}
 
-    \texttt{MkOr} requires at least one of the arguments to be \texttt{True} (see Listing \ref{des:tyand-or}). As such, the case where we would have a \texttt{TyOr False False} is impossible. None of the constructors provided for \texttt{TyOr} can be used on \texttt{False False}, so a \texttt{TyOr} cannot exist. This means the \texttt{Or} cannot evaluate to \texttt{True}, i.e. we have a proof that it must evaluate to \texttt{False}.
+    \texttt{MkOr} requires at least one of the arguments to be \texttt{True} (see Listing \ref{des:tyand-or}). As such, the case where we would have a \texttt{TyOr False False} is impossible. None of the constructors provided for \texttt{TyOr} can be used on \texttt{False False}, so a \texttt{TyOr} cannot be created. This means the \texttt{Or} cannot evaluate to \texttt{True}, i.e. we have a proof that it must evaluate to \texttt{False}. Using these proofs of when a \texttt{TyOr} can be constructed, we can define the decidability rules for \texttt{Or}.
+    
+    \begin{code}[caption={Decidability rules for \texttt{Or}}]
+        isOr : (b1 : Bool) -> (b2 : Bool) -> Dec (TyOr b1 b2)
+        isOr False False = No absurd
+        isOr True False  = Yes MkOrL
+        isOr False True  = Yes MkOrR
+        isOr True True   = Yes MkOr
+    \end{code}
+    
+    When at least one of the arguments to \texttt{isOr} is \texttt{True}, it is possible to construct a \texttt{TyOr} using the appropriate constructor. If both arguments are \texttt{False}, constructing a \texttt{TyOr} is absurd since none of the constructors can be applied to \texttt{False False} (as defined in Listing \ref{des:or-uninh}). Hence, given two boolean expressions, a proof of what they evaluate to, and using the decidability rules, we can construct a \texttt{BooleanExpression} using the \texttt{Or} constructor, i.e. we can prove boolean disjunction.
     % TODO: decidability rules
 
 \section{Boolean Negation (\texttt{Not})}
