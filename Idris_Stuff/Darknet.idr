@@ -218,13 +218,6 @@ implementation Uninhabited (TyNEq Z Z) where
     uninhabited MkNEqL impossible
     uninhabited MkNEqR impossible
 
-
--- teh6: if the numbers are equal, we cannot construct a NEq proof for the
---       successors
-proveSuccEq : TyNEq (S k) (S j) -> Void
-proveSuccEq MkNEqL impossible
-proveSuccEq MkNEqR impossible
-
 -- teh6: if we have a recursive counter-proof for k and j, the counter-proof
 --       for their successors is 'included'
 proveNEqRec: (contra : TyNEq k j -> Void) -> TyNEq (S k) (S j) -> Void
