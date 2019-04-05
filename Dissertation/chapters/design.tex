@@ -114,7 +114,7 @@ data BEvald : BooleanExpression -> Nat -> Type where
         The operators \texttt{And}, \texttt{Eq}, \texttt{LT}, \texttt{LTE}, \texttt{GT}, and \texttt{GTE} were already implemented. So in order to have a complete set of operators, I implemented \texttt{NEq}, \texttt{Or}, and \texttt{Not}.
 
 \section{Inequality (\texttt{NEq})}
-    \texttt{Eq} had already been implemented by the \textsc{TeamPlay} project as part of the D1.1 deliverable \cite{teamplay:d1.1}, using the built-in \texttt{=} data type and the \texttt{DecEq} interface. Because there is no built-in \texttt{NEq} data type, I defined my own.
+    \texttt{Eq} had already been implemented by the \textsc{TeamPlay} project, using the built-in \texttt{(=)} data type and the \texttt{DecEq} interface, as part of the D1.1 deliverable \cite{teamplay:d1.1}. Because there is no built-in \texttt{NEq} data type, one had to be defined.
     \begin{code}[caption={The data type used for capturing inequality}]
         data TyNEq : Nat -> Nat -> Type where
             MkNEqL   : TyNEq Z (S k)
@@ -125,12 +125,56 @@ data BEvald : BooleanExpression -> Nat -> Type where
     \begin{itemize}
         \item \textbf{The first number is zero and the second is not} -- in this case the numbers are not equal, specifically the left number is zero. Since no number can have zero as its successor, the numbers are not equal.
         \item \textbf{The second number is zero and the first is not} -- in this case, the numbers are not equal, specifically the right number is zero. Since no number can have zero as its successor, the numbers are not equal.
-        \item \textbf{The numbers are not equal} -- in this case, the successors of the numbers must also be not equal. For example, $2 \neq 5 \rightarrow 3 \neq 6$
+        \item \textbf{The numbers are not equal} -- in this case, the successors of the numbers must also be not equal. For example, $2 \neq 5 \rightarrow 3 \neq 6 \rightarrow 4 \neq 7$ etc.
     \end{itemize}
-    % TODO: NEq operator
-    % TODO: uninhabited NEq and `proveNEqRec`
-    % TODO? rename `proveNEqRec`
-    % TODO: decidability rules for NEq
+    Using the \texttt{TyNEq} data type, we can then define \texttt{NEq}.
+    \begin{code}[label={des:neq-code}, caption={The definition of \texttt{NEq}}, escapeinside={(*}{*)}]
+        data BooleanExprssion : Type where
+            (*\vdots*)
+            
+            NEq :  (x : NumericExpression)
+                -> (y : NumericExpression)
+                -> Evald x x'
+                -> Evald y y'
+                -> Dec (TyNEq x' y')
+                -> BooleanExpression
+            (*\vdots*)
+    \end{code}
+    
+    \texttt{NEq} takes two numeric expressions, proofs of what they evaluate to, and a decidable proof of whether the numeric expressions are inequal. From this, \texttt{NEq} returns a \texttt{BooleanExpression} which will evaluate to \texttt{True} if the numeric expressions were not equal, and \texttt{False} otherwise. For the decidability part, we need some proof functions so that we can guarantee the inequality of numbers.
+    
+    \begin{code}[label={des:neq-uninh}, caption={Not equals cannot be constructed on 0 0}]
+        implementation Uninhabited (TyNEq Z Z) where
+            uninhabited MkNEqL   impossible
+            uninhabited MkNEqR   impossible
+            uninhabited MkNEqRec impossible
+    \end{code}
+
+    If we try to construct a \texttt{TyNEq} from 0 0, i.e. try to prove $0 \neq 0$, this is impossible: \texttt{MkNEqL} requires only the left argument to be zero, \texttt{MkNEqR} requires only the right argument to be zero, and \texttt{MkNEqRec} requires the successors to be not equal (i.e. $1 \neq 1$, $2 \neq 2$, etc.). So \texttt{TyNEq 0 0} is uninhabited as we cannot use any of its constructors to create that type. For non-zero equal numbers, we need to take a similar approach to \texttt{MkNEqRec}.
+    
+    \begin{code}[caption={Proving inequality of numbers is impossible}]
+        succNEqImpossible : (contra : TyNEq k j -> Void) ->
+                            TyNEq (S k) (S j) -> Void   
+        succNEqImpossible contra (MkNEqRec x) = contra x
+    \end{code}
+
+    The \texttt{succNEqImpossible} function takes a proof that \texttt{TyNEq k j} cannot be constructed and proves that in that case, \texttt{TyNEq (S k) (S j)} can also not be constructed. What this does is maintain that if two numbers are \textit{not} not equal, i.e. that they \textit{are} equal, then so are their successors.\\
+    With constructors for the valid \texttt{TyNEq} cases, and proofs why the invalid cases are impossible, we can construct the decidability rules for \texttt{TyNEq}. These will allow us to construct the \texttt{Dec (TyNEq x' y')} part from Listing \ref{des:neq-code}.
+    
+    \begin{code}[caption={Decidability rules for \texttt{NEq}}]
+isNEq : (n1 : Nat) -> (n2 : Nat) -> Dec (TyNEq n1 n2)
+isNEq Z Z         = No absurd
+isNEq Z (S k)     = Yes MkNEqL
+isNEq (S k) Z     = Yes MkNEqR
+isNEq (S k) (S j) = case isNEq k j of
+                        Yes prf   => Yes (MkNEqRec prf)
+                        No contra => No (succNEqImpossible contra)
+    \end{code}
+    
+    If the \texttt{isNEq} is given two zeros as its arguments, then it is absurd to construct an inequality (as described in Listing \ref{des:neq-uninh}). If either the first or second argument is zero and the other is not, then the inequality is trivial as no natural number can have \texttt{Z} as its successor. In the final case, where both numbers are non-zero, we recurse on their predecessors. If the predecessors are not equal (by one of them being zero and the other not), then the numbers themselves must also be not equal. On the other hand, if it was impossible to prove the predecessors unequal, we use \texttt{succNEqImpossible} to maintain/prove that it is also impossible for the successors to be unequal.
+    \\\par
+    
+    With the \texttt{eval} function and the \texttt{Evald} type giving us the numbers, and the decidability rules through the implementation of the \texttt{Uninhabited} interface and using the \texttt{succNEqImpossible} function, we have all the parts needed for the \texttt{NEq} constructor. Hence, we can prove inequality between numbers.
     
 \section{Boolean Disjunction (\texttt{Or})}
     The boolean operators are made up of different stages: Constructors for boolean expressions which evaluate to true, the operators keywords, an evaluation of the boolean expression, and a proof of what the boolean expression evaluates to. Boolean conjunction (\texttt{And}) was already implemented. I used it as a starting point for how to implement \texttt{Or}, as they are somewhat similar.
