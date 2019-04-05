@@ -164,6 +164,7 @@ data BEvald : BooleanExpression -> Nat -> Type where
     
 \section{Boolean Disjunction (\texttt{Or})}
     The boolean operators are made up of different stages: Constructors for boolean expressions which evaluate to true, the operators keywords, an evaluation of the boolean expression, and a proof of what the boolean expression evaluates to. Boolean conjunction (\texttt{And}) was already implemented. I used it as a starting point for how to implement \texttt{Or}, as they are somewhat similar.
+    
     \begin{code}[label={des:tyand-or}, caption={The constructors for true \texttt{And} and \texttt{Or} statements}, escapeinside={(*}{*)}]
         mutual
             data TyAnd : Bool -> Bool -> Type where
@@ -174,6 +175,7 @@ data BEvald : BooleanExpression -> Nat -> Type where
                 MkOrL : TyOr True False
                 MkOrR : TyOr False True
     \end{code}
+
     There is only one case where \texttt{And} evaluates to true, i.e. \texttt{And True True}. This is reflected in that the only constructor for \texttt{TyAnd} has to have both arguments be \texttt{True}. With this idea in mind, the constructors for \texttt{Or} can be implemented. \texttt{TyOr} can be constructed when the expression evaluates to true, i.e. in three cases:
     \begin{itemize}
         \item both arguments are \texttt{True}, \texttt{Or True True}
@@ -204,53 +206,30 @@ data BEvald : BooleanExpression -> Nat -> Type where
                     -> BooleanExpression
                 (*\vdots*)
     \end{code}
-    \texttt{And} takes 5 arguments: two boolean expressions, the proofs of what these evaluated to, and decidable proof of whether those arguments would cause the \texttt{And} to evaluate to true. From the constructors of \texttt{TyAnd} (Listing \ref{des:tyand-or}), this can only be constructed when both arguments are \texttt{True}, i.e. when the \texttt{And} would evaluate to \texttt{True}. Based on this, \texttt{And} returns a new \texttt{BooleanExpression} (which can then be evaluated using the \texttt{beval} function). \texttt{Or} takes the same first 4 arguments. The difference being that its 5$^{th}$ argument is a decidable proof of whether those arguments would cause the \texttt{Or} to evaluate to \texttt{True}. From the constructors of \texttt{TyOr} (Listing \ref{des:tyand-or}), this can only be constructed if one or both of the arguments is \texttt{True}, i.e. the \texttt{Or} would evaluate to \texttt{True}. Based on its arguments, \texttt{Or} then returns a new \texttt{BooleanExpression} (which can then be evaluated using the \texttt{beval} function).
-    % TODO: explain how `uninhabited` ties into all of this
 
-
-
-
-
-
-
-
+    \texttt{And} takes 5 arguments: two boolean expressions, the proofs of what these evaluated to, and decidable proof of whether those arguments would cause the \texttt{And} to evaluate to true. From the constructors of \texttt{TyAnd} (Listing \ref{des:tyand-or}), this can only be constructed when both arguments are \texttt{True}, i.e. when the \texttt{And} would evaluate to \texttt{True}. Based on this, \texttt{And} returns a new \texttt{BooleanExpression} (which can then be evaluated using the \texttt{beval} function). \texttt{Or} takes the same first 4 arguments. The difference being that its 5$^{th}$ argument is a decidable proof of whether those arguments would cause the \texttt{Or} to evaluate to \texttt{True}. From the constructors of \texttt{TyOr} (Listing \ref{des:tyand-or}), this can only be constructed if one or both of the arguments is \texttt{True}, i.e. the \texttt{Or} would evaluate to \texttt{True}. Based on its arguments, \texttt{Or} then returns a new \texttt{BooleanExpression} (which can then be evaluated using the \texttt{beval} function). Both \texttt{And} and \texttt{Or} rely on \texttt{Dec}, i.e. that a proof that it cannot evaluate to \texttt{True} exists.
     
-    \begin{code}[caption={The proof type for \texttt{And}}]
-        data TyAnd : Bool -> Bool -> Type where
-            MkAnd : TyAnd True True
+    \begin{code}[caption={Impossible \texttt{And} cases}]
+        implementation Uninhabited (TyAnd False True) where
+            uninhabited MkAnd impossible
+            
+        implementation Uninhabited (TyAnd True False) where
+            uninhabited MkAnd impossible
+            
+        implementation Uninhabited (TyAnd False False) where
+            uninhabited MkAnd impossible
     \end{code}
-    The proof of the conjunction of two \texttt{BooleanExpression}s being true was done through the use of the \texttt{TyAnd} type, who's only constructor was one where both expressions were true. Seeing this, I defined the \texttt{TyOr} type, which could only be constructed if the disjunction of the expressions was true:
-    \begin{code}[caption={The proof type for \texttt{Or}}]
-        data TyOr : Bool -> Bool -> Type where
-            MkOr  : TyOr True True
-            MkOrL : TyOr True False
-            MkOrR : TyOr False True
-    \end{code}
-    Then, an implementation of the \texttt{Uninhabited} interface was done for the case where the disjunction would evaluate to false:
-    \begin{code}[caption={\texttt{Or False False} is impossible}]
+
+    Since \texttt{MkAnd} requires both arguments to be \texttt{True}, an implementation of \texttt{Uninhabited} can be given for the other three cases. In each of the cases, the \texttt{And} would evaluate to \texttt{False}. With an implementation of \texttt{Uninhabited}, we can provide a proof for each case that it is impossible to construct a \texttt{MkAnd} and as such, the expression must evaluate to \texttt{False}. For \texttt{Or} there is only one case which evaluates to \texttt{False}.
+    
+    \begin{code}[caption={The impossible \texttt{Or} case}]
         implementation Uninhabited (TyOr False False) where
             uninhabited MkOr  impossible
             uninhabited MkOrL impossible
             uninhabited MkOrR impossible
     \end{code}
-    With the proofs and counter-proofs implemented, the decidability rules for \texttt{Or} were implemented:
-    \begin{code}[caption={Decidability rules for \texttt{Or}}]
-        isOr : (b1 : Bool) -> (b2 : Bool) -> Dec (TyOr b1 b2)
-        isOr False False = No absurd
-        isOr True False  = Yes MkOrL
-        isOr False True  = Yes MkOrR
-        isOr True True   = Yes MkOr
-    \end{code}
-    Finally, \texttt{beval} was extended to also handle \texttt{Or}:
-    \begin{code}[caption={\texttt{beval} for \texttt{Or}}, escapeinside={(*}{*)}]
-        beval : (env : Env) -> (b : BooleanExpression) -> Bool
-            (*\vdots*)
-        beval env (Or x y x' y' (Yes prf))   = True
-        beval env (Or x y x' y' (No contra)) = False
-            (*\vdots*)
-    \end{code}
-    
-    An evaluation showing that these do indeed prove \texttt{Or} can be found in Section \ref{evaln:ops:or}.
+
+    \texttt{MkOr} requires at least one of the arguments to be \texttt{True} (see Listing \ref{des:tyand-or}). As such, the case where we would have a \texttt{TyOr False False} is impossible. None of the constructors provided for \texttt{TyOr} can be used on \texttt{False False}, so a \texttt{TyOr} cannot exist. This means the \texttt{Or} cannot evaluate to \texttt{True}, i.e. we have a proof that it must evaluate to \texttt{False}.
 
 \section{Boolean Negation (\texttt{Not})}
     Boolean negation was also implemented using a custom proof type. The only case where negation evaluates to true is when negating false. Therefore, it is only possible to construct a \texttt{TyBNot} if the given \texttt{BooleanExpression} was false:
