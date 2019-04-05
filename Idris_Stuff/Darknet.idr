@@ -217,6 +217,7 @@ isOr True True = Yes MkOr
 implementation Uninhabited (TyNEq Z Z) where
     uninhabited MkNEqL impossible
     uninhabited MkNEqR impossible
+    uninhabited MkNEqRec impossible
 
 -- teh6: if we have a recursive counter-proof for k and j, the counter-proof
 --       for their successors is 'included'
