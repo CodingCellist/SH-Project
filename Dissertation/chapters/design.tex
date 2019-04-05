@@ -62,13 +62,14 @@ The following section (\ref{des:tp-dsl}) focuses on describing existing work don
         \begin{code}[caption={The type of the \texttt{eval} function}]
             eval : Env -> NumericExpression -> Nat
         \end{code}
-        The \texttt{eval} function uses this to evaluate a \texttt{NumericExpression}: Given an \texttt{Env} and a \texttt{NumericExpression}, the \texttt{eval} function returns a natural number. This is the result of that \texttt{NumericExpression} over that environment. To use the evaluation in a proof, we use the \texttt{Evald} type which captures the evaluation of a \texttt{NumericExpression} and the \texttt{Nat} it evaluated to.
-        \begin{code}[caption={\texttt{Evald} as defined in the \textsc{TeamPlay} CSL}]
+        The \texttt{eval} function uses this to evaluate a \texttt{NumericExpression}: Given an \texttt{Env} and a \texttt{NumericExpression}, the \texttt{eval} function returns a natural number. This is the result of that \texttt{NumericExpression} over that environment. To use the evaluation in a proof, we use the \texttt{Evald} type.
+        \begin{code}[caption={\texttt{Evald} as defined in the \textsc{TeamPlay} CSL},label={des:evald}]
     data Evald : NumericExpression -> Nat -> Type where
         MkEvald : (x : NumericExpression) -> (y : Nat) -> Evald x y
         \end{code}
-        As can be seen in the listing above, an \texttt{Evald} is a data type constructed from a \texttt{NumericExpression} and \texttt{Nat}. This \textbf{TODO}
-        % TODO: explain Evald
+        Listing \ref{des:evald} shows that \texttt{Evald} is a data type constructed from a \texttt{NumericExpression} and \texttt{Nat}. This  is because \texttt{eval} only evaluates the expression, it does not provide a proof linking the evaluated value and the original expression. The \texttt{Evald} type `links' the numeric expression (\texttt{x}) and its evaluation (\texttt{y}), proving that \texttt{x} evaluates to \texttt{y}.
+        \\
+        
         When applying a numeric operator to some \texttt{NumericExpression}s, we get a \texttt{BooleanExpression}.
     
     \subsection{Boolean Operators and Boolean Expressions}
