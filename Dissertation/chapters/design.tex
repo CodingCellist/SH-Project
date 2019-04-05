@@ -178,7 +178,15 @@ isNEq (S k) (S j) = case isNEq k j of
     
     With the \texttt{eval} function and the \texttt{Evald} type giving us the numbers, and the decidability rules through the implementation of the \texttt{Uninhabited} interface and using the \texttt{succNEqImpossible} function, we have all the parts needed for the \texttt{NEq} constructor. Hence, we can prove inequality between numbers.
     
-    % TODO: beval neq
+    \begin{code}[caption={Evaluating \texttt{NEq} over an environment}, escapeinside={(*}{*)}]
+        beval : (env : Env) -> (b : BooleanExpression) -> Bool
+        (*\vdots*)
+        beval env (NEq x y x' y' (Yes prf))   = True
+        beval env (NEq x y x' y' (No contra)) = False
+        (*\vdots*)
+    \end{code}
+
+    Given an environment and an inequality which has been proven to hold, the inequality evaluates to \texttt{True}. On the other hand, if the inequality has been proven impossible to hold, then it evaluates to \texttt{False}.
     
     
 \section{Boolean Disjunction (\texttt{Or})}
@@ -203,8 +211,6 @@ isNEq (S k) (S j) = case isNEq k j of
     \end{itemize}
     
     With constructors for \texttt{TyOr}, we can then define the \texttt{Or} operator similar to the \texttt{And} operator.
-    
-    \newpage
     
     \begin{code}[caption={The definitions of \texttt{And} and \texttt{Or}}, escapeinside={(*}{*)}]
             data BooleanExpression : Type where
@@ -260,7 +266,15 @@ isNEq (S k) (S j) = case isNEq k j of
     
     When at least one of the arguments to \texttt{isOr} is \texttt{True}, it is possible to construct a \texttt{TyOr} using the appropriate constructor. If both arguments are \texttt{False}, constructing a \texttt{TyOr} is absurd since none of the constructors can be applied to \texttt{False False} (as defined in Listing \ref{des:or-uninh}). Hence, given two boolean expressions, a proof of what they evaluate to, and using the decidability rules, we can construct a \texttt{BooleanExpression} using the \texttt{Or} constructor, i.e. we can prove boolean disjunction.
     
-    % TODO: beval or
+    \begin{code}[caption={Evaluating \texttt{Or} over an environment}, escapeinside={(*}{*)}]
+        beval : (env : Env) -> (b : BooleanExpression) -> Bool
+        (*\vdots*)
+        beval env (Or x y x' y' (Yes prf))    = True
+        beval env (Or x y x' y' (No contra))) = False
+        (*\vdots*)
+    \end{code}
+
+    The evaluation of a disjunction over an environment is \texttt{True} given a disjunction which has been proven to hold, and \texttt{False} given a disjunction which has been proven to be impossible to hold.
 
 
 \section{Boolean Negation (\texttt{Not})}
