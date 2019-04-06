@@ -1,7 +1,6 @@
 \begin{itemize}
-	\item mention/explain TEAMPLAY \texttt{blocks}, \texttt{blockenergy},
-          \texttt{blocktime}, etc?
-    % TODO: CSL
+	%\item mention/explain TEAMPLAY \texttt{blocks}, \texttt{blockenergy},
+    %      \texttt{blocktime}, etc?
 	%\item \sout{\texttt{Eq} was already implemented (using `native' things)}
     %      \texttt{NEq} was more complicated (different ways \texttt{Nat}s can be
     %	  not equal)
@@ -20,7 +19,7 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
 \section{The TeamPlay Project}\label{des:tp-dsl}
     \subsection{Assertions and Contracts}
         % TODO: diagram
-        When writing C programs for embedded systems, the programmer might want to capture extra-functional properties like the time taken or the energy consumed. Furthermore, the programmer may want to have provable guarantees that these properties of the program hold. This is done through contracts which can be proven using the \Idris proof system. The Contract Specification Language (CSL) defined by the \textsc{TeamPlay} project \cite{teamplay:d1.1} lets the programmer annotate existing C code to express properties like the worst time cost of a loop or function, using \texttt{\_\_teamplay\_worst\_time}, and assert these, using \texttt{\_\_teamplay\_assert}, to have a program whose extra-functional properties can be certified to hold. Since the CSL is valid C code, the programmer does not need to change tools, libraries, compiler, or learn a new language. Instead, the annotations seamlessly integrate with the existing code, without disturbing its operation in any way. Once the code has been annotated, it can then be passed through a C parser which extracts the annotations and constructs a model in an \Idris-based DSL. This DSL is in turn what allows the programmer to get a contract specifying which properties do or do not hold, through the \Idris proof system.
+        When writing C programs for embedded systems, the programmer might want to capture extra-functional properties like the time taken or the energy consumed. Furthermore, the programmer may want to have provable guarantees that these properties of the program hold. This is done through contracts which can be proven using the \Idris proof system. The Contract Specification Language (CSL) defined by the \textsc{TeamPlay} project \cite{teamplay:d1.1} lets the programmer annotate existing C code to express properties like the worst time cost of a loop or function, using \texttt{\_\_teamplay\_worst\_time}, and assert these, using \texttt{\_\_teamplay\_assert}. This results in a program whose extra-functional properties can be certified to hold. Since the CSL functions adhere to the C99 function naming scheme, the programmer does not need to change tools, libraries, compiler, or learn a new language. Instead, the annotations seamlessly integrate with the existing code, without disturbing its operation in any way. Once the code has been annotated, it can then be passed through a C parser which extracts the annotations and constructs a model in an \Idris-based DSL. This DSL is in turn what allows the programmer to get a contract specifying which properties do or do not hold, through the \Idris proof system.
         \begin{table}
             \centering
             \begin{tabular}{c | c}
