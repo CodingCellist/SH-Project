@@ -23,11 +23,13 @@
     %      type-checking) and do not concern themselves with timing or energy
 \end{itemize}
 
+Some work on modelling extra-functional properties of programs has already been done. Models and DSLs have been made for various purposes using Haskell and \Idris, but also using simulators.
+
 \section{Haskell-based DSLs}
-	One example of an existing EDSL is ``Feldspar'' \cite{5558637}. Feldspar is a language for reasoning about digital signal processing (DSP) algorithms and is built on Haskell. Its DSL's main building blocks are \texttt{value}, \texttt{ifThenElse}, \texttt{while}, and \texttt{parallel} \cite{5558637}. These capture the building-blocks of simple C programs and introduces its own unique function \texttt{parallel} for describing parts of the program where each `sub-computation' can be done independently \cite{5558637}. Feldspar's aim is to help build sound DSP algorithms and then use the high-level description to generate fast, low-level C code \cite{5558637}. \textbf{[What/How to elaborate?]}
+	Feldspar \cite{5558637} is a language for reasoning about digital signal processing (DSP) algorithms and is built on Haskell. Its DSL's main building blocks are \texttt{value}, \texttt{ifThenElse}, \texttt{while}, and \texttt{parallel} \cite{5558637}. These capture the building-blocks of simple C programs and introduces its own unique function \texttt{parallel} for describing parts of the program where each `sub-computation' can be done independently \cite{5558637}. Feldspar's aim is to help build sound DSP algorithms and then use the high-level description to generate fast, low-level C code \cite{5558637}. \textbf{[What/How to elaborate?]}
     \\\par
 	
-	Another example is ``Hume'' \cite{10.1007/978-3-540-39815-8_3}. Hume is much different from Feldspar in that it focuses on modelling embedded systems and not DSP algorithms. In Hume, the programmer can reason about \texttt{box}es, \texttt{wire}s, \texttt{device}s, \texttt{datatype}s, \texttt{function}s, and \texttt{exception}s \cite{10.1007/978-3-540-39815-8_3}. Through these constructs, the programmer can model embedded systems as coarse- or fine-grained as they want, and Hume then estimates the stack, heap, and space/time requirements \cite{10.1007/978-3-540-39815-8_3}.
+	Hume \cite{10.1007/978-3-540-39815-8_3} is a different DSL which focuses on modelling embedded systems. In Hume, the programmer can reason about \texttt{box}es, \texttt{wire}s, \texttt{device}s, \texttt{datatype}s, \texttt{function}s, and \texttt{exception}s \cite{10.1007/978-3-540-39815-8_3}. Through these constructs, the programmer can model embedded systems as coarse- or fine-grained as they want, and Hume then estimates the stack, heap, and space/time requirements \cite{10.1007/978-3-540-39815-8_3}.
     
     \sout{The idea behind Hume is that the low-level requirements of the embedded system can guide the process of adapting an existing high(er)-level language to the embedded system, whilst maintaining resource requirements \cite{10.1007/978-3-540-39815-8_3}.}
     
@@ -39,7 +41,7 @@
 	DSLs can also be used to create correct-by-construction network protocols where the embedded types ensure that the protocol operates correctly as long as it type-checks \cite{5158855}.
 
 \section{Non-DSL Approaches}
-	Alternatively to DSLs, a simulator could be used. These mainly focus on the designing the architectures themselves \cite{10.1007/3-540-46002-0_32,Lee:2008:FFC:1375657.1375670} or target the energy consumption of the entire embedded system \cite{782199} rather than a specific program or piece of software. Simulation is also orders of magnitude slower than running the actual hardware, even when sacrifices are made in terms of accuracy (for example, using a functional simulator instead of a cycle-accurate simulator).
+	Alternatively to DSLs, a simulator could be used. Since simulators model the hardware itself, ``readings'' can be taken from running the program. With a simulator, there is no need to have the actual hardware and, depending on the power of the simulator and computer being used to run it, many different types of hardware can be simulated. However, simulators mainly focus on the designing the architectures themselves \cite{10.1007/3-540-46002-0_32,Lee:2008:FFC:1375657.1375670} or target the energy consumption of the entire embedded system \cite{782199} rather than a specific program or piece of software. Simulation is also orders of magnitude slower than running the actual hardware, even when sacrifices are made in terms of accuracy (for example, using a functional simulator instead of a cycle-accurate simulator).
 
 \section{Limitations of the existing work}
 	[The Haskell-based DSLs do not have a built-in, straightforward way of producing proofs for the written programs.]
