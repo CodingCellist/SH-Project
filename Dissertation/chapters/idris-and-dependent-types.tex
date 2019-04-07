@@ -1,14 +1,95 @@
 This chapter aims to give the reader enough of an overview of \Idris and dependent types to be able to understand the work done in the later chapters. A complete explanation of \Idris is beyond the scope of this chapter. This chapter borrows a lot of examples and explanations from the \Idris book (``Type-Driven Development with Idris'') \cite{brady_2017}.
 
-\section{Types and Dependent Types}
-% TODO: types and dependent types
+\section{Types}
+
+    \begin{code}[caption={In \Idris, the type of a function is specified using `\texttt{:}'}]
+        anInt : Int
+        anInt = 10
+        
+        aString : String
+        aString = "foo"
+        
+        aBool : Bool
+        aBool = False
+    \end{code}
+
+    Types classify values. In programming, we often come across types like \texttt{Int}, \texttt{String}, or \texttt{Bool}, which could be values like \texttt{10}, \texttt{"foo"}, or \texttt{False} respectively.
+
+    \newpage
+
+    \begin{code}[caption={Mismatching types}, escapeinside={(*}{*)}]
+        aString : String
+        aString = 10
+        
+        
+        -- Compiler error --
+        
+          |
+        2 | aString = 10
+          |           ~~
+        When checking right hand side of aString with expected type
+        String
+        
+        String is not a numeric type
+    \end{code}
+    Types in \Idris are checked at compile time, meaning that if the types of the functions in a program do not match (for example, passing an \texttt{Int} where a \texttt{String} is required) then the program will not compile and the compiler will give a type-error.
+    
+    \begin{code}[caption={Values are not automatically cast}]
+anInt : Int
+anInt = 10
+
+half : Double -> Double
+half x = x / 2
+
+
+> half anInt
+(input):1:1-10:When checking an application of function Main.half:
+        Type mismatch between
+                Int (Type of anInt)
+        and
+                Double (Expected type)
+    \end{code}
+    
+    \Idris is strongly typed, so the compiler will not automatically cast values or parameters. This means you cannot pass an \texttt{Int} to a function which requires a \texttt{Double} and have it automatically work, because \texttt{Int} is a different type, a different `category' from \texttt{Double}.
+    
+\section{Type Variables and Dependent Types}
+    A different example of a type is a list of values. In languages like Java or Python, lists are parametrised over a type.
+    \begin{code}[caption={The types of different lists in \Idris}]
+        [1, 2, 3, 4, 5] : List Integer
+        
+        ["a", "b", "c"] : List String
+        
+        [True, False]   : List Bool
+    \end{code}
+    In \Idris this is still the case. You can have lists of \texttt{String}, lists of \texttt{Int}, or lists of \texttt{Bool} and these are different types. In general, you can have any \texttt{List elem} where \texttt{elem} is a type variable representing the type of the elements of the list. \Idris provides an even more specific type of lists: \texttt{Vect}
+    \begin{code}[caption={Example \texttt{Vect} types}]
+        [1, 2, 3, 4, 5] : Vect 5 Int
+        
+        ["a", "b", "c"] : Vect 3 String
+        
+        [True, False]   : Vect 2 Bool
+    \end{code}
+    A \texttt{Vect}, short for ``vector'', is a list with a specific length. In general, you can have any \texttt{Vect n elem}. Here, \texttt{elem} is the same as in \texttt{List}, and \texttt{n} is the length of the list. Since the value of \texttt{n} \textit{depends} on the number of elements in the list, we refer to types like \texttt{Vect n elem} as dependent because its precise type depends on other values. Another example of a dependent type is \texttt{Matrix m n elem}, i.e. a matrix of \texttt{m} rows and \texttt{n} columns, with elements of type \texttt{elem}.
+    \[
+    \begin{pmatrix}
+    1 & 2 \\
+    3 & 4 \\
+    5 & 6 \\
+    \end{pmatrix}
+    \hspace{50pt}
+    \begin{pmatrix}
+    ``1" & ``2" & ``3" \\
+    ``4" & ``5" & ``6" \\
+    \end{pmatrix}
+    \]
+    Here, the first matrix would have type \texttt{Matrix 3 2 Int} and the second matrix would have type \texttt{Matrix 2 3 String}. In \Idris we can also define our own data types. This is useful when we want to capture an aspect of the program we are writing which is likely not pre-defined in the \Idris prelude.
 
 \section{Data Types}
 % TODO: data types
 
 \section{Functions}
-% TODO: purity
 % TODO: functions in Idris
+% TODO: purity
 
 \section{Natural Numbers}
     Natural numbers in \Idris are implemented as Peano numbers \cite{brady_2013}. This means that the natural numbers $\mathbb{N}$ are defined based on the constant 0 (\idrisinline{Z} in Idris) and the \textit{successor function} \idrisinline{S}. From these two, all the naturals can be constructed:
