@@ -34,7 +34,7 @@ This chapter aims to give the reader enough of an overview of \Idris and depende
     \end{code}
     Types in \Idris are checked at compile time, meaning that if the types of the functions in a program do not match (for example, passing an \texttt{Int} where a \texttt{String} is required) then the program will not compile and the compiler will give a type-error.
     
-    \begin{code}[caption={Values are not automatically cast}]
+    \begin{code}[label={des:no-cast}, caption={Values are not automatically cast}]
 anInt : Int
 anInt = 10
 
@@ -61,7 +61,7 @@ half x = x / 2
         
         [True, False]   : List Bool
     \end{code}
-    In \Idris this is still the case. You can have lists of \texttt{String}, lists of \texttt{Int}, or lists of \texttt{Bool} and these are different types. In general, you can have any \texttt{List elem} where \texttt{elem} is a type variable representing the type of the elements of the list. \Idris provides an even more specific type of lists: \texttt{Vect}
+    In \Idris this is still the case. You can have lists of \texttt{String}, lists of \texttt{Int}, or lists of \texttt{Bool} and these are different types. In general, you can have any \texttt{List elem} where \texttt{elem} is a \textit{type variable} representing the type of the elements of the list. \Idris provides an even more specific type of lists: \texttt{Vect}
     \begin{code}[caption={Example \texttt{Vect} types}]
         [1, 2, 3, 4, 5] : Vect 5 Int
         
@@ -69,7 +69,7 @@ half x = x / 2
         
         [True, False]   : Vect 2 Bool
     \end{code}
-    A \texttt{Vect}, short for ``vector'', is a list with a specific length. In general, you can have any \texttt{Vect n elem}. Here, \texttt{elem} is the same as in \texttt{List}, and \texttt{n} is the length of the list. Since the value of \texttt{n} \textit{depends} on the number of elements in the list, we refer to types like \texttt{Vect n elem} as dependent because its precise type depends on other values. Another example of a dependent type is \texttt{Matrix m n elem}, i.e. a matrix of \texttt{m} rows and \texttt{n} columns, with elements of type \texttt{elem}.
+    A \texttt{Vect}, short for ``vector'', is a list with a specific length. In general, you can have any \texttt{Vect n elem}. Here, \texttt{elem} is the same as in \texttt{List}, and \texttt{n} is the length of the list. Since the value of \texttt{n} \textit{depends} on the number of elements in the list, we refer to types like \texttt{Vect n elem} as \textit{dependent types} because its precise type depends on other values. Another example of a dependent type is \texttt{Matrix m n elem}, i.e. a matrix of \texttt{m} rows and \texttt{n} columns, with elements of type \texttt{elem}.
     \[
     \begin{pmatrix}
     1 & 2 \\
@@ -82,34 +82,126 @@ half x = x / 2
     ``4" & ``5" & ``6" \\
     \end{pmatrix}
     \]
-    Here, the first matrix would have type \texttt{Matrix 3 2 Int} and the second matrix would have type \texttt{Matrix 2 3 String}. In \Idris we can also define our own data types. This is useful when we want to capture an aspect of the program we are writing which is likely not pre-defined in the \Idris prelude.
-
-\section{Data Types}
-% TODO: data types
+    Here, the first matrix would have type \texttt{Matrix 3 2 Int} and the second matrix would have type \texttt{Matrix 2 3 String}.
+    
+    \begin{code}[caption={Types are \textit{first-class}}]
+        ty : Type
+        ty = Bool
+        
+        StringOrInt : Bool -> Type
+        StringOrInt x = case x of
+                            True => Int
+                            False => String
+    \end{code}
+    
+    In \Idris, types are \textit{first-class}. This means that they can be used without any restrictions: we can assign them to variables (\texttt{ty}), or have functions return them (\texttt{StringOrInt}). Types are used everywhere, in particular when defining functions.
+    
+\newpage
+    
 
 \section{Functions}
-% TODO: functions in Idris
-% TODO: purity
+    In Listing \ref{des:no-cast} I defined a function \texttt{half}. Functions in \Idris consist of a \textit{type declaration} and a \textit{function definition}.
+    \begin{code}[caption={The \texttt{half} function from Listing \ref{des:no-cast}}]
+        half : Double -> Double
+        half x = x / 2
+    \end{code}
+    The first line of the \texttt{half} function is its type declaration and the second line is the function definition. These can each be broken down into further parts. A function definition consists of:
+    \begin{itemize}
+        \item a function name, \texttt{half}
+        \item a function type, \texttt{Double -> Double}
+    \end{itemize}
+    A function definition is a number of equations with:
+    \begin{itemize}
+        \item a right hand side, \texttt{half x}
+        \item a left hand side, \texttt{x / 2}
+    \end{itemize}
+    \begin{code}[caption={A different definition of \texttt{half}}]
+        half' : Double -> Double
+        half' 0.0 = 0.0
+        half' n = n / 2
+    \end{code}
+    In this different definition of \texttt{half}, \texttt{half'}, there are multiple functions definitions. A function can have varying definitions depending on its input. This is known as \textit{pattern matching} and is used extensively in \Idris. Here, it is not massively useful, as all it is doing is not bothering with the division, if the input is 0.
+
+    \begin{code}[caption={A function with a function as an argument}]
+        twice : (a -> a) -> a -> a
+        twice f x = f (f x)
+    \end{code}
+    
+    Functions in \Idris are first-class, so we can use them as arguments to other functions. The \texttt{twice} function's first argument is a function \texttt{f} which takes something of type \texttt{a} and produces something of type \texttt{a}. The second argument \texttt{x} is then something of type \texttt{a}. By not specifying a type and instead using a type variable, \texttt{twice} can be used on any type, as long as \texttt{x} has the same type as in the input to \texttt{f} and that \texttt{f} does not change the type of \texttt{x}.
+    
+    In addition to being first-class, functions in \Idris are \textit{pure} meaning that they do not have side effects (e.g. they do not do console I/O and they do not throw exceptions). This in turn means that for the same input, a function will always give the same output \cite{brady_2017}.
+
+
+\section{Data Types}
+    In addition to the given types, we can define our own data types. This is useful when we want to capture an aspect of the program we are writing which is likely to not be pre-defined in the \Idris prelude. Data types are defined using the \texttt{data} keyword. A data type is defined by a type constructor and one or more data constructors \cite{brady_2017}. Some of the included types are defined as data types, for example \texttt{List}.
+    
+    \begin{code}[caption={\texttt{List} as defined in the \Idris prelude}]
+        data List : (elem : Type) -> Type where
+            Nil  : List elem
+            (::) : (x : elem) -> (xs : List elem) -> List elem 
+    \end{code}
+    A \texttt{List} of elements of type \texttt{Type} can be constructed by either constructing the empty list \texttt{Nil}, or an \texttt{x} of type \texttt{elem} (the type of all elements in the list) followed by a list of more elements of the same type.
+    
+    \begin{code}[caption={\texttt{Bool} as defined in the \Idris prelude}]
+        data Bool = False
+                  | True
+    \end{code}
+    Data types can be constructed with either equals and vertical bars (see the definition of \texttt{Bool} just above) or as functions, like in the definition of \texttt{List}. They are mostly interchangeable, but the \texttt{data ... -> Type where} syntax is more flexible and general, at the cost of also being more verbose. Data type definitions can be recursive.
+    % TODO? more?
+
+\pagebreak
+
 
 \section{Natural Numbers}
-    Natural numbers in \Idris are implemented as Peano numbers \cite{brady_2013}. This means that the natural numbers $\mathbb{N}$ are defined based on the constant 0 (\idrisinline{Z} in Idris) and the \textit{successor function} \idrisinline{S}. From these two, all the naturals can be constructed:
+    \begin{code}[caption={Natural numbers as defined in the \Idris prelude}]
+        data Nat = Z | S Nat
+    \end{code}
+
+    Natural numbers in \Idris are also a data record. They base case is the constant 0 (\texttt{Z} in Idris) and the other constructor is the \textit{successor function} \texttt{S}. From these two, all the naturals can be constructed:
+    
     \begin{tabular}{r l}
-        \idrisinline{Z} & $\mapsto 0$ \\ 
-        \idrisinline{S Z} & $\mapsto 1$ \\ 
-        \idrisinline{S (S Z)} & $\mapsto 2$ \\
+        \texttt{Z} & $\mapsto 0$ \\ 
+        \texttt{S Z} & $\mapsto 1$ \\ 
+        \texttt{S (S Z)} & $\mapsto 2$ \\
         etc & \\
         \vdots & \\
     \end{tabular}
     \par
-    The benefit of this is that it allows us to pattern match on numbers. This helps in terms of decidability.
+    The benefit of this is that it allows us to pattern match on numbers.
+    
+    \begin{code}[caption={Pattern matching on \texttt{Nat}s}]
+        natFact : Nat -> Nat
+        natFact Z = 1
+        natFact (S k) = (S k) * fact k
+    \end{code}
+    By pattern matching on the possible constructors for \texttt{Nat}, we have captured the base case, and the recursive step for calculating the factorial of a number using the \texttt{natFact} function.
+    Pattern matching also helps in terms of decidability.
 
 \section{Decidability}\label{idris:dec}
-	The reader may be familiar with Haskell's \texttt{Maybe} monad, which allows a function to return something that may not be there, e.g. a specific substring of a string. In \Idris, the \texttt{Dec} type allows for a stronger guarantee: either something is there, or there is a proof that it is impossible to create that thing.
-	\begin{code}[caption={\texttt{Dec} as defined in the \Idris prelude \cite{brady_2017}}]
+    Due to functions being pure, it can be difficult to reason about failure or uncertainty of a result being there.
+    \begin{code}[caption={The \texttt{Maybe} data type}]
+        data Maybe : (a : Type) -> Type where
+            Nothing : Maybe a
+            Just : (x : a) -> Maybe a
+    \end{code}
+    The \texttt{Maybe} data type captures this in the form of either having \texttt{Just} a value \texttt{x} or \texttt{Nothing}. We could use this to implement taking the n$^{th}$ element from a list.
+    \begin{code}[caption={List indexing using \texttt{Maybe}}]
+        getIndex : Nat -> List a -> Maybe a
+        getIndex _ Nil = Nothing
+        getIndex Z (x :: xs) = Just x
+        getIndex (S k) (x :: xs) = getIndex k xs
+    \end{code}
+    Since we could either be given the empty list or run out of bounds, we use \texttt{Maybe} to reflect that the index may not be valid. If the index exists, we return \texttt{Just x} where \texttt{x} is the n$^{th}$ element, and if we run out of bounds we return \texttt{Nothing}.
+    
+	\begin{code}[caption={\texttt{Dec} as defined in the \Idris prelude}]
         data Dec : (prop : Type) -> Type where
              Yes : (prf : prop) -> Dec prop
              No  : (contra : prop -> Void) -> Dec prop
 	\end{code}
+
+    % TODO: how to write this?
+    The \texttt{Dec} data type allows for a different, stronger type of uncertainty: Decidability.
+     either something is there, or there is a proof that it is impossible to create that thing.
     Here, \texttt{prf} is a proof that \texttt{prop} holds. And \texttt{contra} is a proof that the value can never exist. The latter is done by having a function which returns \texttt{Void} given \texttt{prop}. \texttt{Void} is a data type with no constructors, i.e. if it is ever possible to return a \texttt{Void}, then it must be impossible to construct one of the arguments to the function (in this case \texttt{prop}). An example use-case of this is proving that two natural numbers are equal:
 	\begin{code}[caption={Proving the equality between natural numbers \cite{brady_2017}},label={lst:decEq}]
     -- a proof that zero cannot be the successor of a natural number
