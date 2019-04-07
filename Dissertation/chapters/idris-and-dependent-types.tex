@@ -146,18 +146,18 @@ half x = x / 2
         data Bool = False
                   | True
     \end{code}
-    Data types can be constructed with either equals and vertical bars (see the definition of \texttt{Bool} just above) or as functions, like in the definition of \texttt{List}. They are mostly interchangeable, but the \texttt{data ... -> Type where} syntax is more flexible and general, at the cost of also being more verbose. Data type definitions can be recursive.
-    % TODO? more?
+    Data types can be constructed with either equals and vertical bars (see the definition of \texttt{Bool} just above) or as functions, like in the definition of \texttt{List}. They are mostly interchangeable, but the \texttt{data ... -> Type where} syntax is more flexible and general, at the cost of also being more verbose.
+    \\
+    
+    Data type definitions can also be recursive.
 
-\pagebreak
 
-
-\section{Natural Numbers}
+\section{Natural Numbers}\label{des:nats}
     \begin{code}[caption={Natural numbers as defined in the \Idris prelude}]
         data Nat = Z | S Nat
     \end{code}
 
-    Natural numbers in \Idris are also a data record. They base case is the constant 0 (\texttt{Z} in Idris) and the other constructor is the \textit{successor function} \texttt{S}. From these two, all the naturals can be constructed:
+    Natural numbers in \Idris are also a data record. They base case is the constant 0 (\texttt{Z} in Idris) and the other constructor is the \textit{successor function} \texttt{S}. From these two, all the natural numbers can be constructed:
     
     \begin{tabular}{r l}
         \texttt{Z} & $\mapsto 0$ \\ 
@@ -177,32 +177,110 @@ half x = x / 2
     By pattern matching on the possible constructors for \texttt{Nat}, we have captured the base case, and the recursive step for calculating the factorial of a number using the \texttt{natFact} function.
     Pattern matching also helps in terms of decidability.
 
-\section{Decidability}\label{idris:dec}
-    Due to functions being pure, it can be difficult to reason about failure or uncertainty of a result being there.
-    \begin{code}[caption={The \texttt{Maybe} data type}]
+
+\section{Decidable Equality}\label{idris:deceq}
+    % TODO? split this into sections instead of sub-sections?
+    \subsection{\texttt{Maybe} -- Handling uncertainty}
+        Due to functions being pure, it can be difficult to reason about failure or uncertainty of a result being there.
+        \begin{code}[caption={The \texttt{Maybe} data type}]
         data Maybe : (a : Type) -> Type where
             Nothing : Maybe a
             Just : (x : a) -> Maybe a
-    \end{code}
-    The \texttt{Maybe} data type captures this in the form of either having \texttt{Just} a value \texttt{x} or \texttt{Nothing}. We could use this to implement taking the n$^{th}$ element from a list.
-    \begin{code}[caption={List indexing using \texttt{Maybe}}]
+        \end{code}
+        The \texttt{Maybe} data type captures this in the form of either having \texttt{Just} a value \texttt{x} or \texttt{Nothing}. We could use this to implement taking the n$^{th}$ element from a list.
+        \begin{code}[caption={List indexing using \texttt{Maybe}}]
         getIndex : Nat -> List a -> Maybe a
         getIndex _ Nil = Nothing
         getIndex Z (x :: xs) = Just x
         getIndex (S k) (x :: xs) = getIndex k xs
-    \end{code}
-    Since we could either be given the empty list or run out of bounds, we use \texttt{Maybe} to reflect that the index may not be valid. If the index exists, we return \texttt{Just x} where \texttt{x} is the n$^{th}$ element, and if we run out of bounds we return \texttt{Nothing}.
-    
-	\begin{code}[caption={\texttt{Dec} as defined in the \Idris prelude}]
-        data Dec : (prop : Type) -> Type where
-             Yes : (prf : prop) -> Dec prop
-             No  : (contra : prop -> Void) -> Dec prop
-	\end{code}
+        \end{code}
+        Since we could either be given the empty list or run out of bounds, we use \texttt{Maybe} to reflect that the index may not be valid. If the index exists, we return \texttt{Just x} where \texttt{x} is the n$^{th}$ element, and if we run out of bounds we return \texttt{Nothing}.
 
-    % TODO: how to write this?
-    The \texttt{Dec} data type allows for a different, stronger type of uncertainty: Decidability.
-     either something is there, or there is a proof that it is impossible to create that thing.
-    Here, \texttt{prf} is a proof that \texttt{prop} holds. And \texttt{contra} is a proof that the value can never exist. The latter is done by having a function which returns \texttt{Void} given \texttt{prop}. \texttt{Void} is a data type with no constructors, i.e. if it is ever possible to return a \texttt{Void}, then it must be impossible to construct one of the arguments to the function (in this case \texttt{prop}). An example use-case of this is proving that two natural numbers are equal:
+    \subsection{The \texttt{(=)} data type}
+        \begin{code}[label={des:refl-concept}, caption={The concept of an equality data type}]
+            data (=) : a -> b -> Type where
+                Refl : x = x
+        \end{code}
+        
+        A very useful pre-defined data type is the \texttt{(=)} data type. It is not quite defined as a data type since `\texttt{=}' is a reserved symbol, instead it is part of the \Idris syntax. It is still a data type, just defined at a lower level of the language than the \texttt{data} construct. Its constructor \texttt{Refl} is short for `reflexive'. Reflexivity is a mathematical concept stating that every element in a set is related to itself. In logic, one would write $\forall x \in X : x R x$ where $X$ is a set of elements $x$ and $R$ is a binary relation. This further means that \texttt{=} also must be symmetric and transitive: if $x = y$ then $y = x$; and if $x = y$ and $y = z$ then $x = z$. In short, if two elements are reflexive, this means they are the same element. \textbf{[correct?]}
+        
+        \begin{code}[label={des:refl-egs}, caption={Examples of reflexivity}]
+            Idris> the ("World" = "World") Refl
+            Refl : "World" = "World"
+            
+            
+            Idris> the (True = True) Refl
+            Refl : True = True
+            
+            
+            Idris> the (1 + 2 + 3 = 6) Refl
+            Refl : 6 = 6
+        \end{code}
+        At the \Idris prompt, we can use the \texttt{the} function to create some example instances of \texttt{Refl}. The last example shows that \Idris evaluates the sides of a type before trying to construct the \texttt{Refl}.
+        
+        \newpage
+        
+        \begin{code}[label={des:not-refl}, caption={Things that are not reflexive}, escapeinside={(*}{*)}]
+    Idris> the ("Foo" = "Bar") Refl
+    (input):1:1-24:When checking argument value to function
+    Prelude.Basics.the:
+        Type mismatch between
+            x = x (Type of Refl)
+        and
+            "Foo" = "Bar" (Expected type)
+    
+        Specifically:
+            Type mismatch between
+                "Foo"
+            and
+                "Bar"
+    
+    Idris> the (True = False) Refl
+    (input):1:1-23:When checking argument value to function
+    Prelude.Basics.the:
+        Type mismatch between
+            x = x (Type of Refl)
+        and
+            True = False (Expected type)
+    
+        Specifically:
+            Type mismatch between
+                True
+            and
+                False
+    
+    
+    Idris> the (2 = 3) Refl
+    (input):1:1-16:When checking argument value to function
+    Prelude.Basics.the:
+        Type mismatch between
+            3 = 3 (Type of Refl)
+        and
+            2 = 3 (Expected type)
+        
+        Specifically:
+            Type mismatch between
+                3
+            and
+                2
+        \end{code}
+        If we try to instantiate \texttt{Refl} using elements which are not reflexive, the type-checker complains and tells us that it does not make sense and so we cannot create a \texttt{Refl} from things which are not reflexive. Combining the \texttt{=} data type with decidability proves to be very useful.
+
+    \subsection{The \texttt{Void} data type}
+    % TODO: rewrite `Void` here
+
+    \subsection{Decidability}
+        Decidability is more specific than \texttt{Maybe}. Instead of saying that we have just the value or nothing, \texttt{Dec} allows us to express that we can always decide whether a property holds or not for certain values.
+        
+        \begin{code}[caption={\texttt{Dec} as defined in the \Idris prelude}]
+            data Dec : (prop : Type) -> Type where
+                Yes : (prf : prop) -> Dec prop
+                No  : (contra : prop -> Void) -> Dec prop
+        \end{code}
+        The definition of \texttt{Dec} seems similar to that of \texttt{Maybe}. \texttt{Yes (prf : prop) -> Dec prop} seems very similar to \texttt{Just : (x : a) -> Maybe a} and that is because they are. However, contrary to \texttt{Maybe}'s \texttt{Nothing} which simply was the absence of a value, \texttt{No} also holds a value: `\texttt{contra}'. This value is a proof that no value of the required type can exist. This is a much stronger statement as instead of saying ``the value is not there'' we have said ``the value can never be there''.
+        % TODO: give examples of use-cases -- the book!
+
+    % TODO: split this into each definition and explain
 	\begin{code}[caption={Proving the equality between natural numbers \cite{brady_2017}},label={lst:decEq}]
     -- a proof that zero cannot be the successor of a natural number
     zeroNotSuc : (0 = S k) -> Void
@@ -227,7 +305,6 @@ half x = x / 2
                             Yes prf => Yes (cong prf)
                             No contra => No (noRec contra)
 	\end{code}
-    This is somewhat useful on its own, but the best bit is that any function which uses the above check, or any other \texttt{Dec}, has both an answer as to whether the check was valid or not \textit{and} a proof that it is or a proof that it is impossible.
 
 \section{Proofs}
     Proofs in \Idris rely on the type-checker and constructors. The reason \texttt{Refl} is a proof for equality is that it is defined as follows:
