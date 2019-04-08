@@ -1,6 +1,8 @@
-I initially made sure the basic operators worked. Once this was done, more
-complicated examples were created using the operators.
+In order to be able to use the existing operators, and the ones I had implemented, in code, I needed to make sure that they worked, i.e. that they did not return anything unexpected (e.g., \texttt{Eq} should not evaluate to true for 1 and 3, and \texttt{And False False} should not evaluate to \texttt{True}). This is the purpose of the first section (\ref{evaln:ops}) of this chapter. With working operators, it should then be possible to construct slightly more complex C programs, and annotate and model them using the framework.
+
+
 \section{Operators}\label{evaln:ops}
+    \todo{rewrite this}
 	Several examples were constructed to evaluate whether the operators worked
 	as intended. There were three cases which needed to be covered:
 	\begin{enumerate}
@@ -14,6 +16,7 @@ complicated examples were created using the operators.
 	
 	\newpage
 	
+    \todo{explain ALL of this: why is it interesting/relevant?}
     \subsection{The \texttt{Eq} Operator}
 		\idrisinput{"../Idris_Stuff/Examples/Eq/Eq_0_0.idr"}
 		\idrisinput{"../Idris_Stuff/Examples/Eq/Eq_0_0.out"}
