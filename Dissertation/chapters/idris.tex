@@ -1,0 +1,421 @@
+This chapter aims to give the reader enough of an overview of \Idris and dependent types to be able to understand the work done in the later chapters. A complete explanation of \Idris is beyond the scope of this chapter. This chapter borrows a lot of examples and explanations from the \Idris book (``Type-Driven Development with Idris'') \cite{brady_2017}.
+
+\section{Types}
+
+    \begin{code}[caption={In \Idris, the type of a function is specified using `\texttt{:}'}]
+        anInt : Int
+        anInt = 10
+        
+        aString : String
+        aString = "foo"
+        
+        aBool : Bool
+        aBool = False
+    \end{code}
+
+    Types classify values. In programming, we often come across types like \texttt{Int}, \texttt{String}, or \texttt{Bool}, which could be values like \texttt{10}, \texttt{"foo"}, or \texttt{False} respectively.
+
+    \newpage
+
+    \begin{code}[caption={Mismatching types}, escapeinside={(*}{*)}]
+        aString : String
+        aString = 10
+        
+        
+        -- Compiler error --
+        
+          |
+        2 | aString = 10
+          |           ~~
+        When checking right hand side of aString with expected type
+        String
+        
+        String is not a numeric type
+    \end{code}
+    Types in \Idris are checked at compile time, meaning that if the types of the functions in a program do not match (for example, passing an \texttt{Int} where a \texttt{String} is required) then the program will not compile and the compiler will give a type-error.
+    
+    \begin{code}[label={des:no-cast}, caption={Values are not automatically cast}]
+anInt : Int
+anInt = 10
+
+half : Double -> Double
+half x = x / 2
+
+
+> half anInt
+(input):1:1-10:When checking an application of function Main.half:
+        Type mismatch between
+                Int (Type of anInt)
+        and
+                Double (Expected type)
+    \end{code}
+    
+    \Idris is strongly typed, so the compiler will not automatically cast values or parameters. This means you cannot pass an \texttt{Int} to a function which requires a \texttt{Double} and have it automatically work, because \texttt{Int} is a different type, a different `category' from \texttt{Double}.
+    
+\section{Type Variables and Dependent Types}
+    A different example of a type is a list of values. In languages like Java or Python, lists are parametrised over a type.
+    \begin{code}[caption={The types of different lists in \Idris}]
+        [1, 2, 3, 4, 5] : List Integer
+        
+        ["a", "b", "c"] : List String
+        
+        [True, False]   : List Bool
+    \end{code}
+    In \Idris this is still the case. You can have lists of \texttt{String}, lists of \texttt{Int}, or lists of \texttt{Bool} and these are different types. In general, you can have any \texttt{List elem} where \texttt{elem} is a \textit{type variable} representing the type of the elements of the list. \Idris provides an even more specific type of lists: \texttt{Vect}
+    \begin{code}[caption={Example \texttt{Vect} types}]
+        [1, 2, 3, 4, 5] : Vect 5 Int
+        
+        ["a", "b", "c"] : Vect 3 String
+        
+        [True, False]   : Vect 2 Bool
+    \end{code}
+    A \texttt{Vect}, short for ``vector'', is a list with a specific length. In general, you can have any \texttt{Vect n elem}. Here, \texttt{elem} is the same as in \texttt{List}, and \texttt{n} is the length of the list. Since the value of \texttt{n} \textit{depends} on the number of elements in the list, we refer to types like \texttt{Vect n elem} as \textit{dependent types} because its precise type depends on other values. Another example of a dependent type is \texttt{Matrix m n elem}, i.e. a matrix of \texttt{m} rows and \texttt{n} columns, with elements of type \texttt{elem}.
+    \[
+    \begin{pmatrix}
+    1 & 2 \\
+    3 & 4 \\
+    5 & 6 \\
+    \end{pmatrix}
+    \hspace{50pt}
+    \begin{pmatrix}
+    ``1" & ``2" & ``3" \\
+    ``4" & ``5" & ``6" \\
+    \end{pmatrix}
+    \]
+    Here, the first matrix would have type \texttt{Matrix 3 2 Int} and the second matrix would have type \texttt{Matrix 2 3 String}.
+    
+    \begin{code}[caption={Types are \textit{first-class}}]
+        ty : Type
+        ty = Bool
+        
+        StringOrInt : Bool -> Type
+        StringOrInt x = case x of
+                            True => Int
+                            False => String
+    \end{code}
+    
+    In \Idris, types are \textit{first-class}. This means that they can be used without any restrictions: we can assign them to variables (\texttt{ty}), or have functions return them (\texttt{StringOrInt}). Types are used everywhere, in particular when defining functions.
+    
+\newpage
+    
+
+\section{Functions}
+    In Listing \ref{des:no-cast} I defined a function \texttt{half}. Functions in \Idris consist of a \textit{type declaration} and a \textit{function definition}.
+    \begin{code}[caption={The \texttt{half} function from Listing \ref{des:no-cast}}]
+        half : Double -> Double
+        half x = x / 2
+    \end{code}
+    The first line of the \texttt{half} function is its type declaration and the second line is the function definition. These can each be broken down into further parts. A function definition consists of:
+    \begin{itemize}
+        \item a function name, \texttt{half}
+        \item a function type, \texttt{Double -> Double}
+    \end{itemize}
+    A function definition is a number of equations with:
+    \begin{itemize}
+        \item a right hand side, \texttt{half x}
+        \item a left hand side, \texttt{x / 2}
+    \end{itemize}
+    \begin{code}[caption={A different definition of \texttt{half}}]
+        half' : Double -> Double
+        half' 0.0 = 0.0
+        half' n = n / 2
+    \end{code}
+    In this different definition of \texttt{half}, \texttt{half'}, there are multiple functions definitions. A function can have varying definitions depending on its input. This is known as \textit{pattern matching} and is used extensively in \Idris. Here, it is not massively useful, as all it is doing is not bothering with the division, if the input is 0.
+
+    \begin{code}[caption={A function with a function as an argument}]
+        twice : (a -> a) -> a -> a
+        twice f x = f (f x)
+    \end{code}
+    
+    Functions in \Idris are first-class, so we can use them as arguments to other functions. The \texttt{twice} function's first argument is a function \texttt{f} which takes something of type \texttt{a} and produces something of type \texttt{a}. The second argument \texttt{x} is then something of type \texttt{a}. By not specifying a type and instead using a type variable, \texttt{twice} can be used on any type, as long as \texttt{x} has the same type as in the input to \texttt{f} and that \texttt{f} does not change the type of \texttt{x}.
+    
+    In addition to being first-class, functions in \Idris are \textit{pure} meaning that they do not have side effects (e.g. they do not do console I/O and they do not throw exceptions). This in turn means that for the same input, a function will always give the same output \cite{brady_2017}.
+
+
+\section{Data Types}
+    In addition to the given types, we can define our own data types. This is useful when we want to capture an aspect of the program we are writing which is likely to not be pre-defined in the \Idris prelude. Data types are defined using the \texttt{data} keyword. A data type is defined by a type constructor and one or more data constructors \cite{brady_2017}. Some of the included types are defined as data types, for example \texttt{List}.
+    
+    \begin{code}[caption={\texttt{List} as defined in the \Idris prelude}]
+        data List : (elem : Type) -> Type where
+            Nil  : List elem
+            (::) : (x : elem) -> (xs : List elem) -> List elem 
+    \end{code}
+    A \texttt{List} of elements of type \texttt{Type} can be constructed by either constructing the empty list \texttt{Nil}, or an \texttt{x} of type \texttt{elem} (the type of all elements in the list) followed by a list of more elements of the same type.
+    
+    \begin{code}[caption={\texttt{Bool} as defined in the \Idris prelude}]
+        data Bool = False
+                  | True
+    \end{code}
+    Data types can be constructed with either equals and vertical bars (see the definition of \texttt{Bool} just above) or as functions, like in the definition of \texttt{List}. They are mostly interchangeable, but the \texttt{data ... -> Type where} syntax is more flexible and general, at the cost of also being more verbose.
+    \\
+    
+    Data type definitions can also be recursive.
+
+
+\section{Natural Numbers}\label{des:nats}
+    \begin{code}[caption={Natural numbers as defined in the \Idris prelude}]
+        data Nat = Z | S Nat
+    \end{code}
+
+    Natural numbers in \Idris are also a data record. They base case is the constant 0 (\texttt{Z} in Idris) and the other constructor is the \textit{successor function} \texttt{S}. From these two, all the natural numbers can be constructed:
+    
+    \begin{tabular}{r l}
+        \texttt{Z} & $\mapsto 0$ \\ 
+        \texttt{S Z} & $\mapsto 1$ \\ 
+        \texttt{S (S Z)} & $\mapsto 2$ \\
+        etc & \\
+        \vdots & \\
+    \end{tabular}
+    \par
+    The benefit of this is that it allows us to pattern match on numbers.
+    
+    \begin{code}[caption={Pattern matching on \texttt{Nat}s}]
+        natFact : Nat -> Nat
+        natFact Z = 1
+        natFact (S k) = (S k) * fact k
+    \end{code}
+    By pattern matching on the possible constructors for \texttt{Nat}, we have captured the base case, and the recursive step for calculating the factorial of a number using the \texttt{natFact} function.
+    Pattern matching also helps in terms of decidability.
+    \\
+
+
+\section{\texttt{Maybe} -- Handling uncertainty}
+    Due to functions being pure, it can be difficult to reason about failure or uncertainty of a result being there.
+    \begin{code}[caption={The \texttt{Maybe} data type}]
+        data Maybe : (a : Type) -> Type where
+            Nothing : Maybe a
+            Just : (x : a) -> Maybe a
+    \end{code}
+    The \texttt{Maybe} data type captures this in the form of either having \texttt{Just} a value \texttt{x} or \texttt{Nothing}. We could use this to implement taking the n$^{th}$ element from a list.
+    \begin{code}[caption={List indexing using \texttt{Maybe}}]
+        getIndex : Nat -> List a -> Maybe a
+        getIndex _ Nil = Nothing
+        getIndex Z (x :: xs) = Just x
+        getIndex (S k) (x :: xs) = getIndex k xs
+    \end{code}
+    Since we could either be given the empty list or run out of bounds, we use \texttt{Maybe} to reflect that the index may not be valid. If the index exists, we return \texttt{Just x} where \texttt{x} is the n$^{th}$ element, and if we run out of bounds we return \texttt{Nothing}.
+
+\section{The \texttt{(=)} data type}
+    \begin{code}[label={des:refl-concept}, caption={The concept of an equality data type}]
+            data (=) : a -> b -> Type where
+                Refl : x = x
+    \end{code}
+        
+    A very useful pre-defined data type is the \texttt{(=)} data type. It is not quite defined as a data type since `\texttt{=}' is a reserved symbol, instead it is part of the \Idris syntax. It is still a data type, just defined at a lower level of the language than the \texttt{data} construct. Its constructor \texttt{Refl} is short for `reflexive'. Reflexivity is a mathematical concept stating that every element in a set is related to itself. In logic, one would write $\forall x \in X : x R x$ where $X$ is a set of elements $x$ and $R$ is a binary relation. This further means that \texttt{=} also must be symmetric and transitive: if $x = y$ then $y = x$; and if $x = y$ and $y = z$ then $x = z$. In short, if two elements are reflexive, this means they are the same element. \textbf{[correct?]}
+        
+    \begin{code}[label={des:refl-egs}, caption={Examples of reflexivity}]
+            Idris> the ("World" = "World") Refl
+            Refl : "World" = "World"
+            
+            
+            Idris> the (True = True) Refl
+            Refl : True = True
+            
+            
+            Idris> the (1 + 2 + 3 = 6) Refl
+            Refl : 6 = 6
+    \end{code}
+    At the \Idris prompt, we can use the \texttt{the} function to create some example instances of \texttt{Refl}. The last example shows that \Idris evaluates the sides of a type before trying to construct the \texttt{Refl}.
+        
+    \newpage
+        
+    \begin{code}[label={des:not-refl}, caption={Things that are not reflexive}, escapeinside={(*}{*)}]
+    Idris> the ("Foo" = "Bar") Refl
+    (input):1:1-24:When checking argument value to function
+    Prelude.Basics.the:
+        Type mismatch between
+            x = x (Type of Refl)
+        and
+            "Foo" = "Bar" (Expected type)
+    
+        Specifically:
+            Type mismatch between
+                "Foo"
+            and
+                "Bar"
+    
+    Idris> the (True = False) Refl
+    (input):1:1-23:When checking argument value to function
+    Prelude.Basics.the:
+        Type mismatch between
+            x = x (Type of Refl)
+        and
+            True = False (Expected type)
+    
+        Specifically:
+            Type mismatch between
+                True
+            and
+                False
+    
+    
+    Idris> the (2 = 3) Refl
+    (input):1:1-16:When checking argument value to function
+    Prelude.Basics.the:
+        Type mismatch between
+            3 = 3 (Type of Refl)
+        and
+            2 = 3 (Expected type)
+        
+        Specifically:
+            Type mismatch between
+                3
+            and
+                2
+    \end{code}
+    If we try to instantiate \texttt{Refl} using elements which are not reflexive, the type-checker complains and tells us that it does not make sense and so we cannot create a \texttt{Refl} from things which are not reflexive. The \texttt{Refl} type can be used to prove that things are equal. In order to prove the opposite, that things cannot be equal, we use a different data type.
+
+\section{The \texttt{Void} data type and the \texttt{void} function}
+    The \texttt{Void} data type expresses the impossibility of something happening.
+        
+    \begin{code}[caption={The \texttt{Void} type has no constructors}]
+            data Void : type where
+    \end{code}
+    Since \texttt{Void} has no constructors, it is impossible to directly create an instance of \texttt{Void}. Therefore, if a function returns an instance of \texttt{Void}, this means that its arguments resulted in something which is impossible to create. From a logical point of view, the arguments to the function express a contradiction, and as such \texttt{Void} represents something which can only be constructed if we accept that the contradiction is true.
+        
+    \begin{code}[label={des:zns}, caption={Zero cannot be the successor of a natural number}]
+            zeroNotSuc : (0 = S k) -> Void
+            zeroNotSuc Refl impossible
+    \end{code}
+    The first argument to the \texttt{zeroNotSuc} function is a reflexive equality expressing that zero is the successor of some natural number \texttt{k}. This is impossible and as such we cannot construct the \texttt{Refl}, which means that the function could return a \texttt{Void}. The \texttt{impossible} keyword tells the \Idris type checker that the pattern must not type check. Since we could not possibly have a \texttt{Refl : 0 = S k}, this holds.
+    
+    \begin{code}[caption={Invalid use of the \texttt{impossible} keyword}, escapeinside={(*}{*)}]
+        boolRefl : (b : Bool) -> (b = b)
+        boolRefl True = Refl
+        boolRefl False impossible
+        
+        
+        (*\underline{\textnormal {Compiler error:}}*)
+        
+          |
+        3 | boolRefl False impossible
+          |                ~~~~~~~~~~
+        boolRefl False is a valid case
+    \end{code}
+    The \texttt{boolRefl} function here simply shows that booleans are reflexive. If we try to use the \texttt{impossible} keyword for the \texttt{False} case, the type checker complains and tells us that it \textit{is} a valid case.
+        
+    \begin{code}[label={des:snz}, caption={The successor of a natural number cannot be zero}]
+            sucNotZero : (S k = 0) -> Void
+            sucNotZero Refl impossible
+    \end{code}
+    Similar to stating that zero cannot be the successor of a number, we can state that no natural number \texttt{k} can have zero as its successor. If we could create a \texttt{Refl : S k = 0}, we could create an instance of \texttt{Void}. Actually, if we could create an instance of \texttt{Void}, we would be able to create an instance of any type. Or logically: if we accept a contradiction to be true, we can prove anything.
+
+
+    \begin{code}[caption={The \texttt{void} function}]
+            void : Void -> a
+    \end{code}
+    
+    The \texttt{void} function captures this: given an instance of \texttt{Void}, the \texttt{void} function returns an instance of any type. Although this may seem like a peculiar thing to have a function whose input cannot exist. However, if we can say that certain things \textit{cannot} happen, we can use that to say more precisely what \textit{can} happen.
+        
+    \begin{code}[label={des:no-rec}, caption={Applying a function to an impossibility does not make it possible}]
+            noRec : (contra : (k = j) -> Void) -> (S k = S j) -> Void
+            noRec contra Refl = contra Refl
+    \end{code}
+        
+    The \texttt{noRec} function takes a proof that two natural numbers are not equal and proves that their successors must then also be not equal. Given a \texttt{contra} which is a function from \texttt{(k = j)} to \texttt{Void} and a \texttt{Refl} representing \texttt{(S k = S j)}, we can use the \texttt{contra} function to return an instance of \texttt{Void}. Hence, the\linebreak
+    \texttt{Refl : S k = S j} cannot exist.
+
+\section{Decidability}
+    Decidability is more specific than \texttt{Maybe}. Instead of saying that we have \texttt{Just} the value or \texttt{Nothing}, decidability allows us to express that we can always \textit{decide} whether a property holds or not for certain values.
+        
+    \begin{code}[caption={\texttt{Dec} as defined in the \Idris prelude}]
+            data Dec : (prop : Type) -> Type where
+                Yes : (prf : prop) -> Dec prop
+                No  : (contra : prop -> Void) -> Dec prop
+    \end{code}
+    The definition of \texttt{Dec} may seem similar to that of \texttt{Maybe},
+    
+    \begin{code}
+        Yes (prf : prop) -> Dec prop
+    \end{code}
+    seems very similar to
+    
+    \begin{code}
+        Just : (x : a) -> Maybe a
+    \end{code}
+    and that is because they are. Both \texttt{a} and \texttt{prop} represent the type of the element that may or may not be there. However, contrary to \texttt{Maybe}'s `\texttt{Nothing}' which simply is the absence of a value, \texttt{Dec}'s `\texttt{No}' holds a value: `\texttt{contra}'. The type of \texttt{contra} is \texttt{prop -> Void}, i.e. it is a proof that no value of the required type can exist (because if it did, we would return an instance of \texttt{Void}). This is a much stronger statement than \texttt{Nothing}. Instead of saying ``the value is not there'' we have said ``here is why the value can never be there''.
+    \\
+        
+    Using \texttt{Dec} and Listings \ref{des:zns}, \ref{des:snz}, and \ref{des:no-rec}, we can decidably prove equality of natural numbers.
+
+   	\begin{code}[label={des:dec-eq}, caption={Proving equality of natural numbers}]
+    decEq : (a : Nat) -> (b : Nat) -> Dec (a = b)
+    decEq Z Z = Yes Refl
+    decEq Z (S j) = No zeroNotSuc
+    decEq (S k) Z = No sucNotZero
+    decEq (S k) (S j) = case decEq k j of
+                            Yes prf => Yes (cong prf)
+                            No contra => No (noRec contra)
+   	\end{code}
+    The \texttt{decEq} function models decidable equality of natural numbers. It takes two natural numbers \texttt{a} and \texttt{b} and decidably produces whether \texttt{a} is reflexive to \texttt{b}, \texttt{Dec (a = b)}. We do this by pattern matching on the input:
+    \begin{itemize}
+        \item zero and zero -- are equal, and it is trivial to construct a
+              \texttt{Refl} showing this
+        \item zero and the successor of a number -- are not equal as zero cannot
+              be the successor of a natural number, so we return \texttt{No},
+              followed by Listing \ref{des:zns} which proves this
+        \item the successor of a number and zero -- are not equal as no number 
+              can have zero as its successor, so we return \texttt{No} followed
+              by Listing \ref{des:snz} which proves this
+        \item the successor of a number and the successor of another number --
+              are equal if and only if the predecessors are equal, so we recurse
+              on the predecessors and test if they are equal. If they are, we
+              use the \texttt{cong} function on the proof. The \texttt{cong}
+              function simply guarantees that equality respects function
+              application. If the predecessors are not equal, we use the
+              \texttt{noRec} function to prove that their successors can also
+              not be equal.
+    \end{itemize}
+
+    Specifying impossible inputs allows us to refine which inputs \textit{are} valid. Since this is something we commonly want to do, \Idris provides several constructs for facilitating this.
+
+
+\section{Expressing the impossible}
+    In Listing \ref{des:zns} and \ref{des:snz} we used the \texttt{impossible} keyword which tells the type checker that a pattern must not type check. We also used the \texttt{Void} data type to express that something cannot exist, and the \texttt{void} function to express that if \texttt{Void} coulb be instantiated, we could do anything.
+    
+    \begin{code}[caption={The \texttt{Uninhabited} interface}]
+        interface Uninhabited t where
+            uninhabited : t -> Void
+    \end{code}
+    
+    An interface can be thought of as a classification of types. They provide methods which must be given in an implementation of the interface using a certain type. The \texttt{Uninhabited} interface is a generalisation of types which cannot be constructed.
+    
+    \begin{code}[caption={2 cannot equal 3}]
+            implementation Uninhabited (2 = 3) where
+                uninhabited Refl impossible
+    \end{code}
+    If a type cannot exist (like \texttt{Refl : 2 = 3}), we can provide an implementation of the \texttt{Uninhabited} interface for it.
+    
+    \begin{code}[caption={The \texttt{uninhabited} function}]
+            uninhabited : Uninhabited t => t -> Void
+    \end{code}
+    The \texttt{uninhabited} function, which is required by an implementation of \texttt{Uninhabited}, takes a thing which implements the \texttt{Uninhabited} interface and produces an instance of \texttt{Void}, i.e. if \texttt{uninhabited} can ever be given its argument \texttt{t}, we must have constructed a contradiction.
+
+    \newpage
+
+    \begin{code}[caption={The \texttt{absurd} function}]
+            absurd : Uninhabited t => (h : t) -> a
+            absurd h = void (uninhabited h)
+    \end{code}
+    
+    Using \texttt{uninhabited} and \texttt{void}, the \Idris prelude defines the \texttt{absurd} function. Recalling that \texttt{uninhabited} constructs an instance of \texttt{Void} and that \texttt{void} constructs anything from this, \texttt{absurd} essentially states that the existence of any instance of something which implements \texttt{Uninhabited} is absurd as it would mean anything, any type, could be created.
+    
+    \begin{code}[caption={Example pre-defined implementations of \texttt{Uninhabited}}]
+        implementation Uninhabited (True = False) where
+            uninhabited Refl impossible
+            
+        implementation Uninhabited (False = True) where
+            uninhabited Refl impossible
+    \end{code}
+    \Idris comes with many implementations of \texttt{Uninhabited} already defined. Two examples of this are the proofs that \texttt{True} cannot be \texttt{False}, and \texttt{False} cannot be \texttt{True}
+    
+    \begin{code}[caption={Using \texttt{absurd}}]
+            isTrue : (b : Bool) -> Dec (b = True)
+            isTrue True  = Yes Refl
+            isTrue False = No absurd
+            
+            isFalse : (b : Bool) -> Dec (b = False)
+            isFalse True  = No absurd
+            isFalse False = Yes Refl
+    \end{code}
+    One usage of \texttt{Uninhabited} could be to decidably determine whether a boolean is \texttt{True} or \texttt{False}. If the boolean \textit{is} the correct instance, then we simply return a \texttt{Yes Refl}. And if the boolean is \textit{not} the correct instance, we return \texttt{No absurd} which shows that it cannot be the same boolean because if it was, we could construct any type. \texttt{No absurd} shows that we have had a contradiction.
