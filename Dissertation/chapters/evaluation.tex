@@ -1,23 +1,25 @@
-In order to be able to use the existing operators, and the ones I had implemented, in code, I needed to make sure that they worked, i.e. that they did not return anything unexpected (e.g., \texttt{Eq} should not evaluate to true for 1 and 3, and \texttt{And False False} should not evaluate to \texttt{True}). This is the purpose of the first section (\ref{evaln:ops}) of this chapter. With working operators, it should then be possible to construct slightly more complex C programs, and annotate and model them using the framework.
+In order to be able to use the existing operators, and the ones I had implemented, in code, I needed to make sure that they worked, i.e. that they did not return anything unexpected (e.g., \texttt{Eq} should not evaluate to true for 1 and 3, and \texttt{And False False} should not evaluate to \texttt{True}). This is the described in the first section (\ref{evaln:ops}) of this chapter. With working operators, it should then be possible to construct slightly more complex C programs, and annotate and model them using the framework. This is described in the second section (\ref{evaln:progs}).
 
 
 \section{Operators}\label{evaln:ops}
-    \todo{rewrite this}
-	Several examples were constructed to evaluate whether the operators worked
-	as intended. There were three cases which needed to be covered:
-	\begin{enumerate}
-		\item \idrisinline{Z} (i.e 0), as this is the base case for all
-			  \texttt{Nat}s
-		\item \idrisinline{S Z} (i.e 1), as it is the immediate successor of 0
-		\item \idrisinline{(S ... (S Z)..)} (i.e. numbers greater than 1), as they
-			  demonstrate that the recursion works.
-	\end{enumerate}
-	For each of the numeric operators, I wrote examples based on relationships between 0, 1, and 3. I then used the numeric operators to define two simple statements, one which was true and a one which was false, and used these to evaluate the boolean operators.
+    In order to evaluate the operators, I constructed multiple examples which tested specific input cases/categories and asserted that they functioned as expected in each case. For numeric operators, I tested the following input cases:
+    \begin{itemize}
+        \item zero and zero -- they form the base case of natural numbers so for
+              all recursive operations to be correct, the base case has to be correct
+        \item zero and one or one and zero -- since one is the immediate
+              successor of zero, there is only the need for one recursive step,
+              so if this case works, adding more recursive steps is likely to 
+              work
+        \item numbers greater than zero and one -- these require multiple 
+              recursive steps and so if they work, all numbers should work as
+              we then know that recursion works
+    \end{itemize}
+    \todo{wording?...}
+    
+    For boolean operators, I tested the possible combinations of \texttt{True} and \texttt{False} for the operator and compared the results with the corresponding truth-table for the corresponding logical-operator.
 	
-	\newpage
-	
-    \todo{explain ALL of this: why is it interesting/relevant?}
     \subsection{The \texttt{Eq} Operator}
+        \todo{explain ALL of this: why is it interesting/relevant?}
 		\idrisinput{"../Idris_Stuff/Examples/Eq/Eq_0_0.idr"}
 		\idrisinput{"../Idris_Stuff/Examples/Eq/Eq_0_0.out"}
     
@@ -43,5 +45,5 @@ In order to be able to use the existing operators, and the ones I had implemente
         \idrisinput{"../Idris_Stuff/Examples/Not/Not_false.idr"}
         \idrisinput{"../Idris_Stuff/Examples/Not/Not_false.out"}
 
-\section{Advanced}
+\section{Simple Programs}\label{evaln:progs}
     \subsection{Loop accumulation}
