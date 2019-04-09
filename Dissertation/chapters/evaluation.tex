@@ -19,13 +19,15 @@ In order to be able to use the existing operators, and the ones I had implemente
     For boolean operators, I tested the possible combinations of \texttt{True} and \texttt{False} for the operator and compared the results with the corresponding truth-table for the corresponding logical operator.
 	
     \subsection{The \texttt{Eq} Operator}\label{evaln:ops:eq}
-        \lstinputlisting[caption={A simple C program which requires $0 = 0$}]{"../Idris_Stuff/Examples/Eq/Eq_0_0.c"}
+        \lstinputlisting[caption={A C program which requires $0 = 0$}]{"../Idris_Stuff/Examples/Eq/Eq_0_0.c"}
         
-        The C program itself does not do anything. Its purpose is to test the base case of equality between natural numbers: that zero equals zero.
+        The C program itself may not seem very interesting. However, it is a structurally correct C program. Its purpose is to test the base case of equality between natural numbers: that zero equals zero. This equality assertion would be similar for larger, more complex programs using the annotation.
         
 		\idrisinput{"../Idris_Stuff/Examples/Eq/Eq_0_0.idr"}
         
         Transforming the C annotation into \Idris, we get the model detailed above. The model `\texttt{eq\_0\_0} is a \texttt{CLang} consisting of an assertion named `\texttt{eq\_0\_0\_assert}' and nothing more (\texttt{Halt}). This assertion contains two literals \texttt{x} and \texttt{y} both carrying the value 0, their evaluation \texttt{x'} and \texttt{y'} over a given environment \texttt{env}, and a decidable proof \texttt{prf} that the numbers are equal. Using these, we can use \texttt{MkAssertion} (\todo{listing}) to construct an instance of \texttt{Assertion} (\todo{listing}).
+        
+        \newpage
         
         \begin{code}
 Idris> mkCertificate eq_0_0
@@ -35,15 +37,13 @@ Idris> mkCertificate eq_0_0
         Using the \texttt{mkCertificate} function, we construct a certificate based on the \texttt{Assertion} made. We can see that the evaluation of the literals has worked correctly from \texttt{MkEvald (Lit 0) 0}. The final argument to the \texttt{MkAssertion} is a \texttt{Yes Refl}, so the \texttt{Eq} operator worked for zero and zero: It found that they were equal, which is correct.
         \\
         
-        \lstinputlisting[caption={A simple C program which requires $1 = 1$}]{"../Idris_Stuff/Examples/Eq/Eq_1_1.c"}
+        \lstinputlisting[caption={A C program which requires $1 = 1$}]{"../Idris_Stuff/Examples/Eq/Eq_1_1.c"}
         
-        Again, the actual C program does not do anything interesting. The assertion tests that 1 equals 1 as this is the immediate successor of zero and hence only requires one recursive step.
+        Again, the actual C program is structurally sound. The assertion tests that 1 equals 1, as one is the immediate successor of zero and hence only requires one recursive step.
         
         \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_1_1.idr"}
         
         The resulting \Idris model `\texttt{eq\_1\_1}' contains an assertion that 1 equals 1 (\texttt{Assert eq\_1\_1\_assert}) and nothing more (\texttt{Halt}). This assertion in turn contains the two literals (\texttt{x} and \texttt{y}) both carrying a value of 1 (\texttt{Lit 1}), their evaluation over the given environment (\texttt{x'} and \texttt{y'}), and a decidable proof `\texttt{prf}' that the evaluations are equal.
-        
-        \newpage
         
         \begin{code}
 Idris> mkCertificate eq_1_1
@@ -54,13 +54,15 @@ Idris> mkCertificate eq_1_1
         \\
         
         
-        \lstinputlisting[caption={A simple C program which requires $0 = 1$...}]{"../Idris_Stuff/Examples/Eq/Eq_0_1.c"}
+        \lstinputlisting[label={evaln:ops:eq-0-1}, caption={A C program which requires $0 = 1$}]{"../Idris_Stuff/Examples/Eq/Eq_0_1.c"}
         
-        With $0 = 0$ and $1 = 1$ working, I decided to confirm that the operator was working correctly for 0 and 1 by testing that $0 = 1$ and $1 = 0$ did not produce a \texttt{Yes Refl}.
+        With $0 = 0$ and $1 = 1$ working, I evaluated that the operator was working correctly for 0 and 1 by testing that $0 = 1$ and $1 = 0$ did not produce a \texttt{Yes Refl}.
+        
+        \newpage
         
         \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_0_1.idr"}
         
-        Again, we get a model containing the literals, their evaluation, and a decidable proof of whether they are equal or not.
+        This time, the \Idris model contains two numerically different literals, their evaluation, and a decidable proof of whether they are equal or not.
         
         \begin{code}
 Idris> mkCertificate eq_0_1
@@ -69,48 +71,111 @@ Idris> mkCertificate eq_0_1
         
         The output from the \texttt{mkCertificate} function over \texttt{eq\_0\_1} shows the literals were evaluated correctly. The proof argument this time contains \texttt{No ZnotS}. This is the built-in version of the proof that zero cannot be the successor of a natural number (Listing \ref{idr:zns}). Given that 0 and 1 were the arguments to \texttt{Eq}, the operator has worked correctly: zero and one are not equal, because zero cannot be the successor of any natural number.
         
-        The details of the vice-versa of this, i.e. $1 = 0$ not returning \texttt{Yes Refl}, can be found in Appendix \ref{app:evaln}, Section \ref{app:evaln:ops:eq}.
+        The details of the vice-versa of this, i.e. $1 = 0$ not returning \texttt{Yes Refl}, can be found in Appendix \ref{app:evaln}, Section \ref{app:evaln:ops:eq}. The output from \texttt{mkCertificate} function is slightly unusual, and as such is included here.
+        
+        \newpage
         
         \begin{code}
 Idris> mkCertificate eq_1_0
         \end{code}
         \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_1_0.out"}
+        
         However, the certificate produced is slightly unexpected: it still contains \texttt{ZnotS}, this time combined with a function `\texttt{negEqSym}'. The \texttt{negEqSym} function has the following type:\par
-        \idrisinline{negEqSym : ((a = b) -> Void) -> (b = a) -> Void}\\
+        \texttt{negEqSym : ((a = b) -> Void) -> (b = a) -> Void}\\
         Essentially, the \texttt{negEqSym} proves that if two numbers are not equal, then swapping them around does not change that fact; It proves/states that the negation of equality is \textit{symmetric}. Hence, \texttt{ZnotS} can also be used to prove that $1 = 0$ is false as it is symmetric to proving $0 = 1$ is false. So the \texttt{Eq} operator works correctly when asserting $1 = 0$.
+        
+        \lstinputlisting[label={evaln:ops:eq-3-3}, caption={A C program which requires $3 = 3$}]{"../Idris_Stuff/Examples/Eq/Eq_3_3.c"}
+        
+        With both zero and one working, the remaining case is to test that \texttt{Eq} works with multiple recursive calls, i.e. any natural number greater than 1.
         
         \newpage
         
-        \lstinputlisting[caption={A simple C program which requires $3 = 3$}]{"../Idris_Stuff/Examples/Eq/Eq_3_3.c"}
-        TODO
-        \todo{3 == 3 true}
-        \\
+        \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_3_3.idr"}
         
-        \lstinputlisting[caption={A simple C program which requires $1 = 3$}]{"../Idris_Stuff/Examples/Eq/Eq_1_3.c"}
-        \todo{1 and 3 false}
+        The \texttt{eq\_3\_3} model contains two `3'-literals, their evaluation over the given environment, and a decidable proof that the two evaluations are equal.
+        
+        \begin{code}
+Idris> mkCertificate eq_3_3
+        \end{code}
+        \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_3_3.out"}
+        
+        Both evaluations returned 3 as expected and the final argument to \texttt{MkAssertion} is a \texttt{Yes Refl}. Hence, the \texttt{Eq} operator works for numbers greater than 0 and 1; It works in general.
+        
+        \lstinputlisting[label={evaln:ops:eq-1-3}, caption={A C program which requires $1 = 3$}]{"../Idris_Stuff/Examples/Eq/Eq_1_3.c"}
+        
+        Finally, to make sure that the operator disproves incorrect equalities for numbers greater than 1, I used the C program above.
+        
+        \newpage
+        
+        \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_1_3.idr"}
+        
+        The model contains the literals `1' and `3', their evaluation over the given environment, and a decidable proof of their equality.
+        
+        \begin{code}
+Idris> mkCertificate eq_1_3
+        \end{code}
+        \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_1_3.out"}
+        
+        Both evaluations match with the literals. The final argument in the \texttt{MkAssertion} argument uses a lambda function and the \texttt{succInjective} function. It has the type:\par
+        \texttt{succInjective : (left : Nat) -> (right : Nat) -> (p : S left = S right) -> left = right}\\
+        It takes two numbers and proves that if the successor of the left number is reflexive to the successor of the right number, then the numbers themselves must be equal. The argument \texttt{h} is a proof that \texttt{0 = S k}, so if it exists, then we could create a \texttt{Void}. This is a contradiction, so the equality is impossible. Swapping the operands results in almost the same proof.
+        
+        \newpage
+        
+        \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_3_1.out"}
+        
+        The only difference between this output is that it uses the \texttt{sym} function. Like with $0 = 1$ and $1 = 0$, this proves that numbers not being equal is symmetrical, so the same proof that they are not equal can be used. These two examples ($1 = 3$ and $3 = 1$), combined with the example in Listing \ref{evaln:ops:eq-3-3}, shows that the \texttt{Eq} function (and by extension, the \texttt{==} operator) works as intended for numbers greater than 0 and 1: if they are equal, then \texttt{Eq} proves it, and if they are not equal, then it correctly produces a proof as to why this is.
     
     \subsection{The \texttt{NEq} Operator}\label{evaln:ops:neq}
-        \lstinputlisting{"../Idris_Stuff/Examples/NEq/NEq_2_5.c"}
+        \lstinputlisting[caption={A C program requiring $0 \neq 1$}]{"../Idris_Stuff/Examples/NEq/NEq_0_1.c"}
+        
+        The C program for testing inequality is syntactically correct. Any more complex program which was trying to assert an inequality at some point would use the same annotation and operator.
+        \todo{Idris model}
+        \todo{contract}
+        
+        \lstinputlisting[label={evaln:ops:neq-0-0}, caption={A C program requiring $0 \neq 0$}]{"../Idris_Stuff/Examples/NEq/NEq_0_0.c"}
+        \todo{neq 0 0}
+        
+        \lstinputlisting[caption={A C program requiring $1 \neq 0$}]{"../Idris_Stuff/Examples/NEq/NEq_1_0.c"}
+        \todo{neq 1 0}
+        
+        \lstinputlisting[caption={A C program requiring $1 \neq 1$}]{"../Idris_Stuff/Examples/NEq/NEq_1_1.c"}
+        \todo{neq 1 1}
+    
+        \lstinputlisting[caption={A C program requiring $2 \neq 5$}]{"../Idris_Stuff/Examples/NEq/NEq_2_5.c"}
+        \todo{2 NEq 5}
         \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_2_5.idr"}
         \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_2_5.out"}
+        \todo{5 NEq 2}
+        
+        \lstinputlisting{"../Idris_Stuff/Examples/NEq/NEq_3_3.c"}
+        \todo{3 NEq 3}
+        
     
     \subsection{The \texttt{LTE} Operator}
-    
-    \subsection{The \texttt{LT} Operator}
-    
-    \subsection{The \texttt{GTE} Operator}
-    
-    \subsection{The \texttt{GT} Operator}
-    
-    \subsection{The \texttt{And} Operator}
+        \todo{LTE}
+        \todo{explain how all others relate}
+        \todo{put the others in appendix}
     
     \subsection{The \texttt{Or} Operator}\label{evaln:ops:or}
-        \idrisinput{"../Idris_Stuff/Examples/Or/Or_f_t.idr"}
-        \idrisinput{"../Idris_Stuff/Examples/Or/Or_f_t.out"}
+        \lstinputlisting{"../Idris_Stuff/Examples/Or/Or_t_t.c"}
+        \todo{true or true}
+    
+        \lstinputlisting{"../Idris_Stuff/Examples/Or/Or_f_t.c"}
+        \todo{false or true}
+    
+        \lstinputlisting{"../Idris_Stuff/Examples/Or/Or_t_f.c"}
+        \todo{true or false}
+        
+        \lstinputlisting{"../Idris_Stuff/Examples/Or/Or_t_f.c"}
+        \todo{false or false}
     
     \subsection{The \texttt{Not} Operator}\label{evaln:ops:not}
-        \idrisinput{"../Idris_Stuff/Examples/Not/Not_false.idr"}
-        \idrisinput{"../Idris_Stuff/Examples/Not/Not_false.out"}
+        \lstinputlisting{"../Idris_Stuff/Examples/Not/Not_false.c"}
+        \todo{not false}
+        
+        \lstinputlisting{"../Idris_Stuff/Examples/Not/Not_true.c"}
+        \todo{not true}
 
 \section{Simple Programs}\label{evaln:progs}
     \subsection{Loop accumulation}
