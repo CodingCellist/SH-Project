@@ -131,6 +131,7 @@ half x = x / 2
     
     In addition to being first-class, functions in \Idris are \textit{pure} meaning that they do not have side effects (e.g. they do not do console I/O and they do not throw exceptions). This in turn means that for the same input, a function will always give the same output \cite{brady_2017}.
 
+\todo{Scopes: mutual and let}
 
 \section{Data Types}
     In addition to the given types, we can define our own data types. This is useful when we want to capture an aspect of the program we are writing which is likely to not be pre-defined in the \Idris prelude. Data types are defined using the \texttt{data} keyword. A data type is defined by a type constructor and one or more data constructors \cite{brady_2017}. Some of the included types are defined as data types, for example \texttt{List}.
