@@ -274,7 +274,7 @@ half x = x / 2
     \end{code}
     Since \texttt{Void} has no constructors, it is impossible to directly create an instance of \texttt{Void}. Therefore, if a function returns an instance of \texttt{Void}, this means that its arguments resulted in something which is impossible to create. From a logical point of view, the arguments to the function express a contradiction, and as such \texttt{Void} represents something which can only be constructed if we accept that the contradiction is true.
         
-    \begin{code}[label={des:zns}, caption={Zero cannot be the successor of a natural number}]
+    \begin{code}[label={idr:zns}, caption={Zero cannot be the successor of a natural number}]
             zeroNotSuc : (0 = S k) -> Void
             zeroNotSuc Refl impossible
     \end{code}
@@ -295,7 +295,7 @@ half x = x / 2
     \end{code}
     The \texttt{boolRefl} function here simply shows that booleans are reflexive. If we try to use the \texttt{impossible} keyword for the \texttt{False} case, the type checker complains and tells us that it \textit{is} a valid case.
         
-    \begin{code}[label={des:snz}, caption={The successor of a natural number cannot be zero}]
+    \begin{code}[label={idr:snz}, caption={The successor of a natural number cannot be zero}]
             sucNotZero : (S k = 0) -> Void
             sucNotZero Refl impossible
     \end{code}
@@ -315,6 +315,7 @@ half x = x / 2
         
     The \texttt{noRec} function takes a proof that two natural numbers are not equal and proves that their successors must then also be not equal. Given a \texttt{contra} which is a function from \texttt{(k = j)} to \texttt{Void} and a \texttt{Refl} representing \texttt{(S k = S j)}, we can use the \texttt{contra} function to return an instance of \texttt{Void}. Hence, the\linebreak
     \texttt{Refl : S k = S j} cannot exist.
+
 
 \section{Decidability}
     Decidability is more specific than \texttt{Maybe}. Instead of saying that we have \texttt{Just} the value or \texttt{Nothing}, decidability allows us to express that we can always \textit{decide} whether a property holds or not for certain values.
@@ -337,7 +338,7 @@ half x = x / 2
     and that is because they are. Both \texttt{a} and \texttt{prop} represent the type of the element that may or may not be there. However, contrary to \texttt{Maybe}'s `\texttt{Nothing}' which simply is the absence of a value, \texttt{Dec}'s `\texttt{No}' holds a value: `\texttt{contra}'. The type of \texttt{contra} is \texttt{prop -> Void}, i.e. it is a proof that no value of the required type can exist (because if it did, we would return an instance of \texttt{Void}). This is a much stronger statement than \texttt{Nothing}. Instead of saying ``the value is not there'' we have said ``here is why the value can never be there''.
     \\
         
-    Using \texttt{Dec} and Listings \ref{des:zns}, \ref{des:snz}, and \ref{des:no-rec}, we can decidably prove equality of natural numbers.
+    Using \texttt{Dec} and Listings \ref{idr:zns}, \ref{idr:snz}, and \ref{des:no-rec}, we can decidably prove equality of natural numbers.
 
    	\begin{code}[label={des:dec-eq}, caption={Proving equality of natural numbers}]
     decEq : (a : Nat) -> (b : Nat) -> Dec (a = b)
@@ -354,10 +355,10 @@ half x = x / 2
               \texttt{Refl} showing this
         \item zero and the successor of a number -- are not equal as zero cannot
               be the successor of a natural number, so we return \texttt{No},
-              followed by Listing \ref{des:zns} which proves this
+              followed by Listing \ref{idr:zns} which proves this
         \item the successor of a number and zero -- are not equal as no number 
               can have zero as its successor, so we return \texttt{No} followed
-              by Listing \ref{des:snz} which proves this
+              by Listing \ref{idr:snz} which proves this
         \item the successor of a number and the successor of another number --
               are equal if and only if the predecessors are equal, so we recurse
               on the predecessors and test if they are equal. If they are, we
@@ -372,7 +373,7 @@ half x = x / 2
 
 
 \section{Expressing the impossible}
-    In Listing \ref{des:zns} and \ref{des:snz} we used the \texttt{impossible} keyword which tells the type checker that a pattern must not type check. We also used the \texttt{Void} data type to express that something cannot exist, and the \texttt{void} function to express that if \texttt{Void} coulb be instantiated, we could do anything.
+    In Listing \ref{idr:zns} and \ref{idr:snz} we used the \texttt{impossible} keyword which tells the type checker that a pattern must not type check. We also used the \texttt{Void} data type to express that something cannot exist, and the \texttt{void} function to express that if \texttt{Void} coulb be instantiated, we could do anything.
     
     \begin{code}[caption={The \texttt{Uninhabited} interface}]
         interface Uninhabited t where
