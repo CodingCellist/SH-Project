@@ -4,7 +4,8 @@
                        (MkEvald (Lit 1) 1)
                        (MkEvald (Lit 1) 1)
                        (Yes Refl))
-                   (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1) (Yes Refl))
+                   (Eq (Lit 1) (Lit 1) (MkEvald (Lit 1) 1) (MkEvald (Lit 1) 1)
+                                                                    (Yes Refl))
                    (MkBEvald (Eq (Lit 1)
                                  (Lit 1)
                                  (MkEvald (Lit 1) 1)
@@ -17,5 +18,6 @@
                                  (MkEvald (Lit 1) 1)
                                  (Yes Refl))
                              True)
-                   (Yes MkAnd))]) : (List (String, Nat), List Assertion)
+                   (Yes MkAnd))]) :
+(List (String, Nat), List Assertion)
 

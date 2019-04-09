@@ -3,6 +3,6 @@
                    (Lit 5)
                    (MkEvald (Lit 2) 2)
                    (MkEvald (Lit 5) 5)
-                   (Yes (MkNEqRec (MkNEqRec MkNEqL))))]) : (List (String, Nat),
-                                                            List Assertion)
+                   (Yes (MkNEqRec (MkNEqRec MkNEqL))))]) :
+(List (String, Nat), List Assertion)
 

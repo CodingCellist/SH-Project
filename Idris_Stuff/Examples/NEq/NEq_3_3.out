@@ -3,7 +3,7 @@
                    (Lit 3)
                    (MkEvald (Lit 3) 3)
                    (MkEvald (Lit 3) 3)
-                   (No (succNEqImpossible (succNEqImpossible (succNEqImpossible absurd)))))]) : (List (String,
-                                                                                                       Nat),
-                                                                                                 List Assertion)
+                   (No (succNEqImpossible (succNEqImpossible
+                                            (succNEqImpossible absurd)))))]) :
+(List (String, Nat), List Assertion)
 
