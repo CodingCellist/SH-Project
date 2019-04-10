@@ -286,9 +286,47 @@ Idris> mkCertificate lte_1_1
         
         When having a left-hand side greater than 1, we can more clearly see the recursive step. Here, the \texttt{LTESucc} function is applied three times to the \texttt{LTEZero} proof, thereby proving that the left-hand side `3' reached 0 before, or at the same time as, the right-hand side and therefore it is LTE to the right-hand side.
         
-        \todo{false examples}
+        \lstinputlisting[caption={A C program requiring $1 \leq 0$}]{"../Idris_Stuff/Examples/LTE/LTE_1_0.c"}
+        
+        To test that the \texttt{LTE} operator can prove that numbers cannot be LTE to each other, we first test with 0 and its immediate successor (1), as they should not require any recursive steps.
+        
+        \idrisinput{"../Idris_Stuff/Examples/LTE/LTE_1_0.idr"}
+        
+        The resulting \Idris model has the literals 1 and 0 respectively, their evaluation, and a decidable proof of whether the left is LTE to the right (i.e. $1 \leq 0$).
+        
+        \begin{code}
+Idris> mkCertificate lte_1_0
+        \end{code}
+        \idrisinput{"../Idris_Stuff/Examples/LTE/LTE_1_0.out"}
+        
+        Generating a certificate from the model, from the `\texttt{No}' we can see that it successfully evaluated that 1 is not LTE than 0. The exact proof, \texttt{succNotLTEzero}, has the following type:\\
+        \texttt{succNotLTEzero : Not (LTE (S m) 0)}\\
+        It states that no successor of any natural number \texttt{m} could be LTE to zero. So the \texttt{LTE} operator successfully works for 1 and its immediate predecessor 0, which is also the base case of natural numbers.
+        
+        \lstinputlisting[caption={A C program requiring $3 \leq 1$}]{"../Idris_Stuff/Examples/LTE/LTE_3_1.c"}
+        
+        Changing the false expression such that both numbers are greater than 0, we should get more recursive steps to prove that they cannot be LTE to each other.
+        
+        \newpage
+        
+        \idrisinput{"../Idris_Stuff/Examples/LTE/LTE_3_1.idr"}
+        
+        The \Idris model has the literals 3 and 1 instead of 1 and 0 respectively. Apart from that, it is identical to the previous.
+        
+        \begin{code}
+Idris> mkCertificate lte_3_1
+        \end{code}
+        \idrisinput{"../Idris_Stuff/Examples/LTE/LTE_3_1.out"}
+        
+        The certificate makes use of the same \texttt{succNotLTEzero} proof to prove that 3 cannot be LTE to 1. The recursive step is the \texttt{fromLteSucc} function, which is passed the argument \texttt{x1} from a lambda. The \texttt{fromLteSucc} function has the following type:\\
+        \texttt{fromLteSucc : LTE (S m) (S n) -> LTE m n}\\
+        It takes a proof that the successors of two numbers are LTE to each other and concludes that in that case, so are their predecessors. If it was possible to construct this proof for 2 and 0 (the predecessors to 3 and 1), then \texttt{succNotLTEzero} states that it cannot exist. So it is never possible that 3 is LTE to 1.
+        \\
+        
+        With these examples, covering the base case (0), its immediate successor (1), and numbers larger than this (where recursion is used), we have showed that the \texttt{LTE} operator works as intended.
         
         \todo{put the other ops in appendix}
+        \todo{explain why the others are in an appendix}
     
     \subsection{The \texttt{Or} Operator}\label{evaln:ops:or}
         \lstinputlisting{"../Idris_Stuff/Examples/Or/Or_t_t.c"}
