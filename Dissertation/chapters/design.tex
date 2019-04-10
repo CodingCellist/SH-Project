@@ -238,7 +238,7 @@ isNEq (S k) (S j) = case isNEq k j of
 
     \texttt{And} takes 5 arguments: two boolean expressions, the proofs of what these evaluated to, and decidable proof of whether those arguments would cause the \texttt{And} to evaluate to true. From the constructors of \texttt{TyAnd} (Listing \ref{des:tyand-or}), this can only be constructed when both arguments are \texttt{True}, i.e. when the \texttt{And} would evaluate to \texttt{True}. Based on this, \texttt{And} returns a new \texttt{BooleanExpression} (which can then be evaluated using the \texttt{beval} function). \texttt{Or} takes the same first 4 arguments. The difference being that its 5$^{th}$ argument is a decidable proof of whether those arguments would cause the \texttt{Or} to evaluate to \texttt{True}. From the constructors of \texttt{TyOr} (Listing \ref{des:tyand-or}), this can only be constructed if one or both of the arguments is \texttt{True}, i.e. the \texttt{Or} would evaluate to \texttt{True}. Based on its arguments, \texttt{Or} then returns a new \texttt{BooleanExpression} (which can then be evaluated using the \texttt{beval} function). Both \texttt{And} and \texttt{Or} rely on \texttt{Dec}, i.e. that a proof that it cannot evaluate to \texttt{True} exists.
     
-    \begin{code}[caption={Impossible \texttt{And} cases}]
+    \begin{code}[label={des:or-uninh}, caption={Impossible \texttt{And} cases}]
         implementation Uninhabited (TyAnd False True) where
             uninhabited MkAnd impossible
             
@@ -292,7 +292,7 @@ isNEq (S k) (S j) = case isNEq k j of
     The only case where boolean negation evaluates to \texttt{True} is when negating \texttt{False}. Therefore, it is only possible to construct a \texttt{TyBNot} if the given \texttt{BooleanExpression} was \texttt{False}.
     Similarly, there is only one case where boolean negation evaluates to \texttt{False}.
     
-    \begin{code}[caption={The \texttt{uninhabited} case for constructing a \texttt{TyBNot}}]
+    \begin{code}[label={des:not-uninh}, caption={The \texttt{uninhabited} case for constructing a \texttt{TyBNot}}]
         implementation Uninhabited (TyBNot True) where
             uninhabited MkBNot impossible
     \end{code}

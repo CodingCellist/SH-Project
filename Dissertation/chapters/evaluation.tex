@@ -331,24 +331,123 @@ Idris> mkCertificate lte_3_1
         \todo{explain why the others are in an appendix}
     
     \subsection{The \texttt{Or} Operator}\label{evaln:ops:or}
-        \lstinputlisting{"../Idris_Stuff/Examples/Or/Or_t_t.c"}
-        \todo{true or true}
-    
-        \lstinputlisting{"../Idris_Stuff/Examples/Or/Or_f_t.c"}
-        \todo{false or true}
-    
-        \lstinputlisting{"../Idris_Stuff/Examples/Or/Or_t_f.c"}
-        \todo{true or false}
+        Since `or' operates on booleans, we needed two \texttt{BooleanExpression}s: one \texttt{True} and one \texttt{False} . We used $1 = 1$ for \texttt{True} and $0 = 1$ for \texttt{False}
         
-        \lstinputlisting{"../Idris_Stuff/Examples/Or/Or_t_f.c"}
-        \todo{false or false}
+        \idrisinput[label={evaln:ops:or:true}, caption={A boolean expression which is true}]{"../Idris_Stuff/Examples/True.idr"}
+        
+        The `\texttt{b\_true}' function is a boolean expression which evaluates to \texttt{True} over an environment. In this case, $1 = 1$.
+        
+        \idrisinput[label={evaln:ops:or:false}, caption={A boolean expression which is false}]{"../Idris_Stuff/Examples/False.idr"}
+        
+        The `\texttt{b\_false}' function is a boolean expression which evaluates to \texttt{False} over an environment. In this case, $0 = 1$.
+        \\
+    
+        The truth-table for logical `or' is:
+        \begin{center}
+            \begin{tabular}{c | c}
+                a b & a $\lor$ b \\
+                \hline
+                T T & T \\
+                T F & T \\
+                F T & T \\
+                F F & F \\
+            \end{tabular}
+        \end{center}
+    
+        \lstinputlisting[caption={A C program where both `or' operands happen to be true}]{"../Idris_Stuff/Examples/Or/Or_t_t.c"}
+        
+        It is possible that a program would at some point assert that at least one of two properties held. And that both properties happened to hold. Such a program would have a similar assertion to the above.
+        
+        \newpage
+        
+        \idrisinput{"../Idris_Stuff/Examples/Or/Or_t_t.idr"}
+        
+        The resulting \Idris model contains two boolean expressions which should evaluate to \texttt{True} (Listing \ref{evaln:ops:or:true}), their evaluation over a given environment, and a decidable proof of whether the `or' expression evaluates to true.
+        
+        \idrisinput{"../Idris_Stuff/Examples/Or/Or_t_t.out"}
+        
+        When generating the certificate, we can see that the true boolean expression has been filled in where the \texttt{b\_true} used to be, and that the expressions held true: both \texttt{MkBevald}s have \texttt{True} at the end. The final argument to the \texttt{Or} function is a \texttt{Yes MkOr}, i.e. the operator has evaluated to \texttt{True} due to both arguments being true.
+    
+        \lstinputlisting[label={evaln:ops:or-t-f}, caption={A C program where the left `or' operand happens to be true}]{"../Idris_Stuff/Examples/Or/Or_t_f.c"}
+        
+        Another possibility is that one of the properties could be true and the other false. This should still evaluate to true.
+        
+        \idrisinput{"../Idris_Stuff/Examples/Or/Or_t_f.idr"}
+        
+        The resulting model now contains both a true and a false boolean expression (from Listing \ref{evaln:ops:or:true} and \ref{evaln:ops:or:false} respectively). Apart from that, it is unchanged.
+        
+        \newpage
+        
+        \idrisinput{"../Idris_Stuff/Examples/Or/Or_t_f.out"}
+        
+        From the certificate we can see that the boolean expressions were correctly evaluated: the first evaluated to \texttt{True} and the second to \texttt{False}. The final line before the type declaration is \texttt{Yes MkOrL}, so the operator has correctly showed that the expression evaluates to \texttt{True}: the left argument held true.
+        
+        \idrisinput{"../Idris_Stuff/Examples/Or/Or_f_t.out"}
+        
+        Swapping the true and false boolean expressions (Appendix \ref{app:evaln:ops:or}, Listing \ref{app:evaln:ops:or-f-t}), we get the above certificate. Again, the boolean expressions have been evaluated correctly: the first is \texttt{False} and the second is \texttt{True}. This time, the proof for `or' is a \texttt{Yes MkOrR}, so the operator functioned correctly: The `or' expression evaluates to \texttt{True} because the right argument held true.
+        
+        \lstinputlisting[caption={A C program where both `or' operands happen to be false}]{"../Idris_Stuff/Examples/Or/Or_f_f.c"}
+        
+        Finally, it is possible that both properties did not hold. In this case, the operator should evaluate to \texttt{False}, i.e it should be impossible to construct one of the previous proofs.
+        
+        \idrisinput{"../Idris_Stuff/Examples/Or/Or_f_f.idr"}
+        
+        The corresponding \Idris model's boolean expressions are both the ones that evaluate to \texttt{False} (Listing \ref{evaln:ops:or:false}). Apart from that, it is identical to the previous ones.
+        
+        \newpage
+        
+        \idrisinput{"../Idris_Stuff/Examples/Or/Or_f_f.out"}
+        
+        The resulting certificate shows that both boolean expressions correctly evaluated to \texttt{False}. Furthermore, the final part is a `\texttt{No absurd}' which shows that the operator correctly determined that the `or'-expression cannot be true, using the \texttt{Uninhabited} implementations for \texttt{TyOr} (Listing \ref{des:or-uninh}) to prove this.
+        \\
+        
+        All the cases evaluate to the value predicted from the truth-table. As such, we can conclude that the \texttt{Or} operator works correctly.
     
     \subsection{The \texttt{Not} Operator}\label{evaln:ops:not}
-        \lstinputlisting{"../Idris_Stuff/Examples/Not/Not_false.c"}
-        \todo{not false}
+        The \texttt{True} and \texttt{False} boolean expressions used to evaluate \texttt{Not} are the same as in \texttt{Or}, i.e. Listings \ref{evaln:ops:or:true} and \ref{evaln:ops:or:false}.
+        \\
         
-        \lstinputlisting{"../Idris_Stuff/Examples/Not/Not_true.c"}
-        \todo{not true}
+        The truth-table for logical negation is:
+        \begin{center}
+            \begin{tabular}{c | c}
+                p & $\lnot$p \\
+                \hline
+                F & T \\
+                T & F \\
+            \end{tabular}
+        \end{center}
+        
+        \newpage
+        
+        \lstinputlisting[caption={A C program where the property that must not hold is false}]{"../Idris_Stuff/Examples/Not/Not_false.c"}
+        
+        If a program was trying to assert that a property did not hold, then it would be using the logical `not' operator. In the desired case, this means the property itself evaluates to false. This situation would be similar to the one in the program above.
+        
+        \idrisinput{"../Idris_Stuff/Examples/Not/Not_false.idr"}
+        
+        The corresponding \Idris model only has one boolean expression which should evaluate to \texttt{False} (Listing \ref{app:evaln:ops:or:false}), its evaluation over a given environment, and a proof of whether its negation is true.
+        
+        \idrisinput{"../Idris_Stuff/Examples/Not/Not_false.out"}
+        
+        Making the certificate, we can see that the boolean expression was evaluated to \texttt{False} (in the \texttt{BEvald}) and that the final argument is a \texttt{Yes MkBNot}. This shows that the operator returns \texttt{True} when the input is \texttt{False}, as it should.
+        
+        \lstinputlisting[caption={A C program where the property that must not hold is true}]{"../Idris_Stuff/Examples/Not/Not_true.c"}
+        
+        In the undesired case, the property that must not hold does. This means that the expression should evaluate to \texttt{False}. This situation would be similar to the one in the program above.
+        
+        \idrisinput{"../Idris_Stuff/Examples/Not/Not_true.idr"}
+        
+        The resulting \Idris model again only has one boolean expression. However, this time it should evaluate to \texttt{True} (Listing \ref{evaln:ops:or:true}). Apart from this, the model is identical to the previous.
+        
+        \idrisinput{"../Idris_Stuff/Examples/Not/Not_true.out"}
+        
+        Looking at the certificate produced, we can see that the boolean expression correctly evaluated to \texttt{True} and that the final argument is a `\texttt{No absurd}'. This means that the operator has proved that the expression cannot evaluate to \texttt{True}, using the \texttt{Uninhabited} implementation of \texttt{Not} (Listing \ref{des:not-uninh}), and as such, the operator functions correctly when negating a \texttt{True} expression.
+        \\
+        
+        The results from the operator correspond to the truth-table for boolean negation. Therefore, the \texttt{Not} operator works as intended.
+        \\
+        
+        With a set of operators verified to be correct, I constructed and modelled some more complex examples.
 
 \newpage
 
@@ -356,3 +455,10 @@ Idris> mkCertificate lte_3_1
 \section{Simple Programs}\label{evaln:progs}
     \subsection{Loop accumulation}
         \lstinputlisting[caption={A C program whose loop has a timing requirement.}]{"../Idris_Stuff/Examples/Advanced/Loop.c"}
+        
+        \idrisinput{"../Idris_Stuff/Examples/Advanced/Loop.idr"}
+        \todo{fix the out-of-bounds}
+        
+        \newpage
+        
+        \idrisinput{"../Idris_Stuff/Examples/Advanced/Loop.out"}
