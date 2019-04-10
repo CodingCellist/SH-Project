@@ -243,14 +243,14 @@ Idris> mkCertificate lte_0_1
         \end{code}
         \idrisinput{"../Idris_Stuff/Examples/LTE/LTE_0_1.out"}
         
-        The resulting certificate shows that the literals were evaluated correctly, and the \texttt{Yes} on the last line shows that we successfully proved that 0 is less than or equal to 1. The \texttt{LTEZero} proof is part of the \Idris prelude and states that zero is the smallest natural number, so any natural number is less than or equal to it.
+        The certificate created by asserting $0 \leq 1$ is identical (apart from the `1'-literal) due to it still involving zero on the left-hand side.
         \todo{explain how other LTE-Zero proofs relate}
-        
-        \newpage
         
         \lstinputlisting[caption={A C program which requires $1 \leq 1$}]{"../Idris_Stuff/Examples/LTE/LTE_1_1.c"}
         
         Again, the program has the same core structure as any which would assert that one property was LTE to the other. This time both properties are 1 to test that the operator works with the immediate successor of 0.
+        
+        \newpage
         
         \idrisinput{"../Idris_Stuff/Examples/LTE/LTE_1_1.idr"}
         
@@ -264,9 +264,31 @@ Idris> mkCertificate lte_1_1
         Passing the model through the \texttt{mkCertificate} function, we see that it has successfully evaluated the literals and proven that 1 is LTE than itself, by applying \texttt{LTEZero} using the \texttt{LTESucc} function. It has type:\\
         \texttt{LTESucc : LTE left right -> LTE (S left) (S right)}\\
         The \texttt{LTESucc} function takes a proof that two numbers are LTE to each other, and proves than in that case, so are their successors. So \texttt{Yes (LTESucc LTEZero)} says that since 0 is LTE to any natural number $n$, $(0 + 1)$ is LTE to any natural number $(n + 1)$.
-        \todo{finish this}
         
-        \todo{put the others in appendix}
+        \newpage
+        
+        \lstinputlisting[caption={A C program requiring $1 \leq 3$}]{"../Idris_Stuff/Examples/LTE/LTE_1_3.c"}
+        
+        For the case where zero is not on the left-hand side, recursive steps should be required.
+        
+        \idrisinput{"../Idris_Stuff/Examples/LTE/LTE_1_3.idr"}
+        
+        The resulting model this time contains two non-zero literals (1 and 3 respectively), their evaluation over a given environment, and a decidable proof that the left is LTE to the right.
+        
+        \begin{code}
+            Idris> mkCertificate lte_1_3
+        \end{code}
+        \idrisinput{"../Idris_Stuff/Examples/LTE/LTE_1_3.out"}
+        
+        The certificate shows that the evaluation successfully proved the comparison to be true. The specifics of the proof show that the left-hand side reached 0 before (or at the same time as) the right-hand side did, so we can apply the \texttt{LTEZero} proof to that side using the \texttt{LTESucc} function (in this case once, to reach 1).
+        
+        \idrisinput{"../Idris_Stuff/Examples/LTE/LTE_3_3.out"}
+        
+        When having a left-hand side greater than 1, we can more clearly see the recursive step. Here, the \texttt{LTESucc} function is applied three times to the \texttt{LTEZero} proof, thereby proving that the left-hand side `3' reached 0 before, or at the same time as, the right-hand side and therefore it is LTE to the right-hand side.
+        
+        \todo{false examples}
+        
+        \todo{put the other ops in appendix}
     
     \subsection{The \texttt{Or} Operator}\label{evaln:ops:or}
         \lstinputlisting{"../Idris_Stuff/Examples/Or/Or_t_t.c"}
