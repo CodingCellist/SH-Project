@@ -38,3 +38,13 @@
     
     \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_5_2.idr"}
     The resulting \Idris model. The numbers 2 and 5 have swapped order compared to the model for Listing \ref{evaln:ops:neq-2-5}, to reflect the same swap made in the C program.
+
+
+\section{\texttt{LTE} operator}\label{app:evaln:ops:lte}
+    \lstinputlisting[label={evaln:ops:lte-0-1}, caption={A C program which requires $0 \leq 1$}]{"../Idris_Stuff/Examples/LTE/LTE_0_1.c"}
+    
+    This C program has the same structure as the one in Listing \ref{evaln:ops:lte-0-0}, this time asserting $0 \leq 1$.
+    
+    \idrisinput{"../Idris_Stuff/Examples/LTE/LTE_0_1.idr"}
+    
+    Translating this to an \Idris model we get two literals carrying the values 0 and 1 respectively, their evaluation over a given environment, and a decidable proof of whether the first is less than or equal to the first.
