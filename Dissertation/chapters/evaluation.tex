@@ -127,30 +127,101 @@ Idris> mkCertificate eq_1_3
         The only difference between this output is that it uses the \texttt{sym} function. Like with $0 = 1$ and $1 = 0$, this proves that numbers not being equal is symmetrical, so the same proof that they are not equal can be used. These two examples ($1 = 3$ and $3 = 1$), combined with the example in Listing \ref{evaln:ops:eq-3-3}, shows that the \texttt{Eq} function (and by extension, the \texttt{==} operator) works as intended for numbers greater than 0 and 1: if they are equal, then \texttt{Eq} proves it, and if they are not equal, then it correctly produces a proof as to why this is.
     
     \subsection{The \texttt{NEq} Operator}\label{evaln:ops:neq}
-        \lstinputlisting[caption={A C program requiring $0 \neq 1$}]{"../Idris_Stuff/Examples/NEq/NEq_0_1.c"}
+        \lstinputlisting[label={evaln:ops:neq-0-1}, caption={A C program requiring $0 \neq 1$}]{"../Idris_Stuff/Examples/NEq/NEq_0_1.c"}
         
         The C program for testing inequality is syntactically correct. Any more complex program which was trying to assert an inequality at some point would use the same annotation and operator.
-        \todo{Idris model}
-        \todo{contract}
+        
+        \newpage
+        
+        \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_0_1.idr"}
+        
+        The resulting \Idris model contains the literals 0 and 1, their evaluation, and a decidable proof of whether they are equal or not. These are passed as arguments to the \texttt{NEq} function, which is in turn used to construct an \texttt{Assertion} using \texttt{MkAssertion}.
+        
+        \begin{code}
+Idris> mkCertificate neq_0_1
+        \end{code}
+        \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_0_1.out"}
+        
+        Constructing the certificate using the \texttt{mkCertificate} function shows that the last argument to \texttt{NEq} was a \texttt{Yes MkNEqL}, i.e. that the numbers are not equal, specifically because the left number was smaller than the right number, \texttt{MkNEqL}.
+        
+        \newpage
+        
+        \begin{code}
+Idris> mkCertificate neq_1_0
+        \end{code}
+        \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_1_0.out"}
+        
+        Switching the operands around does not change the C program or the model much (see Appendix \ref{app:evaln}, Section \ref{app:evaln:ops:neq}). However, the resulting certificate is slightly different: the numbers are still shown to be not equal (the certificate contains a \texttt{Yes}) but this time specifically because the right number was smaller than the left number, \texttt{MkNEqR}.
+        For the arguments 0 and 1 the \texttt{NEq} function evaluates correctly that the numbers are not equal, regardless of which side of the operator they are on.
+        
         
         \lstinputlisting[label={evaln:ops:neq-0-0}, caption={A C program requiring $0 \neq 0$}]{"../Idris_Stuff/Examples/NEq/NEq_0_0.c"}
-        \todo{neq 0 0}
         
-        \lstinputlisting[caption={A C program requiring $1 \neq 0$}]{"../Idris_Stuff/Examples/NEq/NEq_1_0.c"}
-        \todo{neq 1 0}
+        Since the program requires 0 to be not equal to 0, the \texttt{NEq} operator should evaluate to false.
         
-        \lstinputlisting[caption={A C program requiring $1 \neq 1$}]{"../Idris_Stuff/Examples/NEq/NEq_1_1.c"}
-        \todo{neq 1 1}
+        \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_0_0.idr"}
+        
+        The \Idris model contains two literals, both carrying the value 0, their evaluation, and a decidable proof of whether they are not equal.
+        
+        \begin{code}
+Idris> mkCertificate neq_0_0
+        \end{code}
+        \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_0_0.out"}
+        
+        Constructing a certificate shows that the numbers are not unequal (\texttt{No}). The proof that they cannot be unequal is the \texttt{absurd} function, which can be used thanks to the implementation of \texttt{Uninhabited} that we provided in Section \ref{des:neq}, Listing \ref{des:neq-uninh}.
+        
+        \begin{code}
+Idris> mkCertificate neq_1_1
+        \end{code}
+        \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_1_1.out"}
+        
+        Changing the operands to 1, i.e. having a program which requires the immediate successor of 0 to be not equal to itself (Appendix \ref{app:evaln}, Section \ref{app:evaln:ops:neq}) results in a similar certificate. The proof that this cannot be is still `\texttt{absurd}', but passed through the \texttt{succNEqImpossible} function (detailed in Listing \ref{des:neq-sneqimp}) which proves that if two numbers are proven to not be unequal, then their successors must also not be unequal.
+        \\
+        
+        With these examples, the \texttt{NEq} operator has been shown to work for for the base case, 0, and its immediate successor, 1. For numbers greater than these, more recursive steps are required.
+        
+        \newpage
     
-        \lstinputlisting[caption={A C program requiring $2 \neq 5$}]{"../Idris_Stuff/Examples/NEq/NEq_2_5.c"}
-        \todo{2 NEq 5}
+        \lstinputlisting[label={evaln:ops:neq-2-5}, caption={A C program requiring $2 \neq 5$}]{"../Idris_Stuff/Examples/NEq/NEq_2_5.c"}
+        
+        Both 2 and 5 are greater than 0 and 1, and so are not part of the base cases. Since they are higher successors, they should require more recursive steps to show that they are not equal. If it works, then the recursive step works and so any natural number would work.
+        
         \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_2_5.idr"}
+        
+        Constructing the model, we have the literals 2 and 5, their evaluation over a given environment, and a decidable proof of their inequality. This is passed to the \texttt{NEq} constructor to construct a \texttt{BooleanExpression} which is then passed to the \texttt{MkAssertion} constructor.
+        
+        \begin{code}
+Idris> mkCertificate neq_2_5
+        \end{code}
         \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_2_5.out"}
-        \todo{5 NEq 2}
         
-        \lstinputlisting{"../Idris_Stuff/Examples/NEq/NEq_3_3.c"}
-        \todo{3 NEq 3}
+        Creating a certificate based on the model shows that the literals have been correctly evaluated and associated. It was also possible to construct a proof that the numbers are not equal (the \texttt{Yes} part of the certificate). As can be seen by the repeated \texttt{MkNEqRec} constructor in the proof, the recursive step works; The left number is smaller (\texttt{MkNEqL}), specifically it is 3 smaller (1 smaller + 2 recursive steps). Swapping the operands and generating the resulting model (Appendix \ref{app:evaln}, Section \ref{app:evaln:ops:neq}) should result in a similar result.
         
+        \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_5_2.out"}
+        
+        Having swapped the order of the operands, the resulting certificate is very similar to the previous one. The literals have swapped order, and the two recursive steps are still there. However, this time the numbers are not equal specifically because right number has been shown to be smaller (\texttt{MkNEqR}). So the \texttt{NEq} operator can show that natural numbers greater than 0 and 1 are not equal. However, we still need to show that it can disprove the inequality between numbers greater than 0 and 1.
+        
+        \lstinputlisting[caption={A C program requiring $3 \neq 3$}]{"../Idris_Stuff/Examples/NEq/NEq_3_3.c"}
+        
+        To completely test that the operator works correctly for numbers greater than 0 and 1, the above C program requires that 3 be not equal to itself. This should evaluate to false. If it does, then since 3 requires multiple recursive steps, the operator can prove that two numbers greater than 0 and 1 cannot be unequal.
+        
+        \newpage
+        
+        \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_3_3.idr"}
+        
+        The \Idris model has two literals carrying the value 3, their evaluation over a given environment, and a decidable proof of whether they are not equal.
+        
+        \begin{code}
+Idris> mkCertificate neq_3_3
+        \end{code}
+        \idrisinput{"../Idris_Stuff/Examples/NEq/NEq_3_3.out"}
+        
+        The resulting certificate shows that the literals were evaluated correctly and that the numbers were shown to not be unequal (the \texttt{No} part in the certificate). Similar to the example for $1 \neq 1$, the proof of this is the \texttt{absurd} function, but this time recursively passed through the \texttt{succNEqImpossible} function three times (due to the number being 3). This shows that the \texttt{NEq} operator works correctly in terms of proving that two natural numbers greater than 0 and 1 cannot be unequal.
+        \\
+        
+        Having shown that the \texttt{NEq} operator works correctly for the base case (0), its immediate successor (1), and natural numbers greater than these, we can conclude that the \texttt{NEq} operator works as intended.
+        
+    \newpage
     
     \subsection{The \texttt{LTE} Operator}
         \todo{LTE}
@@ -176,6 +247,9 @@ Idris> mkCertificate eq_1_3
         
         \lstinputlisting{"../Idris_Stuff/Examples/Not/Not_true.c"}
         \todo{not true}
+
+\newpage
+
 
 \section{Simple Programs}\label{evaln:progs}
     \subsection{Loop accumulation}

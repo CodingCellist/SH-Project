@@ -114,10 +114,12 @@ data BEvald : BooleanExpression -> Nat -> Type where
         \texttt{BEvald} works like \texttt{Evald} except for boolean expressions and values. It is a data type constructed from a \texttt{BooleanExpression} and a \texttt{Bool}. Like \texttt{eval}, the \texttt{beval} function only evaluates the value of the boolean expression, it does not provide a proof that the expression evaluates to that boolean. The \texttt{BEval} type is a proof that the boolean expression \texttt{x} evaluates to the boolean \texttt{y}.
         \\
         
+        \todo{explain LTE and its relation to all the other stuff}
+        
         The operators \texttt{And}, \texttt{Eq}, \texttt{LT}, \texttt{LTE}, \texttt{GT}, and \texttt{GTE} were already implemented. So in order to have a complete set of operators, I implemented \texttt{NEq}, \texttt{Or}, and \texttt{Not}.
 
 
-\section{Inequality (\texttt{NEq})}
+\section{Inequality (\texttt{NEq})}\label{des:neq}
     \texttt{Eq} had already been implemented by the \textsc{TeamPlay} project, using the built-in \texttt{(=)} data type and the \texttt{DecEq} interface, as part of the D1.1 deliverable \cite{teamplay:d1.1}. Because there is no built-in \texttt{NEq} data type, one had to be defined.
     \begin{code}[caption={The data type used for capturing inequality}]
         data TyNEq : Nat -> Nat -> Type where
@@ -156,7 +158,7 @@ data BEvald : BooleanExpression -> Nat -> Type where
 
     If we try to construct a \texttt{TyNEq} from 0 0, i.e. try to prove $0 \neq 0$, this is impossible: \texttt{MkNEqL} requires only the left argument to be zero, \texttt{MkNEqR} requires only the right argument to be zero, and \texttt{MkNEqRec} requires the successors to be not equal (i.e. $1 \neq 1$, $2 \neq 2$, etc.). So \texttt{TyNEq 0 0} is uninhabited as we cannot use any of its constructors to create that type. For non-zero equal numbers, we need to take a similar approach to \texttt{MkNEqRec}.
     
-    \begin{code}[caption={Proving inequality of numbers is impossible}]
+    \begin{code}[label={des:neq-sneqimp}, caption={Proving inequality of numbers is impossible}]
         succNEqImpossible : (contra : TyNEq k j -> Void) ->
                             TyNEq (S k) (S j) -> Void   
         succNEqImpossible contra (MkNEqRec x) = contra x
