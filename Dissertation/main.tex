@@ -8,6 +8,7 @@
 \usepackage{amsmath}
 \usepackage{idrislang}
 \usepackage[nounderscore]{syntax}
+\usepackage{pdfpages}
 \usepackage[normalem]{ulem} %TODO: remove this before final submission
 \usepackage{todonotes} % TODO: remove this before final submission
 %\usepackage{palatino}
@@ -66,5 +67,6 @@
     \chapter{Evaluation}\label{app:evaln}
     \input{appendices/evaluation}
     
-    \todo{Ethics as appendix!}
+    \chapter{Ethics}
+    \includepdf[pages={-}]{"appendices/Preliminary_Ethics"}
 \end{document}
