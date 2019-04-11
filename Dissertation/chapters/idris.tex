@@ -131,7 +131,8 @@ half x = x / 2
     
     In addition to being first-class, functions in \Idris are \textit{pure} meaning that they do not have side effects (e.g. they do not do console I/O and they do not throw exceptions). This in turn means that for the same input, a function will always give the same output \cite{brady_2017}.
 
-\todo{Scopes: mutual and let}
+\section{The \texttt{mutual} and \texttt{let} declarations}
+    \todo{write this}
 
 \section{Data Types}
     In addition to the given types, we can define our own data types. This is useful when we want to capture an aspect of the program we are writing which is likely to not be pre-defined in the \Idris prelude. Data types are defined using the \texttt{data} keyword. A data type is defined by a type constructor and one or more data constructors \cite{brady_2017}. Some of the included types are defined as data types, for example \texttt{List}.
@@ -196,75 +197,75 @@ half x = x / 2
     \end{code}
     Since we could either be given the empty list or run out of bounds, we use \texttt{Maybe} to reflect that the index may not be valid. If the index exists, we return \texttt{Just x} where \texttt{x} is the n$^{th}$ element, and if we run out of bounds we return \texttt{Nothing}.
 
-\section{The \texttt{(=)} data type}
-    \begin{code}[label={des:refl-concept}, caption={The concept of an equality data type}]
-            data (=) : a -> b -> Type where
-                Refl : x = x
-    \end{code}
-        
-    A very useful pre-defined data type is the \texttt{(=)} data type. It is not quite defined as a data type since `\texttt{=}' is a reserved symbol, instead it is part of the \Idris syntax. It is still a data type, just defined at a lower level of the language than the \texttt{data} construct. Its constructor \texttt{Refl} is short for `reflexive'. Reflexivity is a mathematical concept stating that every element in a set is related to itself. In logic, one would write $\forall x \in X : x R x$ where $X$ is a set of elements $x$ and $R$ is a binary relation. This further means that \texttt{=} also must be symmetric and transitive: if $x = y$ then $y = x$; and if $x = y$ and $y = z$ then $x = z$. In short, if two elements are reflexive, this means they are the same element. \textbf{[correct?]}
-        
-    \begin{code}[label={des:refl-egs}, caption={Examples of reflexivity}]
-            Idris> the ("World" = "World") Refl
-            Refl : "World" = "World"
-            
-            
-            Idris> the (True = True) Refl
-            Refl : True = True
-            
-            
-            Idris> the (1 + 2 + 3 = 6) Refl
-            Refl : 6 = 6
-    \end{code}
-    At the \Idris prompt, we can use the \texttt{the} function to create some example instances of \texttt{Refl}. The last example shows that \Idris evaluates the sides of a type before trying to construct the \texttt{Refl}.
-        
-    \newpage
-        
-    \begin{code}[label={des:not-refl}, caption={Things that are not reflexive}, escapeinside={(*}{*)}]
-    Idris> the ("Foo" = "Bar") Refl
-    (input):1:1-24:When checking argument value to function
-    Prelude.Basics.the:
-        Type mismatch between
-            x = x (Type of Refl)
-        and
-            "Foo" = "Bar" (Expected type)
-    
-        Specifically:
-            Type mismatch between
-                "Foo"
-            and
-                "Bar"
-    
-    Idris> the (True = False) Refl
-    (input):1:1-23:When checking argument value to function
-    Prelude.Basics.the:
-        Type mismatch between
-            x = x (Type of Refl)
-        and
-            True = False (Expected type)
-    
-        Specifically:
-            Type mismatch between
-                True
-            and
-                False
-    
-    
-    Idris> the (2 = 3) Refl
-    (input):1:1-16:When checking argument value to function
-    Prelude.Basics.the:
-        Type mismatch between
-            3 = 3 (Type of Refl)
-        and
-            2 = 3 (Expected type)
-        
-        Specifically:
-            Type mismatch between
-                3
-            and
-                2
-    \end{code}
-    If we try to instantiate \texttt{Refl} using elements which are not reflexive, the type-checker complains and tells us that it does not make sense and so we cannot create a \texttt{Refl} from things which are not reflexive. The \texttt{Refl} type can be used to prove that things are equal. In order to prove the opposite, that things cannot be equal, we use a different data type.
+%\section{The \texttt{(=)} data type}
+%    \begin{code}[label={des:refl-concept}, caption={The concept of an equality data type}]
+%            data (=) : a -> b -> Type where
+%                Refl : x = x
+%    \end{code}
+%        
+%    A very useful pre-defined data type is the \texttt{(=)} data type. It is not quite defined as a data type since `\texttt{=}' is a reserved symbol, instead it is part of the \Idris syntax. It is still a data type, just defined at a lower level of the language than the \texttt{data} construct. Its constructor \texttt{Refl} is short for `reflexive'. Reflexivity is a mathematical concept stating that every element in a set is related to itself. In logic, one would write $\forall x \in X : x R x$ where $X$ is a set of elements $x$ and $R$ is a binary relation. This further means that \texttt{=} also must be symmetric and transitive: if $x = y$ then $y = x$; and if $x = y$ and $y = z$ then $x = z$. In short, if two elements are reflexive, this means they are the same element. \textbf{[correct?]}
+%        
+%    \begin{code}[label={des:refl-egs}, caption={Examples of reflexivity}]
+%            Idris> the ("World" = "World") Refl
+%            Refl : "World" = "World"
+%            
+%            
+%            Idris> the (True = True) Refl
+%            Refl : True = True
+%            
+%            
+%            Idris> the (1 + 2 + 3 = 6) Refl
+%            Refl : 6 = 6
+%    \end{code}
+%    At the \Idris prompt, we can use the \texttt{the} function to create some example instances of \texttt{Refl}. The last example shows that \Idris evaluates the sides of a type before trying to construct the \texttt{Refl}.
+%        
+%    \newpage
+%        
+%    \begin{code}[label={des:not-refl}, caption={Things that are not reflexive}, escapeinside={(*}{*)}]
+%    Idris> the ("Foo" = "Bar") Refl
+%    (input):1:1-24:When checking argument value to function
+%    Prelude.Basics.the:
+%        Type mismatch between
+%            x = x (Type of Refl)
+%        and
+%            "Foo" = "Bar" (Expected type)
+%    
+%        Specifically:
+%            Type mismatch between
+%                "Foo"
+%            and
+%                "Bar"
+%    
+%    Idris> the (True = False) Refl
+%    (input):1:1-23:When checking argument value to function
+%    Prelude.Basics.the:
+%        Type mismatch between
+%            x = x (Type of Refl)
+%        and
+%            True = False (Expected type)
+%    
+%        Specifically:
+%            Type mismatch between
+%                True
+%            and
+%                False
+%    
+%    
+%    Idris> the (2 = 3) Refl
+%    (input):1:1-16:When checking argument value to function
+%    Prelude.Basics.the:
+%        Type mismatch between
+%            3 = 3 (Type of Refl)
+%        and
+%            2 = 3 (Expected type)
+%        
+%        Specifically:
+%            Type mismatch between
+%                3
+%            and
+%                2
+%    \end{code}
+%    If we try to instantiate \texttt{Refl} using elements which are not reflexive, the type-checker complains and tells us that it does not make sense and so we cannot create a \texttt{Refl} from things which are not reflexive. The \texttt{Refl} type can be used to prove that things are equal. In order to prove the opposite, that things cannot be equal, we use a different data type.
 
 \section{The \texttt{Void} data type and the \texttt{void} function}
     The \texttt{Void} data type expresses the impossibility of something happening.
