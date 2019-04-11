@@ -8,5 +8,6 @@
                                  (MkEvald (Lit 1) 1)
                                  (Yes Refl))
                              True)
-                   (No absurd))]) : (List (String, Nat), List Assertion)
+                   (No absurd))]) :
+(List (String, Nat), List Assertion)
 

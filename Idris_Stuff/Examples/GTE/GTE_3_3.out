@@ -3,6 +3,7 @@
                    (Lit 3)
                    (MkEvald (Lit 3) 3)
                    (MkEvald (Lit 3) 3)
-                   (Yes (LTESucc (LTESucc (LTESucc LTEZero)))))]) :
+                   (Yes (LTESucc (LTESucc
+                            (LTESucc LTEZero)))))]) :
 (List (String, Nat), List Assertion)
 

@@ -3,5 +3,6 @@
                    (Lit 1)
                    (MkEvald (Lit 0) 0)
                    (MkEvald (Lit 1) 1)
-                   (Yes MkNEqL))]) : (List (String, Nat), List Assertion)
+                   (Yes MkNEqL))]) :
+(List (String, Nat), List Assertion)
 

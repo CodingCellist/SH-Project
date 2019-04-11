@@ -125,11 +125,28 @@ data BEvald : BooleanExpression -> Nat -> Type where
     MkBEvald : (x : BooleanExpression) -> (y : Bool) -> BEvald x y
         \end{code}
         \texttt{BEvald} works like \texttt{Evald} except for boolean expressions and values. It is a data type constructed from a \texttt{BooleanExpression} and a \texttt{Bool}. Like \texttt{eval}, the \texttt{beval} function only evaluates the value of the boolean expression, it does not provide a proof that the expression evaluates to that boolean. The \texttt{BEval} type is a proof that the boolean expression \texttt{x} evaluates to the boolean \texttt{y}.
-        \\
         
-        The less-than-or-equals operator, \texttt{LTE}, is the only operator defined from the ground up, as the other similar operators (i.e. \texttt{LT}, \texttt{GTE}, and \texttt{GT}) can be defined from it. Strictly less-than, \texttt{LT}, can be defined from less-than-or-equals as follows: if the successor of a number $m$ is LTE to another number $n$, then $m$ is strictly less-than $n$; $(m + 1) \leq n \Rightarrow m < n$.
+    \subsection{The \texttt{LTE} operator}\label{des:tp:lte}
+        The less-than-or-equals operator, \texttt{LTE}, is the only operator defined in the \Idris prelude, as the other similar operators (i.e. \texttt{LT}, \texttt{GTE}, and \texttt{GT}) can be defined from it.
+        
+        \begin{code}[caption={\texttt{LT} can be defined based on \texttt{LTE}}]
+        isLT : (m : Nat) -> (n : Nat) -> Dec (LTE (S m) n)
+        isLT m n = isLTE (S m) n
+        \end{code}
+        
+        Strictly less-than, \texttt{LT}, can be defined from less-than-or-equals as follows: if the successor of a number $m$ is LTE to another number $n$, then $m$ is strictly less-than $n$; $(m + 1) \leq n \Rightarrow m < n$.
+        
+        \begin{code}[caption={\texttt{GTE} can be defined based on \texttt{LTE}}]
+        isGTE : (m : Nat) -> (n : Nat) -> Dec (LTE n m)
+        isGTE m n = isLTE n m
+        \end{code}
         
         Greater-than-or-equals, \texttt{GTE}, can be defined from less-than-or-equals by simply swapping the operands: if a number $n$ is LTE to a number $m$ then $m$ is greater-than-or-equal to $n$; $n \leq m \Rightarrow m \geq n$.
+        
+        \begin{code}[caption={\texttt{GT} can be defined based on \texttt{LTE}}]
+        isLT : (m : Nat) -> (n : Nat) -> Dec (LTE (S n) m)
+        isLT m n = isLTE (S n) m
+        \end{code}
         
         Finally, strictly greater-than, \texttt{GT}, can be defined as a `combination' of the definitions of \texttt{LT} and \texttt{GTE}: if the successor of a number $n$ is LTE to a number $m$ then $m$ is strictly greater-than to $n$; $(n + 1) \leq m \Rightarrow m > n$.
         \\

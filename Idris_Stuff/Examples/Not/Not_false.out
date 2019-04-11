@@ -8,5 +8,6 @@
                                  (MkEvald (Lit 1) 1)
                                  (No ZnotS))
                              False)
-                   (Yes MkBNot))]) : (List (String, Nat), List Assertion)
+                   (Yes MkBNot))]) :
+(List (String, Nat), List Assertion)
 

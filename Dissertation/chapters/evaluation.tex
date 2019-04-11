@@ -223,7 +223,7 @@ Idris> mkCertificate neq_3_3
         
     \newpage
     
-    \subsection{The \texttt{LTE} Operator}
+    \subsection{The \texttt{LTE} Operator}\label{evaln:ops:lte}
         \lstinputlisting[label={evaln:ops:lte-0-0}, caption={A C program which requires $0 \leq 0$}]{"../Idris_Stuff/Examples/LTE/LTE_0_0.c"}
         
         This C program captures the essential structure of a program requiring that a property be less than or equal to another. It has a function, two properties compared by the less-than-or-equals (LTE) operator, and the \texttt{assert} annotation.
@@ -244,7 +244,6 @@ Idris> mkCertificate lte_0_1
         \idrisinput{"../Idris_Stuff/Examples/LTE/LTE_0_1.out"}
         
         The certificate created by asserting $0 \leq 1$ is identical (apart from the `1'-literal) due to it still involving zero on the left-hand side.
-        \todo{explain how other LTE-Zero proofs relate}
         
         \lstinputlisting[caption={A C program which requires $1 \leq 1$}]{"../Idris_Stuff/Examples/LTE/LTE_1_1.c"}
         
@@ -276,7 +275,7 @@ Idris> mkCertificate lte_1_1
         The resulting model this time contains two non-zero literals (1 and 3 respectively), their evaluation over a given environment, and a decidable proof that the left is LTE to the right.
         
         \begin{code}
-            Idris> mkCertificate lte_1_3
+Idris> mkCertificate lte_1_3
         \end{code}
         \idrisinput{"../Idris_Stuff/Examples/LTE/LTE_1_3.out"}
         
@@ -307,7 +306,7 @@ Idris> mkCertificate lte_1_0
         
         \newpage
         
-        \lstinputlisting[caption={A C program requiring $3 \leq 1$}]{"../Idris_Stuff/Examples/LTE/LTE_3_1.c"}
+        \lstinputlisting[label={evaln:ops:lte-3-1}, caption={A C program requiring $3 \leq 1$}]{"../Idris_Stuff/Examples/LTE/LTE_3_1.c"}
         
         Changing the false expression such that both numbers are greater than 0, we should get more recursive steps to prove that they cannot be LTE to each other.
         
@@ -326,9 +325,35 @@ Idris> mkCertificate lte_3_1
         \\
         
         With these examples, covering the base case (0), its immediate successor (1), and numbers larger than this (where recursion is used), we have showed that the \texttt{LTE} operator works as intended.
+   
+   \subsection{The \texttt{LT}, \texttt{GTE}, and \texttt{GT} operators}\label{evaln:ops:lt-gte-gt}
+        For the operators related to \texttt{LTE}, i.e. \texttt{LT}, \texttt{GTE}, and \texttt{GT}, the examples are identical to those for \texttt{LTE} apart from the operator used in the C code. The \texttt{LTE} operator is the crucial one to have proven to work correctly since it is used to define the similar operators (as explained in Section \ref{des:tp:lte}). Below is the output of a couple of examples from the other operators, to show that \texttt{LTE} really is used to define these. Since we have shown \texttt{LTE} to work correctly, all the related operators also work correctly. The complete examples for the \texttt{LT}, \texttt{GTE}, and \texttt{GT} operators can be found in appenices \ref{app:evaln:ops:lt}, \ref{app:evaln:ops:gte}, and \ref{app:evaln:ops:gt} respectively.
         
-        \todo{put the other ops in appendix}
-        \todo{explain why the others are in an appendix}
+        \idrisinput{"../Idris_Stuff/Examples/LT/LT_0_1.out"}
+        
+        The proof recurses on the successor of the left-hand side (i.e. \texttt{S Z}, 1), using the \texttt{LTESucc} and \texttt{LTEZero}, and thereby proves that since 1 is LTE to 1, then 0 must be LT 1.
+        
+        \idrisinput{"../Idris_Stuff/Examples/LT/LT_0_0.out"}
+        
+        The proof that 0 cannot be LT 0 is done using the \texttt{succNotLTEzero} proof, i.e. since the successor of the left-hand side has to be LTE than 0 (which is impossible), then 0 cannot be LT 0.
+        
+        \idrisinput{"../Idris_Stuff/Examples/GTE/GTE_0_0.out"}
+        
+        The proof for $0 \geq 0$ is \texttt{LTEZero}, i.e. since the right-hand side is zero and any number is LTE to zero, then the left-hand side has to be GTE to the right.
+        
+        \idrisinput{"../Idris_Stuff/Examples/GTE/GTE_0_1.out"}
+        
+        The proof that 0 cannot be GTE to 1 is done using \texttt{succNotLTEzero} on the right-hand side of the expression. The right-hand side contains a successor, and since no successor can be LTE to zero the right-hand side cannot be LTE to the left. And so the left-hand side cannot be GTE to the right.
+        
+        \idrisinput{"../Idris_Stuff/Examples/GT/GT_3_1.out"}
+        
+        The proof of $3 > 1$ is done by proving that 2 is LTE to 3. This can be seen in the multiple recursive steps of \texttt{LTESucc} applied to the \texttt{LTEZero} proof. Since 2 reaches 0 before or at the same time as 3 and all numbers are LTE to 0, 2 must be LTE to 3 and so 3 must be GT 1 (see Section \ref{des:tp:lte}).
+        
+        \newpage
+        
+        \idrisinput{"../Idris_Stuff/Examples/GT/GT_3_3.out"}
+        
+        The proof that 3 cannot be GT 3 is done by showing that the successor of the right-hand side of the expression (i.e. \texttt{S 3}, 4) cannot be LTE to 3 (see Section \ref{des:tp:lte}). This is done similar to the example in Listing \ref{evaln:ops:lte-3-1}. Since 4 cannot be LTE to 3, 3 cannot be GT 3.
     
     \subsection{The \texttt{Or} Operator}\label{evaln:ops:or}
         Since `or' operates on booleans, we needed two \texttt{BooleanExpression}s: one \texttt{True} and one \texttt{False} . We used $1 = 1$ for \texttt{True} and $0 = 1$ for \texttt{False}
@@ -427,6 +452,8 @@ Idris> mkCertificate lte_3_1
         
         The corresponding \Idris model only has one boolean expression which should evaluate to \texttt{False} (Listing \ref{evaln:ops:or:false}), its evaluation over a given environment, and a proof of whether its negation is true.
         
+        \newpage
+        
         \idrisinput{"../Idris_Stuff/Examples/Not/Not_false.out"}
         
         Making the certificate, we can see that the boolean expression was evaluated to \texttt{False} (in the \texttt{BEvald}) and that the final argument is a \texttt{Yes MkBNot}. This shows that the operator returns \texttt{True} when the input is \texttt{False}, as it should.
@@ -453,12 +480,10 @@ Idris> mkCertificate lte_3_1
 
 
 \section{Simple Programs}\label{evaln:progs}
+    \todo{make more of these!}
     \subsection{Loop accumulation}
         \lstinputlisting[caption={A C program whose loop has a timing requirement.}]{"../Idris_Stuff/Examples/Advanced/Loop.c"}
         
         \idrisinput{"../Idris_Stuff/Examples/Advanced/Loop.idr"}
-        \todo{fix the out-of-bounds}
-        
-        \newpage
         
         \idrisinput{"../Idris_Stuff/Examples/Advanced/Loop.out"}
