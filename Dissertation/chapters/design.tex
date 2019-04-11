@@ -13,7 +13,7 @@
     	  a stack-based language)?
 \end{itemize}
 
-The first section (\ref{des:tp-dsl}) focuses on describing existing work done by the \textsc{TeamPlay} project \cite{teamplay:d1.1}.
+The first section (\ref{des:tp-dsl}) focuses on describing existing work done by the \textsc{TeamPlay} project \cite{teamplay:d1.1}. The remaining sections (\ref{des:neq}, \ref{des:or}, and \ref{des:not}) describe extensions of the \textsc{TeamPlay} system, implemented by me.
 
 
 \section{The TeamPlay Project}\label{des:tp-dsl}
@@ -41,6 +41,14 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
             \end{tabular}
             \caption{C to DSL mappings}
         \end{table}
+    
+        \begin{code}[label={des:assertion}, caption={The \texttt{Assertion} data type}]
+            data Assertion  : Type where
+                MkAssertion : BooleanExpression -> Assertion
+        \end{code}
+    
+        Contracts/Certificates consists of one or more \texttt{Assertion}.
+        These are created through the \texttt{MkAssertion} constructor. It takes a \texttt{BooleanExpression} and returns an \texttt{Assertion} based on it. \texttt{BooleanExpression}s are created by applying operators to \texttt{NumericExpression}s or existing \texttt{BooleanExpression}s.
     
     \newpage
     
@@ -203,7 +211,7 @@ isNEq (S k) (S j) = case isNEq k j of
     Given an environment and an inequality which has been proven to hold, the inequality evaluates to \texttt{True}. On the other hand, if the inequality has been proven impossible to hold, then it evaluates to \texttt{False}.
     
     
-\section{Boolean Disjunction (\texttt{Or})}
+\section{Boolean Disjunction (\texttt{Or})}\label{des:or}
     The boolean operators are made up of different stages: Constructors for boolean expressions which evaluate to true, the operators keywords, an evaluation of the boolean expression, and a proof of what the boolean expression evaluates to. Boolean conjunction (\texttt{And}) was already implemented. I used it as a starting point for how to implement \texttt{Or}, as they are somewhat similar.
     
     \begin{code}[label={des:tyand-or}, caption={The constructors for true \texttt{And} and \texttt{Or} statements}, escapeinside={(*}{*)}]
@@ -248,7 +256,7 @@ isNEq (S k) (S j) = case isNEq k j of
 
     \texttt{And} takes 5 arguments: two boolean expressions, the proofs of what these evaluated to, and decidable proof of whether those arguments would cause the \texttt{And} to evaluate to true. From the constructors of \texttt{TyAnd} (Listing \ref{des:tyand-or}), this can only be constructed when both arguments are \texttt{True}, i.e. when the \texttt{And} would evaluate to \texttt{True}. Based on this, \texttt{And} returns a new \texttt{BooleanExpression} (which can then be evaluated using the \texttt{beval} function). \texttt{Or} takes the same first 4 arguments. The difference being that its 5$^{th}$ argument is a decidable proof of whether those arguments would cause the \texttt{Or} to evaluate to \texttt{True}. From the constructors of \texttt{TyOr} (Listing \ref{des:tyand-or}), this can only be constructed if one or both of the arguments is \texttt{True}, i.e. the \texttt{Or} would evaluate to \texttt{True}. Based on its arguments, \texttt{Or} then returns a new \texttt{BooleanExpression} (which can then be evaluated using the \texttt{beval} function). Both \texttt{And} and \texttt{Or} rely on \texttt{Dec}, i.e. that a proof that it cannot evaluate to \texttt{True} exists.
     
-    \begin{code}[label={des:or-uninh}, caption={Impossible \texttt{And} cases}]
+    \begin{code}[label={des:and-uninh}, caption={Impossible \texttt{And} cases}]
         implementation Uninhabited (TyAnd False True) where
             uninhabited MkAnd impossible
             
@@ -291,7 +299,7 @@ isNEq (S k) (S j) = case isNEq k j of
     The evaluation of a disjunction over an environment is \texttt{True} given a disjunction which has been proven to hold, and \texttt{False} given a disjunction which has been proven to be impossible to hold.
 
 
-\section{Boolean Negation (\texttt{Not})}
+\section{Boolean Negation (\texttt{Not})}\label{des:not}
     Boolean negation was fairly simple to implement. As with the other operators, I initially declared a custom data type to capture what negations are valid.
     
     \begin{code}[caption={The case where \texttt{Not} would evaluate to \texttt{True}}]

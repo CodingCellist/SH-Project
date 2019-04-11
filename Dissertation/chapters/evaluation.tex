@@ -25,7 +25,7 @@ In order to be able to use the existing operators, and the ones I had implemente
         
 		\idrisinput{"../Idris_Stuff/Examples/Eq/Eq_0_0.idr"}
         
-        Transforming the C annotation into \Idris, we get the model detailed above. The model `\texttt{eq\_0\_0} is a \texttt{CLang} consisting of an assertion named `\texttt{eq\_0\_0\_assert}' and nothing more (\texttt{Halt}). This assertion contains two literals \texttt{x} and \texttt{y} both carrying the value 0, their evaluation \texttt{x'} and \texttt{y'} over a given environment \texttt{env}, and a decidable proof \texttt{prf} that the numbers are equal. Using these, we can use \texttt{MkAssertion} (\todo{listing}) to construct an instance of \texttt{Assertion} (\todo{listing}).
+        Transforming the C annotation into \Idris, we get the model detailed above. The model `\texttt{eq\_0\_0} is a \texttt{CLang} consisting of an assertion named `\texttt{eq\_0\_0\_assert}' and nothing more (\texttt{Halt}). This assertion contains two literals \texttt{x} and \texttt{y} both carrying the value 0, their evaluation \texttt{x'} and \texttt{y'} over a given environment \texttt{env}, and a decidable proof \texttt{prf} that the numbers are equal. Using these, we can use \texttt{MkAssertion} to construct an instance of \texttt{Assertion} (Listing \ref{des:assertion}).
         
         \newpage
         
@@ -425,7 +425,7 @@ Idris> mkCertificate lte_3_1
         
         \idrisinput{"../Idris_Stuff/Examples/Not/Not_false.idr"}
         
-        The corresponding \Idris model only has one boolean expression which should evaluate to \texttt{False} (Listing \ref{app:evaln:ops:or:false}), its evaluation over a given environment, and a proof of whether its negation is true.
+        The corresponding \Idris model only has one boolean expression which should evaluate to \texttt{False} (Listing \ref{evaln:ops:or:false}), its evaluation over a given environment, and a proof of whether its negation is true.
         
         \idrisinput{"../Idris_Stuff/Examples/Not/Not_false.out"}
         
