@@ -158,14 +158,14 @@ data BEvald : BooleanExpression -> Nat -> Type where
     \texttt{Eq} had already been implemented by the \textsc{TeamPlay} project, using the built-in \texttt{(=)} data type and the \texttt{DecEq} interface, as part of the D1.1 deliverable \cite{teamplay:d1.1}.
     
     \subsection{The \texttt{(=)} data type}
-    \begin{code}[label={des:refl-concept}, caption={The concept of an equality data type}]
+        \begin{code}[label={des:refl-concept}, caption={The concept of an equality data type}]
         data (=) : a -> b -> Type where
-        Refl : x = x
-    \end{code}
+            Refl : x = x
+        \end{code}
     
-    A very useful pre-defined data type is the \texttt{(=)} data type. It is not quite defined as a data type since `\texttt{=}' is a reserved symbol, instead it is part of the \Idris syntax. It is still a data type, just defined at a lower level of the language than the \texttt{data} construct. Its constructor \texttt{Refl} is short for `reflexive'. Reflexivity is a mathematical concept stating that every element in a set is related to itself. In logic, one would write $\forall x \in X : x R x$ where $X$ is a set of elements $x$ and $R$ is a binary relation. This further means that \texttt{=} also must be symmetric and transitive: if $x = y$ then $y = x$; and if $x = y$ and $y = z$ then $x = z$. In short, if two elements are reflexive, this means they are the same element. \textbf{[correct?]}
+        A very useful pre-defined data type is the \texttt{(=)} data type. It is not quite defined as a data type since `\texttt{=}' is a reserved symbol, instead it is part of the \Idris syntax. It is still a data type, just defined at a lower level of the language than the \texttt{data} construct. Its constructor \texttt{Refl} is short for `reflexive'. Reflexivity is a mathematical concept stating that every element in a set is related to itself. In logic, one would write $\forall x \in X : x R x$ where $X$ is a set of elements $x$ and $R$ is a binary relation. This further means that \texttt{=} also must be symmetric and transitive: if $x = y$ then $y = x$; and if $x = y$ and $y = z$ then $x = z$. In short, if two elements are reflexive, this means they are the same element. \textbf{[correct?]}
     
-    \begin{code}[label={des:refl-egs}, caption={Examples of reflexivity}]
+        \begin{code}[label={des:refl-egs}, caption={Examples of reflexivity}]
         Idris> the ("World" = "World") Refl
         Refl : "World" = "World"
         
@@ -176,72 +176,74 @@ data BEvald : BooleanExpression -> Nat -> Type where
         
         Idris> the (1 + 2 + 3 = 6) Refl
         Refl : 6 = 6
-    \end{code}
-    At the \Idris prompt, we can use the \texttt{the} function to create some example instances of \texttt{Refl}. The last example shows that \Idris evaluates the sides of a type before trying to construct the \texttt{Refl}.
+        \end{code}
+        At the \Idris prompt, we can use the \texttt{the} function to create some example instances of \texttt{Refl}. The last example shows that \Idris evaluates the sides of a type before trying to construct the \texttt{Refl}.
     
-    \newpage
+        \newpage
     
-    \begin{code}[label={des:not-refl}, caption={Things that are not reflexive}, escapeinside={(*}{*)}]
+        \begin{code}[label={des:not-refl}, caption={Things that are not reflexive}, escapeinside={(*}{*)}]
         Idris> the ("Foo" = "Bar") Refl
         (input):1:1-24:When checking argument value to function
         Prelude.Basics.the:
-        Type mismatch between
-        x = x (Type of Refl)
-        and
-        "Foo" = "Bar" (Expected type)
+            Type mismatch between
+                x = x (Type of Refl)
+            and
+                "Foo" = "Bar" (Expected type)
         
-        Specifically:
-        Type mismatch between
-        "Foo"
-        and
-        "Bar"
+            Specifically:
+                Type mismatch between
+                    "Foo"
+                and
+                    "Bar"
+        
         
         Idris> the (True = False) Refl
         (input):1:1-23:When checking argument value to function
         Prelude.Basics.the:
-        Type mismatch between
-        x = x (Type of Refl)
-        and
-        True = False (Expected type)
+            Type mismatch between
+                x = x (Type of Refl)
+            and
+                True = False (Expected type)
         
-        Specifically:
-        Type mismatch between
-        True
-        and
-        False
+            Specifically:
+                Type mismatch between
+                    True
+                and
+                    False
         
         
         Idris> the (2 = 3) Refl
         (input):1:1-16:When checking argument value to function
         Prelude.Basics.the:
-        Type mismatch between
-        3 = 3 (Type of Refl)
-        and
-        2 = 3 (Expected type)
-        
-        Specifically:
-        Type mismatch between
-        3
-        and
-        2
-    \end{code}
-    If we try to instantiate \texttt{Refl} using elements which are not reflexive, the type-checker complains and tells us that it does not make sense and so we cannot create a \texttt{Refl} from things which are not reflexive. The \texttt{Refl} type can be used to prove that things are equal. In order to prove the opposite, that things cannot be equal, we use a different data type.
+            Type mismatch between
+                3 = 3 (Type of Refl)
+            and
+                2 = 3 (Expected type)
+            
+            Specifically:
+                Type mismatch between
+                    3
+                and
+                    2
+        \end{code}
+        If we try to instantiate \texttt{Refl} using elements which are not reflexive, the type-checker complains and tells us that it does not make sense and so we cannot create a \texttt{Refl} from things which are not reflexive. The \texttt{Refl} type can be used to prove that things are equal, since it can only exist if the things truly are equal. In order to prove the opposite, that things cannot be equal, we use a different data type.
     
-    Because there is no built-in \texttt{NEq} data type, one had to be defined.
-    \begin{code}[caption={The data type used for capturing inequality}]
+    \subsection{The \texttt{TyNEq} data type}
+        Because there is no built-in \texttt{NEq} data type, I had to define one.
+        \begin{code}[label={des:neq:ty-neq}, caption={The data type used for capturing inequality}]
         data TyNEq : Nat -> Nat -> Type where
             MkNEqL   : TyNEq Z (S k)
             MkNEqR   : TyNEq (S k) Z
             MkNEqRec : TyNEq k j -> TyNEq (S k) (S j)
-    \end{code}
-    The constructors for the \texttt{TyNEq} data type describe the different ways numbers can be not equal:
-    \begin{itemize}
-        \item \textbf{The first number is zero and the second is not} -- in this case the numbers are not equal, specifically the left number is zero. Since no number can have zero as its successor, the numbers are not equal.
-        \item \textbf{The second number is zero and the first is not} -- in this case, the numbers are not equal, specifically the right number is zero. Since no number can have zero as its successor, the numbers are not equal.
-        \item \textbf{The numbers are not equal} -- in this case, the successors of the numbers must also be not equal. For example, $2 \neq 5 \rightarrow 3 \neq 6 \rightarrow 4 \neq 7$ etc.
-    \end{itemize}
-    Using the \texttt{TyNEq} data type, we can then define \texttt{NEq}.
-    \begin{code}[label={des:neq-code}, caption={The definition of \texttt{NEq}}, escapeinside={(*}{*)}]
+        \end{code}
+        The constructors for the \texttt{TyNEq} data type describe the different ways numbers can be not equal:
+        \begin{itemize}
+            \item \textbf{The first number is zero and the second is not} -- in this case the numbers are not equal, specifically the left number is zero. Since no number can have zero as its successor, the numbers are not equal.
+            \item \textbf{The second number is zero and the first is not} -- in this case, the numbers are not equal, specifically the right number is zero. Since no number can have zero as its successor, the numbers are not equal.
+            \item \textbf{The numbers are not equal} -- in this case, the successors of the numbers must also be not equal. For example, $2 \neq 5 \rightarrow 3 \neq 6 \rightarrow 4 \neq 7$ etc.
+        \end{itemize}
+        Using the \texttt{TyNEq} data type, we can then define \texttt{NEq}.
+        \begin{code}[label={des:neq-code}, caption={The definition of \texttt{NEq}}, escapeinside={(*}{*)}]
         data BooleanExprssion : Type where
             (*\vdots*)
             
@@ -252,29 +254,193 @@ data BEvald : BooleanExpression -> Nat -> Type where
                 -> Dec (TyNEq x' y')
                 -> BooleanExpression
             (*\vdots*)
-    \end{code}
+        \end{code}
     
-    \texttt{NEq} takes two numeric expressions, proofs of what they evaluate to, and a decidable proof of whether the numeric expressions are inequal. From this, \texttt{NEq} returns a \texttt{BooleanExpression} which will evaluate to \texttt{True} if the numeric expressions were not equal, and \texttt{False} otherwise. For the decidability part, we need some proof functions so that we can guarantee the inequality of numbers.
+        \texttt{NEq} takes two numeric expressions, proofs of what they evaluate to, and a decidable proof of whether the numeric expressions are inequal. From this, \texttt{NEq} returns a \texttt{BooleanExpression} which will evaluate to \texttt{True} if the numeric expressions were not equal, and \texttt{False} otherwise. For the decidability part,\linebreak
+        \texttt{Dec (TyNEq x' y')}, we need some proof functions which either prove that two numbers must be unequal or prove that they cannot possibly be.
     
-    \begin{code}[label={des:neq-uninh}, caption={Not equals cannot be constructed on 0 0}]
+    \subsection{The \texttt{Void} data type and the \texttt{void} function}
+        The \Idris prelude has a `\texttt{Void}' data type. It expresses the impossibility of something happening.
+    
+        \begin{code}[caption={The \texttt{Void} type has no constructors}]
+        data Void : type where
+        \end{code}
+        Since \texttt{Void} has no constructors, it is impossible to directly create an instance of \texttt{Void}. Therefore, if a function returns an instance of \texttt{Void}, this means that its arguments resulted in something which is impossible to create. From a logical point of view, the arguments to the function express a contradiction, and as such \texttt{Void} represents something which can only be constructed if we accept that the contradiction is true.
+        
+        \begin{code}[label={idr:zns}, caption={Zero cannot be the successor of a natural number}]
+        zeroNotSuc : (0 = S k) -> Void
+        zeroNotSuc Refl impossible
+        \end{code}
+
+        The first argument to the \texttt{zeroNotSuc} function is a reflexive equality expressing that zero is the successor of some natural number \texttt{k}. This is impossible and as such we cannot construct the \texttt{Refl}, which means that the function could return a \texttt{Void}. The `\texttt{impossible}' keyword tells the \Idris type checker that the pattern must not type check. Since we could not possibly have a \texttt{Refl : 0 = S k}, this holds.
+        
+        \newpage
+        
+        \begin{code}[caption={Invalid use of the \texttt{impossible} keyword}, escapeinside={(*}{*)}]
+        boolRefl : (b : Bool) -> (b = b)
+        boolRefl True = Refl
+        boolRefl False impossible
+        
+        
+        (*\underline{\textnormal {Compiler error:}}*)
+        
+          |
+        3 | boolRefl False impossible
+          |                ~~~~~~~~~~
+        boolRefl False is a valid case
+        \end{code}
+        The \texttt{boolRefl} function here simply shows that booleans are reflexive. If we try to use the \texttt{impossible} keyword for the \texttt{False} case, the type checker complains and tells us that it \textit{is} a valid case.
+        
+        \begin{code}[label={idr:snz}, caption={The successor of a natural number cannot be zero}]
+        sucNotZero : (S k = 0) -> Void
+        sucNotZero Refl impossible
+        \end{code}
+        Similar to stating that zero cannot be the successor of a number, we can state that no natural number \texttt{k} can have zero as its successor. If we could create a\linebreak
+        \texttt{Refl : S k = 0}, we could create an instance of \texttt{Void}. Actually, if we could create an instance of \texttt{Void}, we would be able to create an instance of any type. Or logically: if we accept a contradiction to be true, we can prove anything.
+    
+    
+        \begin{code}[caption={The \texttt{void} function}]
+        void : Void -> a
+        \end{code}
+    
+        The pre-defined \texttt{void} function captures this: given an instance of \texttt{Void}, the \texttt{void} function returns an instance of any type. This may seem like a peculiar thing to have: a function whose input cannot exist. However, if we can say that certain things \textit{cannot} happen, we can use that to say more precisely what \textit{can} happen.
+        
+        \begin{code}[label={des:no-rec}, caption={Applying a function to an impossibility does not make it possible}]
+        noRec : (contra : (k = j) -> Void) -> (S k = S j) -> Void
+        noRec contra Refl = contra Refl
+        \end{code}
+        
+        The \texttt{noRec} function takes a proof that two natural numbers are not equal and proves that their successors must then also be not equal. Given a \texttt{contra} which is a function from \texttt{(k = j)} to \texttt{Void} and a \texttt{Refl} representing\linebreak
+        \texttt{(S k = S j)}, we can use the \texttt{contra} function to return an instance of \texttt{Void}. Hence, the
+        \texttt{Refl : S k = S j} cannot exist.
+    
+    \subsection{Decidability}
+        Decidability is more specific than \texttt{Maybe}. Instead of saying that we have \texttt{Just} the value or \texttt{Nothing}, decidability allows us to express that we can always \textit{decide} whether a property holds or not for certain values.
+    
+        \begin{code}[caption={\texttt{Dec} as defined in the \Idris prelude}]
+        data Dec : (prop : Type) -> Type where
+            Yes : (prf : prop) -> Dec prop
+            No  : (contra : prop -> Void) -> Dec prop
+        \end{code}
+        The definition of \texttt{Dec} may seem similar to that of \texttt{Maybe}, specifically
+        
+        \begin{code}
+        Yes (prf : prop) -> Dec prop
+        \end{code}
+        seems very similar to
+    
+        \begin{code}
+        Just : (x : a) -> Maybe a
+        \end{code}
+        and that is because they are. Both \texttt{a} and \texttt{prop} represent the type of the element that may or may not be there. However, contrary to \texttt{Maybe}'s `\texttt{Nothing}' which simply is the absence of a value, \texttt{Dec}'s `\texttt{No}' holds a value: `\texttt{contra}'. The type of \texttt{contra} is \texttt{prop -> Void}, i.e. it is a proof that no value of the required type can exist (because if it did, we could return an instance of \texttt{Void}). This is a much stronger statement than \texttt{Nothing}. Instead of saying ``the value is not there'' we have said ``here is why the value can never be there''.
+        \\
+        
+        Using \texttt{Dec} and Listings \ref{idr:zns}, \ref{idr:snz}, and \ref{des:no-rec}, we can decidably prove equality of natural numbers.
+        
+        \begin{code}[label={des:dec-eq}, caption={Proving equality of natural numbers}]
+        decEq : (a : Nat) -> (b : Nat) -> Dec (a = b)
+        decEq Z Z = Yes Refl
+        decEq Z (S j) = No zeroNotSuc
+        decEq (S k) Z = No sucNotZero
+        decEq (S k) (S j) = case decEq k j of
+                                Yes prf   => Yes (cong prf)
+                                No contra => No (noRec contra)
+        \end{code}
+        The \texttt{decEq} function models decidable equality of natural numbers. It takes two natural numbers \texttt{a} and \texttt{b} and decidably produces whether \texttt{a} is reflexive to \texttt{b},\linebreak
+        \texttt{Dec (a = b)}. We do this by pattern matching on the input:
+        \begin{itemize}
+            \item zero and zero -- are equal, and it is trivial to construct a
+            \texttt{Refl} showing this
+            \item zero and the successor of a number -- are not equal as zero cannot
+            be the successor of a natural number, so we return \texttt{No},
+            followed by Listing \ref{idr:zns} which proves this
+            \item the successor of a number and zero -- are not equal as no number 
+            can have zero as its successor, so we return \texttt{No} followed
+            by Listing \ref{idr:snz} which proves this
+            \item the successor of a number and the successor of another number --
+            are equal if and only if the predecessors are equal, so we recurse
+            on the predecessors and test if they are equal. If they are, we
+            use the \texttt{cong} function on the proof. The \texttt{cong}
+            function simply guarantees that equality respects function
+            application. If the predecessors are not equal, we use the
+            \texttt{noRec} function to prove that their successors can also
+            not be equal.
+        \end{itemize}
+        
+        Specifying impossible inputs allows us to refine which inputs \textit{are} valid. Since this is something we commonly want to do, \Idris provides several constructs for facilitating this.
+    
+    \subsection{Expressing the impossible}
+        In Listing \ref{idr:zns} and \ref{idr:snz} we used the \texttt{impossible} keyword which tells the type checker that a pattern must not type check. We also used the \texttt{Void} data type to express that something cannot exist, and the \texttt{void} function to express that if \texttt{Void} coulb be instantiated, we could do anything.
+        
+        \begin{code}[caption={The \texttt{Uninhabited} interface}]
+        interface Uninhabited t where
+            uninhabited : t -> Void
+        \end{code}
+        
+        An interface can be thought of as a classification of types. They provide methods which must be given in an implementation of the interface using a certain type. The \texttt{Uninhabited} interface is a generalisation of types which cannot be constructed.
+        
+        \begin{code}[caption={2 cannot equal 3}]
+        implementation Uninhabited (2 = 3) where
+            uninhabited Refl impossible
+        \end{code}
+
+        If a type cannot exist (like \texttt{Refl : 2 = 3}), we can provide an implementation of the \texttt{Uninhabited} interface for it.
+        
+        \begin{code}[caption={The \texttt{uninhabited} function}]
+        uninhabited : Uninhabited t => t -> Void
+        \end{code}
+    
+        The \texttt{uninhabited} function, which is required by an implementation of\linebreak
+        \texttt{Uninhabited}, takes a thing which implements the \texttt{Uninhabited} interface and produces an instance of \texttt{Void}, i.e. if \texttt{uninhabited} can ever be given its argument \texttt{t}, we must have constructed a contradiction.
+        
+        \begin{code}[caption={The \texttt{absurd} function}]
+        absurd : Uninhabited t => (h : t) -> a
+        absurd h = void (uninhabited h)
+        \end{code}
+        
+        Using \texttt{uninhabited} and \texttt{void}, the \Idris prelude defines the \texttt{absurd} function. Recalling that \texttt{uninhabited} constructs an instance of \texttt{Void} and that \texttt{void} constructs anything from this, \texttt{absurd} essentially states that the existence of any instance of something which implements \texttt{Uninhabited} is absurd as it would mean anything, any type, could be created.
+        
+        \begin{code}[caption={Example pre-defined implementations of \texttt{Uninhabited}}]
+        implementation Uninhabited (True = False) where
+            uninhabited Refl impossible
+        
+        implementation Uninhabited (False = True) where
+            uninhabited Refl impossible
+        \end{code}
+        \Idris comes with many implementations of \texttt{Uninhabited} already defined. Two examples of this are the proofs that \texttt{True} cannot be \texttt{False}, and \texttt{False} cannot be \texttt{True}
+        
+        \begin{code}[caption={Using \texttt{absurd}}]
+        isTrue : (b : Bool) -> Dec (b = True)
+        isTrue True  = Yes Refl
+        isTrue False = No absurd
+        
+        isFalse : (b : Bool) -> Dec (b = False)
+        isFalse True  = No absurd
+        isFalse False = Yes Refl
+        \end{code}
+        
+        One usage of \texttt{Uninhabited} could be to decidably determine whether a boolean is \texttt{True} or \texttt{False}. If the boolean \textit{is} the correct instance, then we simply return a \texttt{Yes Refl}. And if the boolean is \textit{not} the correct instance, we return \texttt{No absurd} which shows that it cannot be the same boolean because if it was, we could construct any type. \texttt{No absurd} shows that we have had a contradiction.
+    
+    \subsection{Impossible inequalities}    
+        \begin{code}[label={des:neq-uninh}, caption={Not equals cannot be constructed on 0 0}]
         implementation Uninhabited (TyNEq Z Z) where
             uninhabited MkNEqL   impossible
             uninhabited MkNEqR   impossible
             uninhabited MkNEqRec impossible
-    \end{code}
-
-    If we try to construct a \texttt{TyNEq} from 0 0, i.e. try to prove $0 \neq 0$, this is impossible: \texttt{MkNEqL} requires only the left argument to be zero, \texttt{MkNEqR} requires only the right argument to be zero, and \texttt{MkNEqRec} requires the successors to be not equal (i.e. $1 \neq 1$, $2 \neq 2$, etc.). So \texttt{TyNEq 0 0} is uninhabited as we cannot use any of its constructors to create that type. For non-zero equal numbers, we need to take a similar approach to \texttt{MkNEqRec}.
+        \end{code}
     
-    \begin{code}[label={des:neq-sneqimp}, caption={Proving inequality of numbers is impossible}]
+        If we try to construct a \texttt{TyNEq} from 0 0, i.e. try to prove $0 \neq 0$, this is impossible: \texttt{MkNEqL} requires only the left argument to be zero, \texttt{MkNEqR} requires only the right argument to be zero, and \texttt{MkNEqRec} requires the successors to be not equal (i.e. $1 \neq 1$, $2 \neq 2$, etc.). So \texttt{TyNEq 0 0} is uninhabited as we cannot use any of its constructors to create that type. For non-zero equal numbers, we need to take a similar approach to \texttt{MkNEqRec} (Listing \ref{des:neq:ty-neq}).
+        
+        \begin{code}[label={des:neq-sneqimp}, caption={Proving inequality of numbers is impossible}]
         succNEqImpossible : (contra : TyNEq k j -> Void) ->
                             TyNEq (S k) (S j) -> Void   
         succNEqImpossible contra (MkNEqRec x) = contra x
-    \end{code}
-
-    The \texttt{succNEqImpossible} function takes a proof that \texttt{TyNEq k j} cannot be constructed and proves that in that case, \texttt{TyNEq (S k) (S j)} can also not be constructed. What this does is maintain that if two numbers are \textit{not} not equal, i.e. that they \textit{are} equal, then so are their successors.\\
-    With constructors for the valid \texttt{TyNEq} cases, and proofs why the invalid cases are impossible, we can construct the decidability rules for \texttt{TyNEq}. These will allow us to construct the \texttt{Dec (TyNEq x' y')} part from Listing \ref{des:neq-code}.
+        \end{code}
     
-    \begin{code}[caption={Decidability rules for \texttt{NEq}}]
+        The \texttt{succNEqImpossible} function takes a proof that \texttt{TyNEq k j} cannot be constructed and proves that in that case, \texttt{TyNEq (S k) (S j)} can also not be constructed. What this does is maintain that if two numbers are \textit{not} not equal, i.e. that they \textit{are} equal, then so are their successors.\\
+        With constructors for the valid \texttt{TyNEq} cases, and proofs why the invalid cases are impossible, we can construct the decidability rules for \texttt{TyNEq}. These will allow us to construct the \texttt{Dec (TyNEq x' y')} part from Listing \ref{des:neq-code}.
+        
+        \begin{code}[caption={Decidability rules for \texttt{NEq}}]
 isNEq : (n1 : Nat) -> (n2 : Nat) -> Dec (TyNEq n1 n2)
 isNEq Z Z         = No absurd
 isNEq Z (S k)     = Yes MkNEqL
@@ -282,22 +448,22 @@ isNEq (S k) Z     = Yes MkNEqR
 isNEq (S k) (S j) = case isNEq k j of
                         Yes prf   => Yes (MkNEqRec prf)
                         No contra => No (succNEqImpossible contra)
-    \end{code}
-    
-    If the \texttt{isNEq} is given two zeros as its arguments, then it is absurd to construct an inequality (as described in Listing \ref{des:neq-uninh}). If either the first or second argument is zero and the other is not, then the inequality is trivial as no natural number can have \texttt{Z} as its successor. In the final case, where both numbers are non-zero, we recurse on their predecessors. If the predecessors are not equal (by one of them being zero and the other not), then the numbers themselves must also be not equal. On the other hand, if it was impossible to prove the predecessors unequal, we use \texttt{succNEqImpossible} to maintain/prove that it is also impossible for the successors to be unequal.
-    \\\par
-    
-    With the \texttt{eval} function and the \texttt{Evald} type giving us the numbers, and the decidability rules through the implementation of the \texttt{Uninhabited} interface and using the \texttt{succNEqImpossible} function, we have all the parts needed for the \texttt{NEq} constructor. Hence, we can prove inequality between numbers.
-    
-    \begin{code}[caption={Evaluating \texttt{NEq} over an environment}, escapeinside={(*}{*)}]
+        \end{code}
+        
+        If the \texttt{isNEq} is given two zeros as its arguments, then it is absurd to construct an inequality (as described in Listing \ref{des:neq-uninh}). If either the first or second argument is zero and the other is not, then the inequality is trivial as no natural number can have \texttt{Z} as its successor. In the final case, where both numbers are non-zero, we recurse on their predecessors. If the predecessors are not equal (by one of them being zero and the other not), then the numbers themselves must also be not equal. On the other hand, if it was impossible to prove the predecessors unequal, we use \texttt{succNEqImpossible} to maintain/prove that it is also impossible for the successors to be unequal.
+        \\\par
+        
+        With the \texttt{eval} function and the \texttt{Evald} type giving us the numbers, and the decidability rules through the implementation of the \texttt{Uninhabited} interface and using the \texttt{succNEqImpossible} function, we have all the parts needed for the \texttt{NEq} constructor. Hence, we can prove inequality between numbers.
+        
+        \begin{code}[caption={Evaluating \texttt{NEq} over an environment}, escapeinside={(*}{*)}]
         beval : (env : Env) -> (b : BooleanExpression) -> Bool
         (*\vdots*)
         beval env (NEq x y x' y' (Yes prf))   = True
         beval env (NEq x y x' y' (No contra)) = False
         (*\vdots*)
-    \end{code}
-
-    Given an environment and an inequality which has been proven to hold, the inequality evaluates to \texttt{True}. On the other hand, if the inequality has been proven impossible to hold, then it evaluates to \texttt{False}.
+        \end{code}
+    
+        Given an environment and an inequality which has been proven to hold, the inequality evaluates to \texttt{True}. On the other hand, if the inequality has been proven impossible to hold, then it evaluates to \texttt{False}.
     
     
 \section{Boolean Disjunction (\texttt{Or})}\label{des:or}
@@ -389,7 +555,7 @@ isNEq (S k) (S j) = case isNEq k j of
 
 
 \section{Boolean Negation (\texttt{Not})}\label{des:not}
-    Boolean negation was fairly simple to implement. As with the other operators, I initially declared a custom data type to capture what negations are valid.
+    As with the other operators, we need to have a data type to capture correct things. In this case, which negations are valid.
     
     \begin{code}[caption={The case where \texttt{Not} would evaluate to \texttt{True}}]
             data TyBNot : Bool -> Type where
