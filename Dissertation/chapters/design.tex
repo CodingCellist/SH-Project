@@ -23,7 +23,6 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
             \includegraphics[width=\textwidth]{diagrams/process.png}
             \caption{The process of creating a certified C program}
         \end{figure}
-        \todo{describe mkCertificate}
         When writing C programs for embedded systems, the programmer might want to capture extra-functional properties like the time taken or the energy consumed. Furthermore, the programmer may want to have provable guarantees that these properties of the program hold. This is done through contracts which can be proven using the \Idris proof system. The Contract Specification Language (CSL) defined by the \textsc{TeamPlay} project \cite{teamplay:d1.1} lets the programmer annotate existing C code to express properties like the worst time cost of a loop or function, using \texttt{\_\_teamplay\_worst\_time}, and assert these, using \texttt{\_\_teamplay\_assert}. This results in a program whose extra-functional properties can be certified to hold. Since the CSL functions adhere to the C99 function naming scheme, the programmer does not need to change tools, libraries, compiler, or learn a new language. Instead, the annotations seamlessly integrate with the existing code, without disturbing its operation in any way. Once the code has been annotated, it can then be passed through a C parser which extracts the annotations and constructs a model in an \Idris-based DSL. This model is then passed through the \texttt{mkCertificate} function which constructs a contract/certificate specifying which properties do or do not hold, by using the \Idris proof system.
         \begin{table}
             \centering
@@ -42,6 +41,8 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
             \end{tabular}
             \caption{C to DSL mappings}
         \end{table}
+    
+    \newpage
     
     \subsection{Numeric Operators and Numeric Expressions}
         The numeric operators all take two arguments, their evaluation, a proof concerning what the operator evaluates to, and returns a \texttt{BooleanExpression}.
@@ -118,9 +119,14 @@ data BEvald : BooleanExpression -> Nat -> Type where
         \texttt{BEvald} works like \texttt{Evald} except for boolean expressions and values. It is a data type constructed from a \texttt{BooleanExpression} and a \texttt{Bool}. Like \texttt{eval}, the \texttt{beval} function only evaluates the value of the boolean expression, it does not provide a proof that the expression evaluates to that boolean. The \texttt{BEval} type is a proof that the boolean expression \texttt{x} evaluates to the boolean \texttt{y}.
         \\
         
-        \todo{explain LTE and its relation to all the other stuff}
+        The less-than-or-equals operator, \texttt{LTE}, is the only operator defined from the ground up, as the other similar operators (i.e. \texttt{LT}, \texttt{GTE}, and \texttt{GT}) can be defined from it. Strictly less-than, \texttt{LT}, can be defined from less-than-or-equals as follows: if the successor of a number $m$ is LTE to another number $n$, then $m$ is strictly less-than $n$; $(m + 1) \leq n \Rightarrow m < n$.
         
-        The operators \texttt{And}, \texttt{Eq}, \texttt{LT}, \texttt{LTE}, \texttt{GT}, and \texttt{GTE} were already implemented. So in order to have a complete set of operators, I implemented \texttt{NEq}, \texttt{Or}, and \texttt{Not}.
+        Greater-than-or-equals, \texttt{GTE}, can be defined from less-than-or-equals by simply swapping the operands: if a number $n$ is LTE to a number $m$ then $m$ is greater-than-or-equal to $n$; $n \leq m \Rightarrow m \geq n$.
+        
+        Finally, strictly greater-than, \texttt{GT}, can be defined as a `combination' of the definitions of \texttt{LT} and \texttt{GTE}: if the successor of a number $n$ is LTE to a number $m$ then $m$ is strictly greater-than to $n$; $(n + 1) \leq m \Rightarrow m > n$.
+        \\
+        
+        The operators \texttt{And}, \texttt{Eq}, \texttt{LT}, \texttt{LTE}, \texttt{GT}, and \texttt{GTE} were already implemented. In order to have a complete set of operators, I implemented \texttt{NEq}, \texttt{Or}, and \texttt{Not}.
 
 
 \section{Inequality (\texttt{NEq})}\label{des:neq}
