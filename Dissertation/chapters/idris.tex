@@ -221,13 +221,13 @@ half x = x / 2
 
 
 \section{\texttt{Maybe} -- Handling uncertainty}
-    Due to functions being pure, it can be difficult to reason about failure or uncertainty of a result being there.
     \begin{code}[caption={The \texttt{Maybe} data type}]
         data Maybe : (a : Type) -> Type where
             Nothing : Maybe a
             Just : (x : a) -> Maybe a
     \end{code}
-    The \texttt{Maybe} data type captures this in the form of either having \texttt{Just} a value \texttt{x} or \texttt{Nothing}. We could use this to implement taking the n$^{th}$ element from a list.
+
+    The \texttt{Maybe} data type captures the concept of failure or uncertainty of a function. Either, the function will have \texttt{Just} a value \texttt{x} or \texttt{Nothing}. We could use this to implement taking the n$^{th}$ element from a list.
     \begin{code}[caption={List indexing using \texttt{Maybe}}]
         getIndex : Nat -> List a -> Maybe a
         getIndex _ Nil = Nothing

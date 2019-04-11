@@ -1,29 +1,20 @@
-\begin{itemize}
-	%\item mention/explain TEAMPLAY \texttt{blocks}, \texttt{blockenergy},
-    %      \texttt{blocktime}, etc?
-	%\item \sout{\texttt{Eq} was already implemented (using `native' things)}
-    %      \texttt{NEq} was more complicated (different ways \texttt{Nat}s can be
-    %	  not equal)
-    %\item explain how only \texttt{LTE} is required for that selection of
-    %	  operators?
-    %   \item \textbf{explain the structure of operators and decidability rules}
-    %\item \texttt{And} was already implemented with custom types, used this as
-    %	  inspiration for implementation of \texttt{Or}
-    \item explain how these `building blocks'/operators go together (similar to
-    	  a stack-based language)?
-\end{itemize}
-
-The first section (\ref{des:tp-dsl}) focuses on describing existing work done by the \textsc{TeamPlay} project \cite{teamplay:d1.1}. The remaining sections (\ref{des:neq}, \ref{des:or}, and \ref{des:not}) describe extensions of the \textsc{TeamPlay} system, implemented by me.
+The first section (\ref{des:tp-dsl}) focuses on describing existing work done by the \textsc{TeamPlay} project \cite{teamplay:d1.1}. The remaining sections (\ref{des:neq}, \ref{des:or}, and \ref{des:not}) describe extensions of the \textsc{TeamPlay} system, implemented by me. In section \ref{des:neq}, I will also cover the more advanced \Idris concepts that I had to familiarise myself with in order to be able to implement the extensions I did.
 
 
 \section{The TeamPlay Project}\label{des:tp-dsl}
     \subsection{Assertions and Contracts}
-        \begin{figure}[H]
+        When writing C programs for embedded systems, the programmer might want to capture extra-functional properties like the time taken or the energy consumed. Furthermore, the programmer may want to have provable guarantees that these properties of the program hold. This is done through contracts which can be proven using the \Idris proof system.
+        
+        \begin{figure}
             \centering
             \includegraphics[width=\textwidth]{diagrams/process.png}
             \caption{The process of creating a certified C program}
         \end{figure}
-        When writing C programs for embedded systems, the programmer might want to capture extra-functional properties like the time taken or the energy consumed. Furthermore, the programmer may want to have provable guarantees that these properties of the program hold. This is done through contracts which can be proven using the \Idris proof system. The Contract Specification Language (CSL) defined by the \textsc{TeamPlay} project \cite{teamplay:d1.1} lets the programmer annotate existing C code to express properties like the worst time cost of a loop or function, using \texttt{\_\_teamplay\_worst\_time}, and assert these, using \texttt{\_\_teamplay\_assert}. This results in a program whose extra-functional properties can be certified to hold. Since the CSL functions adhere to the C99 function naming scheme, the programmer does not need to change tools, libraries, compiler, or learn a new language. Instead, the annotations seamlessly integrate with the existing code, without disturbing its operation in any way. Once the code has been annotated, it can then be passed through a C parser which extracts the annotations and constructs a model in an \Idris-based DSL. This model is then passed through the \texttt{mkCertificate} function which constructs a contract/certificate specifying which properties do or do not hold, by using the \Idris proof system.
+        
+        The Contract Specification Language (CSL) defined by the \textsc{TeamPlay} project \cite{teamplay:d1.1} lets the programmer annotate existing C code to express properties like the worst time cost of a loop or function, using \texttt{\_\_teamplay\_worst\_time}, and assert these, using \texttt{\_\_teamplay\_assert}. This results in a program whose extra-functional properties can be certified to hold. Since the CSL functions adhere to the C99 function naming scheme, the programmer does not need to change tools, libraries, compiler, or learn a new language. Instead, the annotations seamlessly integrate with the existing code, without disturbing its operation in any way. Once the code has been annotated, it can then be passed through a C parser which extracts the annotations and constructs a model in an \Idris-based DSL.
+        
+        The resulting model is then passed through the \texttt{mkCertificate} function which constructs a contract/certificate specifying which properties do or do not hold, by using the \Idris proof system.
+        
         \begin{table}
             \centering
             \begin{tabular}{c | c}
@@ -75,7 +66,7 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
             \alt ; modulo\\
                  `Mod' <NumericExpression> <NumericExpression>
         \end{grammar}
-        \texttt{NumericExpression}s are evaluated given an environment \texttt{Env}. The environment is essentially a mapping from symbols to values.
+        \texttt{NumericExpression}s are evaluated given an environment \texttt{Env}. An environment is a mapping from variables to natural numbers, which is used to look up the value of a variable when given its identifier.
         \begin{code}[caption={The type of the \texttt{eval} function}]
             eval : Env -> NumericExpression -> Nat
         \end{code}
@@ -84,7 +75,7 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
     data Evald : NumericExpression -> Nat -> Type where
         MkEvald : (x : NumericExpression) -> (y : Nat) -> Evald x y
         \end{code}
-        Listing \ref{des:evald} shows that \texttt{Evald} is a data type constructed from a \texttt{NumericExpression} and \texttt{Nat}. This  is because \texttt{eval} only evaluates the expression, it does not provide a proof linking the evaluated value and the original expression. The \texttt{Evald} type `links' the numeric expression (\texttt{x}) and its evaluation (\texttt{y}), proving that \texttt{x} evaluates to \texttt{y}.
+        Listing \ref{des:evald} shows that \texttt{Evald} is a data type constructed from a \texttt{NumericExpression} and \texttt{Nat}. This  is because \texttt{eval} only evaluates the expression, it does not provide link the evaluated value and the original expression. The \texttt{Evald} type is a relation between the numeric expression, \texttt{x}, and its evaluation, \texttt{y}.
         \\
         
         When applying a numeric operator to some \texttt{NumericExpression}s, we get a \texttt{BooleanExpression}.
@@ -163,7 +154,7 @@ data BEvald : BooleanExpression -> Nat -> Type where
             Refl : x = x
         \end{code}
     
-        A very useful pre-defined data type is the \texttt{(=)} data type. It is not quite defined as a data type since `\texttt{=}' is a reserved symbol, instead it is part of the \Idris syntax. It is still a data type, just defined at a lower level of the language than the \texttt{data} construct. Its constructor \texttt{Refl} is short for `reflexive'. Reflexivity is a mathematical concept stating that every element in a set is related to itself. In logic, one would write $\forall x \in X : x R x$ where $X$ is a set of elements $x$ and $R$ is a binary relation. This further means that \texttt{=} also must be symmetric and transitive: if $x = y$ then $y = x$; and if $x = y$ and $y = z$ then $x = z$. In short, if two elements are reflexive, this means they are the same element. \textbf{[correct?]}
+        A very useful pre-defined data type is the \texttt{(=)} data type. It is not quite defined as a data type since `\texttt{=}' is a reserved symbol, instead it is part of the \Idris syntax. It is still a data type, just defined at a lower level of the language than the \texttt{data} construct. Its constructor \texttt{Refl} is short for `reflexive'. Reflexivity is a mathematical property which, roughly, states that if two elements are reflexive, they are the same element. In \Idris, \texttt{Refl} is the constructor for propositional equality; the \texttt{=} data type.
     
         \begin{code}[label={des:refl-egs}, caption={Examples of reflexivity}]
         Idris> the ("World" = "World") Refl
@@ -226,7 +217,7 @@ data BEvald : BooleanExpression -> Nat -> Type where
                 and
                     2
         \end{code}
-        If we try to instantiate \texttt{Refl} using elements which are not reflexive, the type-checker complains and tells us that it does not make sense and so we cannot create a \texttt{Refl} from things which are not reflexive. The \texttt{Refl} type can be used to prove that things are equal, since it can only exist if the things truly are equal. In order to prove the opposite, that things cannot be equal, we use a different data type.
+        If we try to instantiate \texttt{Refl} using elements which are not reflexive, the type-checker complains and tells us that it does not make sense and so we cannot create a \texttt{Refl} from things which are not reflexive. Successful application of the \texttt{Refl} constructor proves that things are equal, since it can only be called if the things truly are equal. In order to prove the opposite, that things cannot be equal, we use a different data type.
     
     \subsection{The \texttt{TyNEq} data type}
         Because there is no built-in \texttt{NEq} data type, I had to define one.
