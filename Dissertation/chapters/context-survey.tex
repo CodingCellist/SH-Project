@@ -1,29 +1,4 @@
-\begin{itemize}
-    \item existing EDSLs focus on code generation or language reasoning, not the
-          HW side
-    %\item why Haskell and Idris are good tools for implementing EDSLs (citing
-    %      \cite{10.1007/3-540-45350-4_5,685738,hudak1996building} for Haskell
-    %	   and \cite{brady2015embedded} for Idris)
-    %\item mention Hume \cite{10.1007/978-3-540-39815-8_3} and Feldspar
-    %      \cite{5558637} as examples of existing EDSLs
-	%\item something on how Idris proofs work (citing \cite{brady2015embedded})?
-	%\item mention previous work done using Idris on concurrency
-    %      \cite{brady2010correct}?
-    %\item mention previous work done using Idris on systems programming
-    %       \cite{10.1007/978-3-642-27694-1_18,Brady:2011:ISP:1929529.1929536}?
-    %\item mention previous work done using Idris on network protocols
-    %      \cite{5158855}?
-    \item the existing Haskell-based DSLs do not have a built-in proof system(?)
-          for guaranteeing that the ``type-promises'' are correct?
-          %TODO: Haskell and proofs
-    %\item outside DSL-scope, things like simulation (cycle-accurate, functional,
-    %      etc.). But these are slow and/or resource-intensive
-    %\item the existing Idris-based DSLs do not focus on generating
-    %      proofs/contracts that the programs do what they say (beyond
-    %      type-checking) and do not concern themselves with timing or energy
-\end{itemize}
-
-Some work on modelling extra-functional properties of programs has already been done. Models and DSLs have been made for various purposes using Haskell and \Idris, but also using simulators.
+With numerous examples of software-based critical faults, e.g. the malfunction of NASA's ``Demonstration of Autonomous Rendezvous Technology (DART)'' in 2005 \cite{nasa2006dart}, the erroneous administration of radiation amounts at Panama's National Oncology Institute in 2001 \cite{borras2006overexposure}, or the infamous explosion of the Arian 5 flight 501 in 1996 \cite{board1996ariane}, reasoning about and asserting extra-functional properties of software is a very important problem. Some work on modelling extra-functional properties of programs has already been done. Model-checking,  DSLs using Haskell and \Idris, and also simulators are all examples of these.
 
 \section{Haskell-based DSLs}
 	Feldspar \cite{5558637} is a language for reasoning about digital signal processing (DSP) algorithms and is built on Haskell. Its DSL's main building blocks are \texttt{value}, \texttt{ifThenElse}, \texttt{while}, and \texttt{parallel} \cite{5558637}. These capture the building-blocks of simple C programs and introduces its own unique function \texttt{parallel} for describing parts of the program where each `sub-computation' can be done independently \cite{5558637}. Feldspar's aim is to help build sound DSP algorithms and then use the high-level description to generate fast, low-level C code \cite{5558637}. \textbf{[What/How to elaborate?]}
@@ -47,3 +22,5 @@ Some work on modelling extra-functional properties of programs has already been 
 	[The Haskell-based DSLs do not have a built-in, straightforward way of producing proofs for the written programs.]
 	
 	The utility of Idris-based DSLs is great: The types ensure that the program is correctly written, and the built-in proof system allows for conditions to be formally guaranteed to hold. Existing research using these properties \cite{5158855,brady2010correct,10.1007/978-3-642-27694-1_18} show that these features can be leveraged to create powerful prototyping and formal verification methods, but is not in the area of time and energy guarantees.
+    
+    [ However, most of the existing methods are either slow or require a lot of work by the programmer, potentially to the point of having to learn a completely new language.]
