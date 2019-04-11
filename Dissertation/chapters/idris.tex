@@ -131,8 +131,30 @@ half x = x / 2
     
     In addition to being first-class, functions in \Idris are \textit{pure} meaning that they do not have side effects (e.g. they do not do console I/O and they do not throw exceptions). This in turn means that for the same input, a function will always give the same output \cite{brady_2017}.
 
-\section{The \texttt{mutual} and \texttt{let} declarations}
-    \todo{write this}
+
+\section{Local variables}
+    In function declarations we might not want to clutter the equation and instead have local variables which clearly describe what the various parts are. In \Idris you can use the keywords `\texttt{let}' and `\texttt{in}' to define such variables.
+    
+    \begin{code}[label={idr:let-eg}, caption={A program which returns the longer of two given words}]
+        longer : String -> String -> String
+        longer word1 word2 =
+          let
+            len1 = length word1
+            len2 = length word2
+          in
+            if len1 > len2 then word1 else word2
+    \end{code}
+    
+    The variables \texttt{len1} and \texttt{len2} exist only in the statement after the \texttt{in} keyword. If we were to write the program in Listing \ref{idr:let-eg} without a \texttt{let}/\texttt{in} definition it would look like this:
+    
+    \begin{code}[caption={Listing \ref{idr:let-eg} without using \texttt{let}/\texttt{in}}]
+    longer : String -> String -> String
+    longer word1 word2 =
+      if (length word1) > (length word2) then word1 else word2
+    \end{code}
+
+    This is still mostly readable, but less so than Listing \ref{idr:let-eg}.
+    
 
 \section{Data Types}
     In addition to the given types, we can define our own data types. This is useful when we want to capture an aspect of the program we are writing which is likely to not be pre-defined in the \Idris prelude. Data types are defined using the \texttt{data} keyword. A data type is defined by a type constructor and one or more data constructors \cite{brady_2017}. Some of the included types are defined as data types, for example \texttt{List}.
@@ -179,6 +201,23 @@ half x = x / 2
     By pattern matching on the possible constructors for \texttt{Nat}, we have captured the base case, and the recursive step for calculating the factorial of a number using the \texttt{natFact} function.
     Pattern matching also helps in terms of decidability.
     \\
+
+
+\section{The \texttt{mutual} declaration}
+    Occasionally, there might be a situation where we need to define functions or types which rely on each other. This is problematic because in \Idris, something must be defined before you can use it. The \texttt{mutual} declaration allows us to explicitly define things which depend on each other, thereby `bypassing' the declaration order.
+    
+    \begin{code}[caption={Mutually declaring \texttt{odd} and \texttt{even}}]
+        mutual
+            odd : Nat -> Bool
+            odd Z     = False
+            odd (S k) = even k
+            
+            even : Nat -> Bool
+            odd Z     = True
+            odd (S k) = odd k
+    \end{code}
+    
+    If we wanted to define two functions \texttt{odd} and \texttt{even} which determined the parity of a natural number, we could define them by saying that zero is even, and a number bigger than that has the opposite parity of its predecessor. However, in doing so, \texttt{odd} relies on the existence of the \texttt{even} function and vice-versa, so both would have to be defined before each other. Since it is impossible to define two things at the same time, we use a \texttt{mutual} block to indicate that the functions rely on each other and that only when the entire \texttt{mutual} block has been defined will the functions work correctly.
 
 
 \section{\texttt{Maybe} -- Handling uncertainty}
