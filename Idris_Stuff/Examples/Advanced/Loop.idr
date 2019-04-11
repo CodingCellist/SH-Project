@@ -17,7 +17,8 @@ mutual
       p1 = Var "acc"
       p0' = eval env p0
       p1' = eval env p1
+      prf = isLTE p1' p0'
     in
       MkAssertion
-        (LTE p1 p0 (MkEvald p1 p1') (MkEvald p0 p0') (isLTE p1' p0'))
+        (LTE p1 p0 (MkEvald p1 p1') (MkEvald p0 p0') prf)
   

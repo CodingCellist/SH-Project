@@ -14,9 +14,11 @@ In order to be able to use the existing operators, and the ones I had implemente
               recursive steps and so if they work, all numbers should work as
               we then know that recursion works
     \end{itemize}
-    \todo{wording?...}
     
     For boolean operators, I tested the possible combinations of \texttt{True} and \texttt{False} for the operator and compared the results with the corresponding truth-table for the corresponding logical operator.
+    \\
+    
+    Because I am purely evaluating the operators, there are no variables used, only literals. This results in all the environments in the \Idris outputs being empty.
 	
     \subsection{The \texttt{Eq} Operator}\label{evaln:ops:eq}
         \lstinputlisting[caption={A C program which requires $0 = 0$}]{"../Idris_Stuff/Examples/Eq/Eq_0_0.c"}
@@ -481,9 +483,22 @@ Idris> mkCertificate lte_3_1
 
 \section{Simple Programs}\label{evaln:progs}
     \todo{make more of these!}
-    \subsection{Loop accumulation}
+    \subsection{Loop accumulation}\label{evaln:progs:loop}
         \lstinputlisting[caption={A C program whose loop has a timing requirement.}]{"../Idris_Stuff/Examples/Advanced/Loop.c"}
+        
+        The C program detailed above assumes the existence a \texttt{\_\_teamplay\_loop\_time\_acc} annotation. The first annotation, \texttt{\_\_teamplay\_worst\_time}, states that the most time the block below (i.e. the loop) must take is 3 time units, to be stored in the variable `\texttt{measured}', with a confidence level of 100. The annotation which I assume exists would accumulate the time taken after each iteration of the loop in the variable `\texttt{acc}'. Finally, we use the \texttt{\_\_teamplay\_assert} annotation to specify that this program requires the accumulated time of the loop to be less-than-or-equal to the time we measured that block of code takes.
+        
+        This program makes use of variables which are passed to annotations. As such, the resulting environment should reflect this and contain both variables' names and their corresponding values.
+        
+        \newpage
         
         \idrisinput{"../Idris_Stuff/Examples/Advanced/Loop.idr"}
         
+        In the corresponding \Idris model, ``\texttt{loop}'', I have modelled the \texttt{\_\_teamplay\_loop\_time\_acc} annotation as a \texttt{BlockTime} construct with the variable \texttt{acc} and a value of \texttt{2}. The value illustrates $0.02$ time units per iteration, times the 100 iterations that the loop had. Since \texttt{acc} was declared later than \texttt{measured}, it is the second property, which is correctly captured in the \texttt{prf}.
+        
+        \begin{code}
+Idris> mkCertificate loop
+        \end{code}
         \idrisinput{"../Idris_Stuff/Examples/Advanced/Loop.out"}
+        
+        Creating the certificate for \texttt{loop}, we can see that the environment correctly contains the two variables `\texttt{acc}' and `\texttt{measured}' associated with the correct values (2 and 3 respectively). From the two \texttt{MkEvald}s, we can see that the environment has been correctly used to evaluate the variables. Finally, the \texttt{Yes} part of the certificate shows us that the assertion held: the property \texttt{acc} $\leq$ \texttt{measured} held.
