@@ -1,4 +1,4 @@
-The first section (\ref{des:tp-dsl}) focuses on describing existing work done by the \textsc{TeamPlay} project \cite{teamplay:d1.1}. The remaining sections (\ref{des:neq}, \ref{des:or}, and \ref{des:not}) describe extensions of the \textsc{TeamPlay} system, implemented by me. In section \ref{des:neq}, I will also cover the more advanced \Idris concepts that I had to familiarise myself with in order to be able to implement the extensions I did.
+The first section (\ref{des:tp-dsl}) focuses on describing existing work done by the \textsc{TeamPlay} project \cite{teamplay:d1.1}. The remaining sections (\ref{des:neq}, \ref{des:or}, and \ref{des:not}) describe extensions of the \textsc{TeamPlay} system, implemented by me. In section \ref{des:neq}, I will also cover the more advanced \Idris concepts that I had to familiarise myself with in order to be able to implement the extensions I did. Similar to Chapter \ref{ch:idris}, the explanations and examples given when covering the concepts borrow a lot from the \Idris book \cite{brady_2017}.
 
 
 \section{The TeamPlay Project}\label{des:tp-dsl}
@@ -11,9 +11,9 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
             \caption{The process of creating a certified C program}
         \end{figure}
         
-        The Contract Specification Language (CSL) defined by the \textsc{TeamPlay} project \cite{teamplay:d1.1} lets the programmer annotate existing C code to express properties like the worst time cost of a loop or function, using \texttt{\_\_teamplay\_worst\_time}, and assert these, using \texttt{\_\_teamplay\_assert}. This results in a program whose extra-functional properties can be certified to hold. Since the CSL functions adhere to the C99 function naming scheme, the programmer does not need to change tools, libraries, compiler, or learn a new language. Instead, the annotations seamlessly integrate with the existing code, without disturbing its operation in any way. Once the code has been annotated, it can then be passed through a C parser which extracts the annotations and constructs a model in an \Idris-based DSL.
+        The Contract Specification Language (CSL) defined by the \textsc{TeamPlay} project \cite{teamplay:d1.1} lets the programmer annotate existing C code to express properties like the worst time cost of a loop or function, using \texttt{\_\_teamplay\_worst\_time}, and assert these, using \texttt{\_\_teamplay\_assert}. This results in a program whose extra-functional properties can be certified to hold. Since the CSL functions adhere to the C99 function naming scheme, the programmer does not need to change tools, libraries, compiler, or learn a new language. Instead, the annotations seamlessly integrate with the existing code, without disturbing its operation in any way. This means we can compile the code and measure it on the embedded systems to gain data concerning its time and energy properties. Using the data and the annotated C code as input to a parser, the annotations are extracted and used to construct a model in an \Idris-based DSL.
         
-        The resulting model is then passed through the \texttt{mkCertificate} function which constructs a contract/certificate specifying which properties do or do not hold, by using the \Idris proof system.
+        The resulting model is then passed through the \texttt{mkCertificate} function which constructs a contract/certificate specifying which properties do or do not hold, by using the \Idris proof system. The combination of this certificate and the annotated C code forms `certified C code', i.e. C code whose extra-functional properties have been proven to hold.\\
         
         \begin{table}
             \centering
@@ -40,8 +40,6 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
     
         Contracts/Certificates consists of one or more \texttt{Assertion}.
         These are created through the \texttt{MkAssertion} constructor. It takes a \texttt{BooleanExpression} and returns an \texttt{Assertion} based on it. \texttt{BooleanExpression}s are created by applying operators to \texttt{NumericExpression}s or existing \texttt{BooleanExpression}s.
-    
-    \newpage
     
     \subsection{Numeric Operators and Numeric Expressions}
         The numeric operators all take two arguments, their evaluation, a proof concerning what the operator evaluates to, and returns a \texttt{BooleanExpression}.
@@ -220,8 +218,8 @@ data BEvald : BooleanExpression -> Nat -> Type where
         If we try to instantiate \texttt{Refl} using elements which are not reflexive, the type-checker complains and tells us that it does not make sense and so we cannot create a \texttt{Refl} from things which are not reflexive. Successful application of the \texttt{Refl} constructor proves that things are equal, since it can only be called if the things truly are equal. In order to prove the opposite, that things cannot be equal, we use a different data type.
     
     \subsection{The \texttt{TyNEq} data type}
-        Because there is no built-in \texttt{NEq} data type, I had to define one.
-        \begin{code}[label={des:neq:ty-neq}, caption={The data type used for capturing inequality}]
+        Because there is no built-in \texttt{NEq} data type, I had to define one. This was tricky since in order to prove that two numbers are not equal, we have to be able to describe exactly why they cannot possibly be equal. This is captured in the \texttt{TyNEq} data-type.
+        \begin{code}[label={des:neq:ty-neq}, caption={The data-type used for capturing inequality}]
         data TyNEq : Nat -> Nat -> Type where
             MkNEqL   : TyNEq Z (S k)
             MkNEqR   : TyNEq (S k) Z
@@ -306,7 +304,7 @@ data BEvald : BooleanExpression -> Nat -> Type where
         \texttt{Refl : S k = S j} cannot exist.
     
     \subsection{Decidability}
-        Decidability is more specific than \texttt{Maybe}. Instead of saying that we have \texttt{Just} the value or \texttt{Nothing}, decidability allows us to express that we can always \textit{decide} whether a property holds or not for certain values.
+        Decidability is more specific than \texttt{Maybe} (Section \ref{idris:maybe}). Instead of saying that we have \texttt{Just} the value or \texttt{Nothing}, decidability allows us to express that we can always \textit{decide} whether a property holds or not for certain values.
     
         \begin{code}[caption={\texttt{Dec} as defined in the \Idris prelude}]
         data Dec : (prop : Type) -> Type where
@@ -412,7 +410,8 @@ data BEvald : BooleanExpression -> Nat -> Type where
         
         One usage of \texttt{Uninhabited} could be to decidably determine whether a boolean is \texttt{True} or \texttt{False}. If the boolean \textit{is} the correct instance, then we simply return a \texttt{Yes Refl}. And if the boolean is \textit{not} the correct instance, we return \texttt{No absurd} which shows that it cannot be the same boolean because if it was, we could construct any type. \texttt{No absurd} shows that we have had a contradiction.
     
-    \subsection{Impossible inequalities}    
+    \subsection{Impossible inequalities}
+        With ways of expressing impossibility, we can define which inequalities are impossible to be true and why.
         \begin{code}[label={des:neq-uninh}, caption={Not equals cannot be constructed on 0 0}]
         implementation Uninhabited (TyNEq Z Z) where
             uninhabited MkNEqL   impossible
@@ -428,7 +427,7 @@ data BEvald : BooleanExpression -> Nat -> Type where
         succNEqImpossible contra (MkNEqRec x) = contra x
         \end{code}
     
-        The \texttt{succNEqImpossible} function takes a proof that \texttt{TyNEq k j} cannot be constructed and proves that in that case, \texttt{TyNEq (S k) (S j)} can also not be constructed. What this does is maintain that if two numbers are \textit{not} not equal, i.e. that they \textit{are} equal, then so are their successors.\\
+        The \texttt{succNEqImpossible} function takes a proof that \texttt{TyNEq k j} cannot be constructed and proves that in that case, \texttt{TyNEq (S k) (S j)} can also not be constructed. What this does is maintain that if two numbers are \textit{not} not equal, i.e. that they \textit{are} equal, then so are their successors.\par
         With constructors for the valid \texttt{TyNEq} cases, and proofs why the invalid cases are impossible, we can construct the decidability rules for \texttt{TyNEq}. These will allow us to construct the \texttt{Dec (TyNEq x' y')} part from Listing \ref{des:neq-code}.
         
         \begin{code}[caption={Decidability rules for \texttt{NEq}}]
@@ -442,7 +441,7 @@ isNEq (S k) (S j) = case isNEq k j of
         \end{code}
         
         If the \texttt{isNEq} is given two zeros as its arguments, then it is absurd to construct an inequality (as described in Listing \ref{des:neq-uninh}). If either the first or second argument is zero and the other is not, then the inequality is trivial as no natural number can have \texttt{Z} as its successor. In the final case, where both numbers are non-zero, we recurse on their predecessors. If the predecessors are not equal (by one of them being zero and the other not), then the numbers themselves must also be not equal. On the other hand, if it was impossible to prove the predecessors unequal, we use \texttt{succNEqImpossible} to maintain/prove that it is also impossible for the successors to be unequal.
-        \\\par
+        \\
         
         With the \texttt{eval} function and the \texttt{Evald} type giving us the numbers, and the decidability rules through the implementation of the \texttt{Uninhabited} interface and using the \texttt{succNEqImpossible} function, we have all the parts needed for the \texttt{NEq} constructor. Hence, we can prove inequality between numbers.
         
