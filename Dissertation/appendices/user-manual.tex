@@ -1,0 +1,23 @@
+\begin{itemize}
+    \item Install \Idris with help from \url{https://github.com/idris-lang/Idris-dev/wiki/Installation-Instructions}
+    \item \texttt{cd} into the `\texttt{Idris\_Stuff}' directory
+    \item start \Idris with the example you would like to load by running the command\
+          \texttt{idris Path/To/Example.idr}\\
+          (note that the \texttt{Examples/True} and \texttt{Examples/False} files may need to be loaded before any of the examples that use them)
+    \item create a certificate by running the\\
+          \texttt{mkCertificate <var-name>}\\
+          command in \Idris, e.g. if Examples/Loop/Loop.idr is loaded:\\
+          \texttt{mkCertificate loop}
+    \item either quit by typing `\texttt{:q}' (and repeat the \Idris startup with a different module) or load another module by running the\\
+          \texttt{:m Path.To.Module}\\
+          command in \Idris
+\end{itemize}
+
+\section{Notes on code supplied}
+    \begin{itemize}
+    \item The code supplied in the \texttt{Darknet.idr} file is written by the \textsc{TeamPlay} project apart from the bits mentioned in sections \ref{des:neq}, \ref{des:or}, \ref{des:not}.
+    
+    \item The C code in the \texttt{Real\_Life} Examples sub-folder is retrieved from GitHub, from \cite{c_aes,beebs}.
+    
+    \item The code in all the other Examples sub-folders is entirely my own work.
+    \end{itemize}

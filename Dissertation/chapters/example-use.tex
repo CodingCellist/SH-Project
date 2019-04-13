@@ -1,0 +1,19 @@
+An example of a real-world use-case would be to assert that encrypting something using the AES encryption method does not require more than a set amount of energy. This could be to guarantee that the encryption will not heavily impact the embedded device's battery life. For this, I used an implementation of AES written in C \cite{c_aes}. The parts of the code which would be interesting to annotate and assert are the parts that do the AES cipher encryption:
+\begin{lstlisting}[caption={The part of the AES encryption cipher we are interested in: the rounds}, escapeinside={(*}{*)}]
+(*\vdots*)
+add_round_key(state, w, 0);
+
+for (r = 1; r < Nr; r++) {
+    sub_bytes(state);
+    shift_rows(state);
+    mix_columns(state);
+    add_round_key(state, w, r);
+}
+
+sub_bytes(state);
+shift_rows(state);
+add_round_key(state, w, Nr);
+(*\vdots*)
+\end{lstlisting}
+
+This example will evolve throughout this dissertation, as more parts of the project are presented and explained.

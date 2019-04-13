@@ -1,4 +1,4 @@
-The first section (\ref{des:tp-dsl}) focuses on describing existing work done by the \textsc{TeamPlay} project \cite{teamplay:d1.1}. The remaining sections (\ref{des:neq}, \ref{des:or}, and \ref{des:not}) describe extensions of the \textsc{TeamPlay} system, implemented by me. In section \ref{des:neq}, I will also cover the more advanced \Idris concepts that I had to familiarise myself with in order to be able to implement the extensions I did. Similar to Chapter \ref{ch:idris}, the explanations and examples given when covering the concepts borrow a lot from the \Idris book \cite{brady_2017}.
+The first section (\ref{des:tp-dsl}) focuses on describing existing work done by the \textsc{TeamPlay} project \cite{teamplay:d1.1}, apart from the annotation of the AES example which was done by me. The remaining sections (\ref{des:neq}, \ref{des:or}, and \ref{des:not}) describe extensions of the \textsc{TeamPlay} system, implemented by me. In section \ref{des:neq}, I will also cover the more advanced \Idris concepts that I had to familiarise myself with in order to be able to implement the extensions I did. Similar to Chapter \ref{ch:idris}, the explanations and examples given when covering the concepts borrow a lot from the \Idris book \cite{brady_2017}.
 
 
 \section{The TeamPlay Project}\label{des:tp-dsl}
@@ -11,9 +11,10 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
             \caption{The process of creating a certified C program}
         \end{figure}
         
-        The Contract Specification Language (CSL) defined by the \textsc{TeamPlay} project \cite{teamplay:d1.1} lets the programmer annotate existing C code to express properties like the worst time cost of a loop or function, using \texttt{\_\_teamplay\_worst\_time}, and assert these, using \texttt{\_\_teamplay\_assert}. This results in a program whose extra-functional properties can be certified to hold. Since the CSL functions adhere to the C99 function naming scheme, the programmer does not need to change tools, libraries, compiler, or learn a new language. Instead, the annotations seamlessly integrate with the existing code, without disturbing its operation in any way. This means we can compile the code and measure it on the embedded systems to gain data concerning its time and energy properties. Using the data and the annotated C code as input to a parser, the annotations are extracted and used to construct a model in an \Idris-based DSL.
+        The Contract Specification Language (CSL) defined by the \textsc{TeamPlay} project \cite{teamplay:d1.1} lets the programmer annotate existing C code to express properties like the worst time cost of a loop or function, using \texttt{\_\_teamplay\_worst\_time}, and assert these, using \texttt{\_\_teamplay\_assert}. This results in a program whose extra-functional properties can be certified to hold. Since the CSL functions adhere to the C99 function naming scheme, the programmer does not need to change tools, libraries, compiler, or learn a new language. Instead, the annotations seamlessly integrate with the existing code, without disturbing its operation in any way. This means we can compile the code and measure it on the embedded systems to gain data concerning its time and energy properties. Using the data and the annotated C code as input to a parser, the annotations are extracted and used to construct a model in an \Idris-based DSL. Since the parser is currently work in progress, the annotations are assumed to exist and work.
         
-        The resulting model is then passed through the \texttt{mkCertificate} function which constructs a contract/certificate specifying which properties do or do not hold, by using the \Idris proof system. The combination of this certificate and the annotated C code forms `certified C code', i.e. C code whose extra-functional properties have been proven to hold.\\
+        The resulting model is passed through the \texttt{mkCertificate} function which constructs a contract/certificate specifying which properties do or do not hold, by using the \Idris proof system. The combination of this certificate and the annotated C code forms `certified C code', i.e. C code whose extra-functional properties have been proven to hold.
+        \\
         
         \begin{table}
             \centering
@@ -32,6 +33,47 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
             \end{tabular}
             \caption{C to DSL mappings}
         \end{table}
+        
+        \newpage
+        
+        If we were to look at the AES example again, we could express that the rounds should take at most 50 energy units by annotating it as follows:
+        \begin{lstlisting}[caption={Annotating the AES code to express an energy requirement}, escapeinside={(*}{*)}]
+(*\vdots*)
+__teamplay_worst_energy(addRoundKey0);
+add_round_key(state, w, 0);
+
+for (r = 1; r < Nr; r++) {
+    __teamplay_worst_energy_acc(subBytesAcc);
+    sub_bytes(state);
+    
+    __teamplay_worst_energy_acc(shiftRowsAcc);
+    shift_rows(state);
+    
+    __teamplay_worst_energy_acc(mixColumnsAcc);
+    mix_columns(state);
+    
+    __teamplay_worst_energy_acc(addRoundKeyAcc);
+    add_round_key(state, w, r);
+}
+
+__teamplay_worst_energy(subBytes);
+sub_bytes(state);
+
+__teamplay_worst_energy(shiftRows);
+shift_rows(state);
+
+__teamplay_worst_energy(addRoundKeyNr);
+add_round_key(state, w, Nr);
+
+__teamplay_assert(addRoundKey0 + subBytesAcc +
+                  shiftRowsAcc + mixColumnsAcc +
+                  addRoundKeyAcc + subBytes +
+                  shiftRows + addRoundKeyNr
+                  <= 50)
+(*\vdots*)
+        \end{lstlisting}
+        
+        The annotations describe the names of the variables that the energy measurements will be stored in, and some of them express that this measurement is accumulated across loops. At the end, the sum of the variables is required to be less than or equal to a limit, 50.
     
         \begin{code}[label={des:assertion}, caption={The \texttt{Assertion} data type}]
             data Assertion  : Type where
@@ -64,10 +106,14 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
             \alt ; modulo\\
                  `Mod' <NumericExpression> <NumericExpression>
         \end{grammar}
-        \texttt{NumericExpression}s are evaluated given an environment \texttt{Env}. An environment is a mapping from variables to natural numbers, which is used to look up the value of a variable when given its identifier.
+        \texttt{NumericExpression}s are evaluated given an environment \texttt{Env}. An environment is a mapping from variables to natural numbers, which is used to look up the value of a variable when given its identifier. The idea is that this would be provided by the CSV file containing the measurements.
+        
+        \newpage
+        
         \begin{code}[caption={The type of the \texttt{eval} function}]
             eval : Env -> NumericExpression -> Nat
         \end{code}
+    
         The \texttt{eval} function uses this to evaluate a \texttt{NumericExpression}: Given an \texttt{Env} and a \texttt{NumericExpression}, the \texttt{eval} function returns a natural number. This is the result of that \texttt{NumericExpression} over that environment. To use the evaluation in a proof, we use the \texttt{Evald} type.
         \begin{code}[caption={\texttt{Evald} as defined in the \Idris model},label={des:evald}]
     data Evald : NumericExpression -> Nat -> Type where
@@ -77,6 +123,8 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
         \\
         
         When applying a numeric operator to some \texttt{NumericExpression}s, we get a \texttt{BooleanExpression}.
+    
+    \newpage
     
     \subsection{Boolean Operators and Boolean Expressions}
         Boolean expressions result from either a numeric operator or a boolean operator. The grammar for constructing boolean expressions is:
@@ -105,15 +153,21 @@ The first section (\ref{des:tp-dsl}) focuses on describing existing work done by
             `GTE' <NumericExpression> <NumericExpression>
         \end{grammar}
         Similar to \texttt{NumericExpressions}, \texttt{BooleanExpressions} are evaluated over an environment.
+        
         \begin{code}[caption={The type of the \texttt{beval} function}]
             beval : Env -> BooleanExpression -> Bool
         \end{code}
+    
         Given an \texttt{Env} and a \texttt{BooleanExpression}, the \texttt{beval} function returns a boolean. This boolean is the result of evaluating that \texttt{BooleanExpression} over that environment. Like with \texttt{NumericExpressions}, to use the evaluation in a proof, we have the \texttt{BEvald} type.
+        
+        \newpage
+        
         \begin{code}[caption={\texttt{BEvald} as defined in the \Idris model}]
 data BEvald : BooleanExpression -> Nat -> Type where
     MkBEvald : (x : BooleanExpression) -> (y : Bool) -> BEvald x y
         \end{code}
-        \texttt{BEvald} works like \texttt{Evald} except for boolean expressions and values. It is a data type constructed from a \texttt{BooleanExpression} and a \texttt{Bool}. Like \texttt{eval}, the \texttt{beval} function only evaluates the value of the boolean expression, it does not provide a proof that the expression evaluates to that boolean. The \texttt{BEval} type is a proof that the boolean expression \texttt{x} evaluates to the boolean \texttt{y}.
+    
+        \texttt{BEvald} works like \texttt{Evald} except for boolean expressions and values. It is a data type constructed from a \texttt{BooleanExpression} and a \texttt{Bool}. Like \texttt{eval}, the \texttt{beval} function only evaluates the value of the boolean expression, it does not link the expression to the corresponding boolean. The \texttt{BEval} type is a relation between the boolean expression, \texttt{x}, and the boolean it evaluates to, \texttt{y}.
         
     \subsection{The \texttt{LTE} operator}\label{des:tp:lte}
         The less-than-or-equals operator, \texttt{LTE}, is the only operator defined in the \Idris prelude, as the other similar operators (i.e. \texttt{LT}, \texttt{GTE}, and \texttt{GT}) can be defined from it.
@@ -141,6 +195,21 @@ data BEvald : BooleanExpression -> Nat -> Type where
         \\
         
         The operators \texttt{And}, \texttt{Eq}, \texttt{LT}, \texttt{LTE}, \texttt{GT}, and \texttt{GTE} were already implemented. In order to have a complete set of operators, I implemented \texttt{NEq}, \texttt{Or}, and \texttt{Not}.
+        
+    \subsection{Modelling C programs}
+        In order to model and prove properties of C programs, the \textsc{TeamPlay} project defines the \texttt{CLang} data-type.
+        \begin{code}[caption={The \texttt{CLang} data type}]
+    data CLang : Type where
+        BlockTime   : (name : String) -> Nat -> CLang -> CLang
+        StmtTime    : (name : String) -> Nat -> CLang -> CLang
+        BlockEnergy : (name : String) -> Nat -> CLang -> CLang
+        StmtEnergy  : (name : String) -> Nat -> CLang -> CLang
+        Assert      : (Env -> Assertion) -> CLang -> CLang
+        Halt        : CLang
+        \end{code}
+        A \texttt{CLang} consists of a series block or statement time measurements, and/or a series of block or statement energy measurements, and/or a series of assertions. Since time and energy measurements are numeric values, they are represented by natural numbers, each associated to a variable with a \texttt{name}. An \texttt{Assert} block is a function from an environment to an \texttt{Assertion}, i.e. something which will evaluate the \texttt{Assertion} given an environment. The \texttt{Halt} constructor indicates the end of the series.
+        
+    \newpage
 
 
 \section{Inequality (\texttt{NEq})}\label{des:neq}

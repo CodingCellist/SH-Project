@@ -1,4 +1,9 @@
-In order to be able to use the existing operators, and the ones I had implemented, in code, I needed to make sure that they worked, i.e. that they did not return anything unexpected (e.g., \texttt{Eq} should not evaluate to true for 1 and 3, and \texttt{And False False} should not evaluate to \texttt{True}). This is the described in the first section (\ref{evaln:ops}) of this chapter. With working operators, it should then be possible to construct slightly more complex C programs, and annotate and model them using the framework. This is described in the second section (\ref{evaln:progs}).
+In order to be able to use the existing operators, and the ones I had implemented, in code, I needed to make sure that they worked, i.e. that they did not return anything unexpected (e.g., \texttt{Eq} should not evaluate to true for 1 and 3, and \texttt{And False False} should not evaluate to \texttt{True}). This is the described in the first section (\ref{evaln:ops}) of this chapter. With working operators, it should then be possible to construct slightly more complex C programs, i.e. programs which do more than evaluate the operators, and annotate and model them using the framework. This is described in the second section of this chapter (\ref{evaln:small-progs}). In the third section of this chapter (\ref{evaln:real-progs}), some example of real-world use-cases and models are provided, demonstrating that the framework can be used with these programs.
+\\
+
+The parser taking the CSV file and the annotated C code is currently work-in-progress by the \textsc{TeamPlay} project in St Andrews. The compiler and measurement tools are a part of the \textsc{TeamPlay} project being worked on in Germany by TUHH: the Hamburg University of Technology. As such, the models had to be constructed manually and with made-up values. This was somewhat challenging as I had to keep track of which parts of the model depended on what and reason about what the annotations would translate to. All of this should be automated when the parser is complete. However, since the functionality of the framework is unaffected by the lack of these tools, as its main concern for constructing certificates is that there are values in expressions and that the expressions are correct, the evaluation of the framework remains valid.
+
+\newpage
 
 
 \section{Operators}\label{evaln:ops}
@@ -25,11 +30,11 @@ In order to be able to use the existing operators, and the ones I had implemente
         
         The C program itself may not seem very interesting. However, it is a structurally correct C program. Its purpose is to test the base case of equality between natural numbers: that zero equals zero. This equality assertion would be similar for larger, more complex programs using the annotation.
         
+        \newpage
+        
 		\idrisinput{"../Idris_Stuff/Examples/Eq/Eq_0_0.idr"}
         
         Transforming the C annotation into \Idris, we get the model detailed above. The model `\texttt{eq\_0\_0} is a \texttt{CLang} consisting of an assertion named `\texttt{eq\_0\_0\_assert}' and nothing more (\texttt{Halt}). This assertion contains two literals \texttt{x} and \texttt{y} both carrying the value 0, their evaluation \texttt{x'} and \texttt{y'} over a given environment \texttt{env}, and a decidable proof \texttt{prf} that the numbers are equal. Using these, we can use \texttt{MkAssertion} to construct an instance of \texttt{Assertion} (Listing \ref{des:assertion}).
-        
-        \newpage
         
         \begin{code}
 Idris> mkCertificate eq_0_0
@@ -37,7 +42,8 @@ Idris> mkCertificate eq_0_0
 		\idrisinput{"../Idris_Stuff/Examples/Eq/Eq_0_0.out"}
         
         Using the \texttt{mkCertificate} function, we construct a certificate based on the \texttt{Assertion} made. We can see that the evaluation of the literals has worked correctly from \texttt{MkEvald (Lit 0) 0}. The final argument to the \texttt{MkAssertion} is a \texttt{Yes Refl}, so the \texttt{Eq} operator worked for zero and zero: It found that they were equal, which is correct.
-        \\
+        
+        \newpage
         
         \lstinputlisting[caption={A C program which requires $1 = 1$}]{"../Idris_Stuff/Examples/Eq/Eq_1_1.c"}
         
@@ -47,20 +53,18 @@ Idris> mkCertificate eq_0_0
         
         The resulting \Idris model `\texttt{eq\_1\_1}' contains an assertion that 1 equals 1 (\texttt{Assert eq\_1\_1\_assert}) and nothing more (\texttt{Halt}). This assertion in turn contains the two literals (\texttt{x} and \texttt{y}) both carrying a value of 1 (\texttt{Lit 1}), their evaluation over the given environment (\texttt{x'} and \texttt{y'}), and a decidable proof `\texttt{prf}' that the evaluations are equal.
         
+        \newpage
+        
         \begin{code}
 Idris> mkCertificate eq_1_1
         \end{code}
         \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_1_1.out"}
         
         When passing \texttt{eq\_1\_1} through the \texttt{mkCertificate} function, we see that the evaluations were correct (from \texttt{MkEvald (Lit 1) 1}). The final argument to \texttt{MkAssertion} contains a \texttt{Yes Refl}, so the model has confirmed that $1 = 1$ and as such, that \texttt{Eq} works for 1.
-        \\
-        
         
         \lstinputlisting[label={evaln:ops:eq-0-1}, caption={A C program which requires $0 = 1$}]{"../Idris_Stuff/Examples/Eq/Eq_0_1.c"}
         
         With $0 = 0$ and $1 = 1$ working, I evaluated that the operator was working correctly for 0 and 1 by testing that $0 = 1$ and $1 = 0$ did not produce a \texttt{Yes Refl}.
-        
-        \newpage
         
         \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_0_1.idr"}
         
@@ -75,8 +79,6 @@ Idris> mkCertificate eq_0_1
         
         The details of the vice-versa of this, i.e. $1 = 0$ not returning \texttt{Yes Refl}, can be found in Appendix \ref{app:evaln}, Section \ref{app:evaln:ops:eq}. The output from \texttt{mkCertificate} function is slightly unusual, and as such is included here.
         
-        \newpage
-        
         \begin{code}
 Idris> mkCertificate eq_1_0
         \end{code}
@@ -86,11 +88,11 @@ Idris> mkCertificate eq_1_0
         \texttt{negEqSym : ((a = b) -> Void) -> (b = a) -> Void}\\
         Essentially, the \texttt{negEqSym} proves that if two numbers are not equal, then swapping them around does not change that fact; It proves/states that the negation of equality is \textit{symmetric}. Hence, \texttt{ZnotS} can also be used to prove that $1 = 0$ is false as it is symmetric to proving $0 = 1$ is false. So the \texttt{Eq} operator works correctly when asserting $1 = 0$.
         
+        \newpage
+        
         \lstinputlisting[label={evaln:ops:eq-3-3}, caption={A C program which requires $3 = 3$}]{"../Idris_Stuff/Examples/Eq/Eq_3_3.c"}
         
         With both zero and one working, the remaining case is to test that \texttt{Eq} works with multiple recursive calls, i.e. any natural number greater than 1.
-        
-        \newpage
         
         \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_3_3.idr"}
         
@@ -103,11 +105,11 @@ Idris> mkCertificate eq_3_3
         
         Both evaluations returned 3 as expected and the final argument to \texttt{MkAssertion} is a \texttt{Yes Refl}. Hence, the \texttt{Eq} operator works for numbers greater than 0 and 1; It works in general.
         
+        \newpage
+        
         \lstinputlisting[label={evaln:ops:eq-1-3}, caption={A C program which requires $1 = 3$}]{"../Idris_Stuff/Examples/Eq/Eq_1_3.c"}
         
         Finally, to make sure that the operator disproves incorrect equalities for numbers greater than 1, I used the C program above.
-        
-        \newpage
         
         \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_1_3.idr"}
         
@@ -121,8 +123,6 @@ Idris> mkCertificate eq_1_3
         Both evaluations match with the literals. The final argument in the \texttt{MkAssertion} argument uses a lambda function and the \texttt{succInjective} function. It has the type:\par
         \texttt{succInjective : (left : Nat) -> (right : Nat) -> (p : S left = S right) -> left = right}\\
         It takes two numbers and proves that if the successor of the left number is reflexive to the successor of the right number, then the numbers themselves must be equal. The argument \texttt{h} is a proof that \texttt{0 = S k}, so if it exists, then we could create a \texttt{Void}. This is a contradiction, so the equality is impossible. Swapping the operands results in almost the same proof.
-        
-        \newpage
         
         \idrisinput{"../Idris_Stuff/Examples/Eq/Eq_3_1.out"}
         
@@ -483,20 +483,21 @@ Idris> mkCertificate lte_3_1
 \newpage
 
 
-\section{Simple Programs}\label{evaln:progs}
-    \todo{make more of these!}
+\section{Small Programs}\label{evaln:small-progs}
+    This section shows how annotations and operators can be combined to assert extra-functional properties of constructs like \texttt{for}-loops and \texttt{if}-statements. Since these are very widely used in programming, being able to model and assert things about them is crucial if the framework is to be used on real-world programs.
     \subsection{Loop accumulation}\label{evaln:progs:loop}
         \lstinputlisting[caption={A C program whose loop has a timing requirement.}]{"../Idris_Stuff/Examples/Advanced/Loop.c"}
         
-        The C program detailed above assumes the existence a \texttt{\_\_teamplay\_loop\_time\_acc} annotation. The first annotation, \texttt{\_\_teamplay\_worst\_time}, states that the most time the block below (i.e. the loop) must take is 3 time units, to be stored in the variable `\texttt{measured}', with a confidence level of 100. The annotation which I assume exists would accumulate the time taken after each iteration of the loop in the variable `\texttt{acc}'. Finally, we use the \texttt{\_\_teamplay\_assert} annotation to specify that this program requires the accumulated time of the loop to be less-than-or-equal to the time we measured that block of code takes.
+        The \texttt{\_\_teamplay\_worst\_time} annotation states that the most time the block below (i.e. the loop) must take has been measured and stored in the variable `\texttt{measured}'. The \texttt{\_\_teamplay\_loop\_time\_acc} annotation indicates that the accumulated time taken after each iteration of the loop is stored in the variable `\texttt{acc}'. Finally, the \texttt{\_\_teamplay\_assert} annotation specifies that this program requires the accumulated time of the loop to be less-than-or-equal to the time we measured that block of code takes, \texttt{acc <= measured}.
         
-        This program makes use of variables which are passed to annotations. As such, the resulting environment should reflect this and contain both variables' names and their corresponding values.
+        This program makes use of variables in to annotations. These would appear in the CSV file containing the timing measurements. The environment should reflect this and contain both variables' names and their corresponding values.
         
         \newpage
         
         \idrisinput{"../Idris_Stuff/Examples/Advanced/Loop.idr"}
         
-        In the corresponding \Idris model, ``\texttt{loop}'', I have modelled the \texttt{\_\_teamplay\_loop\_time\_acc} annotation as a \texttt{BlockTime} construct with the variable \texttt{acc} and a value of \texttt{2}. The value illustrates $0.02$ time units per iteration, times the 100 iterations that the loop had. Since \texttt{acc} was declared later than \texttt{measured}, it is the second property, which is correctly captured in the \texttt{prf}.
+        In the corresponding \Idris model, ``\texttt{loop}'', the `\texttt{\_\_teamplay\_worst\_time}' annotation had a time of 3 time units, captured in a \texttt{BlockTime}. I modelled the
+        `\texttt{\_\_teamplay\_loop\_time\_acc}' annotation as a \texttt{BlockTime} construct with the variable \texttt{acc} and a value of \texttt{2}. The value illustrates $0.02$ time units per iteration, times the 100 iterations that the loop had. Since \texttt{acc} was declared later than \texttt{measured}, it is the second property, which is correctly captured in the \texttt{prf}. The properties, values, and proof are passed to the \texttt{LTE} function which is in turn passed to the \texttt{MkAssertion} function. This completes the model of the measurements and assertions in the C program.
         
         \begin{code}
 Idris> mkCertificate loop
@@ -504,3 +505,73 @@ Idris> mkCertificate loop
         \idrisinput{"../Idris_Stuff/Examples/Advanced/Loop.out"}
         
         Creating the certificate for \texttt{loop}, we can see that the environment correctly contains the two variables `\texttt{acc}' and `\texttt{measured}' associated with the correct values (2 and 3 respectively). From the two \texttt{MkEvald}s, we can see that the environment has been correctly used to evaluate the variables. Finally, the \texttt{Yes} part of the certificate shows us that the assertion held: the property \texttt{acc} $\leq$ \texttt{measured} held.
+        
+    \subsection{Branching}
+        \lstinputlisting[caption={A C program which requires equal energy consumption between branches}]{"../Idris_Stuff/Examples/Advanced/If_then_else.c"}
+        
+        The \texttt{\_\_teamplay\_branch\_energy} annotation measures the energy consumption of the branches of an \texttt{if}-statement and stores them in two variables. The program then uses an assertion to require that the branches use the same amount of energy. However, for some reason, they do not. This would be represented in the measurements CSV-file passed to the model-builder.
+        
+        \newpage
+        
+        \idrisinput{"../Idris_Stuff/Examples/Advanced/If_then_else.idr"}
+        
+        In the model, I have taken the \texttt{\_\_teamplay\_branch\_energy} annotation to produce two \texttt{BlockEnergy} constructs with the variable names declared in the C file and the energy measurements of 2 and 5 energy units respectively. The proof, \texttt{prf}, is done using the built-in \texttt{decEq} function on the evaluated values \texttt{p0'} and \texttt{p1'}. The equality is captured by the \texttt{Eq} function, and the assertion by the \texttt{MkAssertion} function.
+        
+        \begin{code}
+Idris> mkCertificate if_then_else
+        \end{code}
+        \idrisinput{"../Idris_Stuff/Examples/Advanced/If_then_else.out"}
+        
+        In the resulting certificate we can see the environment contains the same variables as used in the model. As a result, the variables have been correctly associated with their values in the \texttt{MkEvald}s. Since one of the energy measurements was 2 and the other 5, the equality did not hold. This can be seen in the \texttt{No} part of the certificate. The exact proof shows that this is because 0 cannot be the successor of any number (in this case 3) and hence the numbers cannot be equal. Furthermore, this implies (\texttt{succInjective}) that 1 cannot be the successor of 4, and that 2 cannot be the successor of 5, so the numbers cannot be equal.
+        
+    \subsection{Statements}\label{evaln:Statements}
+        \lstinputlisting{"../Idris_Stuff/Examples/Advanced/Statements.c"}
+        
+        This C program has a timing constraint on its read and write statements. The write time must be greater than the read time. Also, the write energy must be LTE to 10.
+        
+        \newpage
+        
+        \idrisinput{"../Idris_Stuff/Examples/Advanced/Statements.idr"}
+        The resulting \Idris model is quite big despite the simple program. The expression was split up into two \texttt{let}/\texttt{in} statements to facilitate the reading. The mechanics are the same as the previous examples, with more components. The proof of the expression is omitted for brevity. It can be found in Appendix \ref{app:stmts}.
+
+\section{Real programs}\label{evaln:real-progs}
+    \subsection{AES encryption}\label{evaln:real}
+        \begin{lstlisting}[caption={The annotated AES code from Chapter \ref{ch:design}}, escapeinside={(*}{*)}]
+(*\vdots*)
+__teamplay_worst_energy(addRoundKey0);
+add_round_key(state, w, 0);
+
+for (r = 1; r < Nr; r++) {
+    __teamplay_worst_energy_acc(subBytesAcc);
+    sub_bytes(state);
+    
+    __teamplay_worst_energy_acc(shiftRowsAcc);
+    shift_rows(state);
+    
+    __teamplay_worst_energy_acc(mixColumnsAcc);
+    mix_columns(state);
+    
+    __teamplay_worst_energy_acc(addRoundKeyAcc);
+    add_round_key(state, w, r);
+}
+
+__teamplay_worst_energy(subBytes);
+sub_bytes(state);
+
+__teamplay_worst_energy(shiftRows);
+shift_rows(state);
+
+__teamplay_worst_energy(addRoundKeyNr);
+add_round_key(state, w, Nr);
+
+__teamplay_assert(addRoundKey0 + subBytesAcc +
+                    shiftRowsAcc + mixColumnsAcc +
+                    addRoundKeyAcc + subBytes +
+                    shiftRows + addRoundKeyNr
+                    <= 50)
+(*\vdots*)
+        \end{lstlisting}
+        
+        \idrisinput{"../Idris_Stuff/Examples/Real_Life/Aes.idr"}
+        
+        Once again, the resulting \Idris model is very big. This is due to the multiple variables being defined and evaluated. The sum of the numbers is a variable which is also evaluated. This is mostly for readability, but a sophisticated parser could perhaps do something similar. The proof that the expression holds is massive due to the numbers involved, but can be found in Appendix \ref{app:aes}.

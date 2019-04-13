@@ -20,11 +20,12 @@
 \hypersetup{
     pdftitle={Improving Trust and Security through First-Class Certificates on Probabilistic Software Behaviour},
     pdfauthor={Thomas Ekstr{\" o}m Hansen},
-    colorlinks=false,
-    % linkcolor=Blue,
-    % citecolor=OliveGreen,
-    linkbordercolor=red,
-    citebordercolor=OliveGreen
+    colorlinks=true,
+    linkcolor=Blue,
+    citecolor=OliveGreen,
+    %colorlinks=false,
+    %linkbordercolor=red,
+    %citebordercolor=OliveGreen
 }
 
 \title{
@@ -43,7 +44,7 @@
     {Supervisor:}\\
     {Dr. Edwin Brady}
 }
-\date{DD MM 2019}
+\date{12 April 2019}
 
 \begin{document}
     \maketitle
@@ -62,10 +63,13 @@
     \chapter{Context Survey}
     \input{chapters/context-survey}
     
+    \chapter{Example use-case}
+    \input{chapters/example-use}
+    
     \chapter{Idris and Dependent Types}\label{ch:idris}
     \input{chapters/idris}
         
-    \chapter{Design}
+    \chapter{Design}\label{ch:design}
     \input{chapters/design}
     
     \chapter{Evaluation}
@@ -74,6 +78,9 @@
     \chapter{Conclusion}
     \input{chapters/conclusion}
     
+    \chapter*{Acknowledgements}
+    \input{chapters/acknowledgements}
+    
     \bibliographystyle{abbrv}
     \bibliography{references}
     
@@ -81,6 +88,9 @@
     
     \chapter{Evaluation}\label{app:evaln}
     \input{appendices/evaluation}
+    
+    \chapter{User manual}\label{app:man}
+    \input{appendices/user-manual}
     
     \chapter{Ethics}
     \includepdf[pages={-}]{"appendices/Preliminary_Ethics"}
