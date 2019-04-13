@@ -1,12 +1,12 @@
-module Examples.Advanced
+module Examples.Advanced.Loop
 
 import Darknet
 
 mutual
   loop : CLang
   loop = BlockTime "measured" 3
-         $ BlockTime "acc" 2  -- dummy value illustrating 0.02 time
-                              -- units over 100 iterations
+         $ BlockTime "acc" 2  -- dummy value illustrating 0.02
+                              -- time units over 100 iterations
          $ Assert loop_assert
          $ Halt
 
