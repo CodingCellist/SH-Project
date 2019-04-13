@@ -1,0 +1,10 @@
+([("b2", 5), ("b1", 2)],
+ [MkAssertion (Eq (Var "b1")
+                  (Var "b2")
+                  (MkEvald (Var "b1") 2)
+                  (MkEvald (Var "b2") 5)
+                  (No (\h =>
+                         ZnotS (succInjective 0 3 
+                                (succInjective 1 4 h)))))]) :
+(List (String, Nat), List Assertion)
+

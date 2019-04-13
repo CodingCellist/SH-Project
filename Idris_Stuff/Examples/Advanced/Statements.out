@@ -1,0 +1,36 @@
+([("wr_energy", 9), ("wr_time", 4), ("rd_time", 3)],
+ [MkAssertion (And (GT (Var "wr_time")
+                       (Var "rd_time")
+                       (MkEvald (Var "wr_time") 4)
+                       (MkEvald (Var "rd_time") 3)
+                       (Yes (LTESucc (LTESucc (LTESucc
+                            (LTESucc LTEZero))))))
+                   (LTE (Var "wr_energy")
+                        (Lit 10)
+                        (MkEvald (Var "wr_energy") 9)
+                        (MkEvald (Lit 10) 10)
+                        (Yes (LTESucc (LTESucc (LTESucc
+                             (LTESucc (LTESucc (LTESucc
+                             (LTESucc (LTESucc (LTESucc
+                                LTEZero)))))))))))
+                   (MkBEvald (GT (Var "wr_time")
+                                 (Var "rd_time")
+                                 (MkEvald (Var "wr_time") 4)
+                                 (MkEvald (Var "rd_time") 3)
+                                 (Yes (LTESucc (LTESucc
+                                      (LTESucc (LTESucc
+                                        LTEZero))))))
+                             True)
+                   (MkBEvald (LTE (Var "wr_energy")
+                                  (Lit 10)
+                                  (MkEvald (Var "wr_energy") 9)
+                                  (MkEvald (Lit 10) 10)
+                                  (Yes (LTESucc (LTESucc
+                                        (LTESucc (LTESucc
+                                        (LTESucc (LTESucc
+                                        (LTESucc (LTESucc (LTESucc
+                                            LTEZero)))))))))))
+                             True)
+                   (Yes MkAnd))]) :
+(List (String, Nat), List Assertion)
+

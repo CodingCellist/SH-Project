@@ -1,0 +1,43 @@
+([("addRoundKeyNr", 3), ("shiftRows", 7), ("subBytes", 1),
+  ("addRoundKeyAcc", 19), ("mixColumnsAcc", 5),
+  ("shiftRowsAcc", 3),
+  ("subBytesAcc", 10),
+  ("addRoundKey0", 2)],
+ [MkAssertion (LTE (Plus (Plus (Plus (Plus
+  (Plus (Plus (Plus (Var "addRoundKeyNr")
+   (Var "shiftRows"))
+   (Var "subBytes"))
+   (Var "addRoundKeyAcc"))
+   (Var "mixColumnsAcc"))
+   (Var "shiftRowsAcc"))
+   (Var "subBytesAcc"))
+   (Var "addRoundKey0"))
+   (Lit 50)
+   (MkEvald (Plus (Plus (Plus (Plus (Plus (Plus
+    (Plus (Var "addRoundKeyNr")
+    (Var "shiftRows"))
+    (Var "subBytes"))
+    (Var "addRoundKeyAcc"))
+    (Var "mixColumnsAcc"))
+    (Var "shiftRowsAcc"))
+    (Var "subBytesAcc"))
+    (Var "addRoundKey0"))
+    50)
+    (MkEvald (Lit 50) 50)
+    (Yes (LTESucc (LTESucc (LTESucc (LTESucc
+         (LTESucc (LTESucc (LTESucc (LTESucc
+         (LTESucc (LTESucc (LTESucc (LTESucc
+         (LTESucc (LTESucc (LTESucc (LTESucc
+         (LTESucc (LTESucc (LTESucc (LTESucc
+         (LTESucc (LTESucc (LTESucc (LTESucc
+         (LTESucc (LTESucc (LTESucc (LTESucc
+         (LTESucc (LTESucc (LTESucc (LTESucc
+         (LTESucc (LTESucc (LTESucc (LTESucc
+         (LTESucc (LTESucc (LTESucc (LTESucc
+         (LTESucc (LTESucc (LTESucc (LTESucc
+         (LTESucc (LTESucc (LTESucc (LTESucc
+         (LTESucc (LTESucc LTEZero))))))))))
+         )))))))))))))))))))))))))))))))))))
+         )))))))]) :
+(List (String, Nat), List Assertion)
+
